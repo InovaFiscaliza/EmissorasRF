@@ -298,7 +298,7 @@ def update_aero(
     aisw = get_aisw()
     aisg = get_aisg()
     redemet = get_redemet()
-    radares = pd.read_excel(os.environ["PATH_RADAR"])
+    radares = pd.read_csv(os.environ["PATH_RADAR"])
     for df in [aisw, aisg, redemet, radares]:
         icao = merge_on_frequency(icao, df)
     icao = icao.astype(

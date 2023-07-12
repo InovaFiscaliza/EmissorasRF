@@ -7,12 +7,11 @@ __all__ = ['LINK_VOR', 'LINK_DME', 'LINK_NDB', 'COLS_VOR', 'COLS_NDB', 'COLS_DME
 import os
 import json
 from urllib.request import urlopen
-import xml.etree.ElementTree as ET
-from typing import Iterable
-from dotenv import load_dotenv
+from typing import List
+from dotenv import load_dotenv, find_dotenv
 import pandas as pd
 
-load_dotenv()
+load_dotenv(find_dotenv(), override=True)
 
 # %% ..\nbs\aisgeo.ipynb 5
 LINK_VOR = "https://geoaisweb.decea.mil.br/geoserver/ICA/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=ICA:vor&outputFormat=application%2Fjson"
@@ -47,6 +46,7 @@ COLS_DME = (
     "Channel",
 )
 
+
 # %% ..\nbs\aisgeo.ipynb 6
 def convert_frequency(
     freq: float,  # Frequência Central da emissão
@@ -66,16 +66,15 @@ def convert_frequency(
             result = -1
     return result
 
+
 # %% ..\nbs\aisgeo.ipynb 7
 def _process_frequency(
     df: pd.DataFrame,  # Dataframe com os dados
-    cols: Iterable[str],  # Subconjunto de Colunas relevantes do DataFrame
+    cols: List[str],  # Subconjunto de Colunas relevantes do DataFrame
 ) -> pd.DataFrame:  # Dataframe com os dados de frequência devidamente processados
     if cols == COLS_DME:
-        df_channels = pd.read_excel(
-            os.environ["PATH_CHANNELS"], engine="openpyxl", dtype="string"
-        )
-        df.dropna(subset=[cols[0]], inplace=True)
+        df_channels = pd.read_csv(os.environ["PATH_CHANNELS"], dtype="string")
+        df = df.dropna(subset=[cols[0]])
         df["Channel"] = df[cols[0]].astype("int").astype("string") + df[cols[1]]
         df["Frequency"] = -1.0
 
@@ -110,11 +109,14 @@ def _filter_df(df, cols):  # sourcery skip: use-fstring-for-concatenation
         }
     )
 
+
 # %% ..\nbs\aisgeo.ipynb 9
 def get_geodf(
     link: str,  # Link para a requisição das estações VOR do GEOAISWEB
-    cols: Iterable[str],  # Subconjunto de Colunas relevantes do DataFrame
-) -> pd.DataFrame:  # DataFrame com frequências, coordenadas e descrição das estações VOR
+    cols: List[str],  # Subconjunto de Colunas relevantes do DataFrame
+) -> (
+    pd.DataFrame
+):  # DataFrame com frequências, coordenadas e descrição das estações VOR
     # sourcery skip: use-fstring-for-concatenation
     """Faz a requisição do `link`, processa o json e o retorna como Dataframe"""
     response = urlopen(link)
@@ -132,6 +134,7 @@ def get_geodf(
     df = _process_frequency(df, cols)
     return _filter_df(df, cols)
 
+
 # %% ..\nbs\aisgeo.ipynb 13
 def get_aisg() -> pd.DataFrame:  # DataFrame com todos os dados do GEOAISWEB
     """Lê e processa os dataframes individuais da API GEOAISWEB e retorna o conjunto concatenado"""
@@ -141,6 +144,4 @@ def get_aisg() -> pd.DataFrame:  # DataFrame com todos os dados do GEOAISWEB
             [LINK_NDB, LINK_VOR, LINK_DME], [COLS_NDB, COLS_VOR, COLS_DME]
         )
     )
-    for c in df.columns:
-        df[c] = df[c].astype("string")
-    return df
+    return df.astype("string")

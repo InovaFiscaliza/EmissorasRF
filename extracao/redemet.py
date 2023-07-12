@@ -11,7 +11,7 @@ from urllib.request import urlopen
 import pandas as pd
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ..\nbs\redemet.ipynb 5
 URL = "https://api-redemet.decea.mil.br/produtos/radar/maxcappi?api_key={}&{}"

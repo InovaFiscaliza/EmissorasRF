@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['get_db']
 
-# %% ..\nbs\main.ipynb 3
+# %% ..\nbs\main.ipynb 2
 import os
 from pathlib import Path
 import json
@@ -20,9 +20,9 @@ from dotenv import load_dotenv, find_dotenv
 from .reading import read_base, read_aero
 from .format import merge_on_frequency, _filter_matlab, _format_matlab
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
-# %% ..\nbs\main.ipynb 4
+# %% ..\nbs\main.ipynb 3
 def get_db(
     path: Union[str, Path],  # Pasta onde salvar os arquivos",
     connSQL: pyodbc.Connection = None,  # Objeto de conexão do banco SQL Server
@@ -34,7 +34,7 @@ def get_db(
     dest = Path(path)
     dest.mkdir(parents=True, exist_ok=True)
     print(":scroll:[green]Lendo as bases de dados da Anatel...")
-    df = read_base(path, connSQL, clientMongoDB)
+    df = read_base(path) #, connSQL, clientMongoDB)
     df = _filter_matlab(df)
     mod_times = {"ANATEL": datetime.now().strftime("%d/%m/%Y %H:%M:%S")}
     print(":airplane:[blue]Requisitando os dados da Aeronáutica.")

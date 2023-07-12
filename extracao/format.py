@@ -22,7 +22,7 @@ from .constants import BW, BW_pattern, APP_ANALISE_PT, APP_ANALISE_EN
 RE_BW = re.compile(BW_pattern)
 MAX_DIST = 10  # Km
 LIMIT_FREQ = 84812.50
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ..\nbs\format.ipynb 3
 def _read_df(folder: Union[str, Path], stem: str) -> pd.DataFrame:
@@ -136,8 +136,8 @@ def _format_matlab(
     df.sort_values(
         by=["Frequency", "Latitude", "Longitude", "Description"], inplace=True
     )
-    unique_columns = df.columns.tolist().remove("Description")
-    df = df.drop_duplicates(subset=unique_columns, keep="last").reset_index(drop=True)
+    # unique_columns = ["Frequency", "Latitude", "Longitude"]
+    # df = df.drop_duplicates(subset=unique_columns, keep="last").reset_index(drop=True)
     df["Id"] = [f"#{i+1}" for i in df.index]
     df["Id"] = df.Id.astype("string")
     df.loc[df.Description == "", "Description"] = pd.NA
@@ -157,6 +157,9 @@ def merge_on_frequency(
     description: str = "Description",
     suffixes: Tuple[str] = ("_x", "_y"),  # Sufixo para as colunas que foram criadas
 ) -> pd.DataFrame:  # DataFrame resultante da mesclagem
+    """Mescla os dataframes baseados na frequência
+    É assumido que as colunas de ambos são idênticas, caso contrário os filtros não irão funcionar como esperado
+    """
     df: pd.DataFrame = pd.merge(
         df_left.astype("string"),
         df_right.astype("string"),
@@ -170,13 +173,15 @@ def merge_on_frequency(
     x, y = suffixes
     lat, long = coords
 
-    left_cols: List[str] = [c for c in df.columns if y not in c]
-
-    right_cols: List[str] = [c for c in df.columns if x not in c]
 
     left = df._merge == "left_only"
     right = df._merge == "right_only"
     both = df._merge == "both"
+    df = df.drop(columns=["_merge"])
+    
+    left_cols: List[str] = [c for c in df.columns if y not in c]
+    right_cols: List[str] = [c for c in df.columns if x not in c]
+
 
     only_left = df.loc[left, left_cols].drop_duplicates().reset_index(drop=True)
     only_left.columns = [c.removesuffix(x) for c in left_cols]
@@ -208,7 +213,5 @@ def merge_on_frequency(
 
     merged_df = pd.concat(
         [df_left, df_right, df_close, df_far_right, df_far_left], ignore_index=True
-    )
-    merged_df.drop(columns=["_merge"], inplace=True)
-    
+    )    
     return merged_df.astype('string')

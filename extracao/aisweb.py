@@ -16,10 +16,9 @@ import pandas as pd
 from fastcore.utils import store_attr
 from fastcore.parallel import parallel
 from dotenv import load_dotenv, find_dotenv
-
 from .icao import map_channels
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ..\nbs\aisweb.ipynb 5
 SIGLA_AERO = ["MIL", "PRIV/PUB", "PUB", "PUB/MIL", "PUB/REST"]
@@ -63,7 +62,6 @@ class AisWeb:
     ):
         store_attr()
         self.url = URL.format(api_key, api_pass)
-        load_dotenv()
 
     def _get_request(self, key, value):
         request_url = f"{self.url}{key}{value}"
