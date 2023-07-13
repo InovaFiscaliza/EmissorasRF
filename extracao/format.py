@@ -136,8 +136,9 @@ def _format_matlab(
     df.sort_values(
         by=["Frequency", "Latitude", "Longitude", "Description"], inplace=True
     )
-    # unique_columns = ["Frequency", "Latitude", "Longitude"]
-    # df = df.drop_duplicates(subset=unique_columns, keep="last").reset_index(drop=True)
+    unique_columns = df.columns.tolist()
+    unique_columns.remove('Description')
+    df = df.drop_duplicates(subset=unique_columns, keep="last").reset_index(drop=True)
     df["Id"] = [f"#{i+1}" for i in df.index]
     df["Id"] = df.Id.astype("string")
     df.loc[df.Description == "", "Description"] = pd.NA
@@ -183,10 +184,10 @@ def merge_on_frequency(
     right_cols: List[str] = [c for c in df.columns if x not in c]
 
 
-    only_left = df.loc[left, left_cols].drop_duplicates().reset_index(drop=True)
+    only_left = df.loc[left, left_cols].drop_duplicates(ignore_index=True)
     only_left.columns = [c.removesuffix(x) for c in left_cols]
 
-    only_right = df.loc[right, right_cols].drop_duplicates().reset_index(drop=True)
+    only_right = df.loc[right, right_cols].drop_duplicates(ignore_index=True)
     only_right.columns = [c.removesuffix(y) for c in right_cols]
 
     both_columns = [f"{lat}{x}", f"{long}{x}", f"{lat}{y}", f"{long}{y}"]
@@ -194,24 +195,32 @@ def merge_on_frequency(
     df.loc[both, "Distance"] = df.loc[both, both_columns].apply(get_km_distance, axis=1)
 
     close = df.loc[both, "Distance"] <= MAX_DIST
-    df_close = df.loc[(both & close)].drop_duplicates().reset_index(drop=True)
+    
+    df_close = df.loc[(both & close)].drop_duplicates(ignore_index=True)
+    
     df_close[f"{description}{x}"] = (
         df_close[f"{description}{x}"] + " | " + df_close[f"{description}{y}"]
     )
-    df_close = df_close[left_cols]
+    
+    df_close = df_close[left_cols]    
     df_close.columns = only_left.columns
+    
+    unique_columns = df_close.columns.tolist()
+    unique_columns.remove('Description')
+    
+    df_close = df_close.drop_duplicates(unique_columns, ignore_index=True)
 
     df_far_left = (
-        df.loc[(both & ~close), left_cols].drop_duplicates().reset_index(drop=True)
+        df.loc[(both & ~close), left_cols].drop_duplicates(ignore_index=True)
     )
     df_far_left.columns = only_left.columns
 
     df_far_right = (
-        df.loc[(both & ~close), right_cols].drop_duplicates().reset_index(drop=True)
+        df.loc[(both & ~close), right_cols].drop_duplicates(ignore_index=True)
     )
     df_far_right.columns = only_right.columns
 
     merged_df = pd.concat(
-        [df_left, df_right, df_close, df_far_right, df_far_left], ignore_index=True
+        [df_left, df_right, df_close, df_far_left, df_far_right], ignore_index=True
     )    
-    return merged_df.astype('string')
+    return merged_df.astype('string').drop_duplicates(ignore_index=True)

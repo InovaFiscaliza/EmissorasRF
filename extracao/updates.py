@@ -23,10 +23,10 @@ import pyodbc
 from pymongo import MongoClient
 from dotenv import load_dotenv, find_dotenv
 
-from .icao import get_icao
-from .aisgeo import get_aisg
-from .aisweb import get_aisw
-from .redemet import get_redemet
+from .aero.icao import get_icao
+from .aero.aisgeo import get_aisg
+from .aero.aisweb import get_aisw
+from .aero.redemet import get_redemet
 from .constants import *
 from .format import parse_bw, merge_on_frequency, _read_df
 
@@ -301,6 +301,9 @@ def update_aero(
     radares = pd.read_csv(os.environ["PATH_RADAR"])
     for df in [aisw, aisg, redemet, radares]:
         icao = merge_on_frequency(icao, df)
+    
+    icao = icao.sort_values(by=icao.columns.to_list(), ignore_index=True)
+    icao = icao.drop_duplicates(subset=['Frequency', 'Latitude', 'Longitude'], keep='last', ignore_index=True)
     icao = icao.astype(
         {
             "Frequency": "float64",
@@ -312,10 +315,11 @@ def update_aero(
     # TODO: Eliminate this eventually
     icao.loc[np.isclose(icao.Longitude, -472.033447), "Longitude"] = -47.2033447
     icao.loc[np.isclose(icao.Longitude, 69.934998), "Longitude"] = -69.934998
+    
     return _save_df(icao, folder, "aero")
 
 
-# %% ..\nbs\updates.ipynb 28
+# %% ..\nbs\updates.ipynb 29
 def validar_coords(
     row: pd.Series,  # Linha de um DataFrame
     connector: pyodbc.Connection = None,  # Conector de Banco de Dados
@@ -344,7 +348,7 @@ def validar_coords(
     return [str(mun), str(lat), str(long), str(is_valid)]
 
 
-# %% ..\nbs\updates.ipynb 29
+# %% ..\nbs\updates.ipynb 30
 def update_cached_df(df: pd.DataFrame, df_cache: pd.DataFrame) -> pd.DataFrame:
     """Mescla ambos dataframes eliminando os excluídos (existentes somente em df_cache)"""
 
@@ -377,7 +381,7 @@ def update_cached_df(df: pd.DataFrame, df_cache: pd.DataFrame) -> pd.DataFrame:
     return df_cache.drop(columns="_merge")
 
 
-# %% ..\nbs\updates.ipynb 30
+# %% ..\nbs\updates.ipynb 31
 def _validar_coords_base(
     df: pd.DataFrame,  # DataFrame com os dados da Anatel
     df_cache: pd.DataFrame,  # DataFrame validado anteriormente, usado como cache
@@ -413,7 +417,7 @@ def _validar_coords_base(
     return df_cache
 
 
-# %% ..\nbs\updates.ipynb 31
+# %% ..\nbs\updates.ipynb 32
 def update_base(
     conn: pyodbc.Connection,  # Objeto de conexão de banco
     clientMongoDB: MongoClient,  # Objeto de conexão com o MongoDB

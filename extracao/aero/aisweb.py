@@ -16,7 +16,7 @@ import pandas as pd
 from fastcore.utils import store_attr
 from fastcore.parallel import parallel
 from dotenv import load_dotenv, find_dotenv
-from ..icao import map_channels
+from .icao import map_channels
 
 load_dotenv(find_dotenv(), override=True)
 

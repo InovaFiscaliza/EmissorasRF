@@ -23,10 +23,10 @@ from extracao.updates import (
     update_aero,
 )
 
-from .icao import get_icao
-from .aisgeo import get_aisg
-from .aisweb import get_aisw
-from .redemet import get_redemet
+from .aero.icao import get_icao
+from .aero.aisgeo import get_aisg
+from .aero.aisweb import get_aisw
+from .aero.redemet import get_redemet
 from .format import _read_df
 
 load_dotenv(find_dotenv())

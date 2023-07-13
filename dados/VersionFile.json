@@ -1,1 +1,23 @@
-{"appAnalise": {"Version": "1.24", "ReleaseDate": "12/08/2022"}, "appColeta": {"Version": "1.0", "ReleaseDate": "28/12/2021"}, "anateldb": {"Version": "0.1.135", "ReleaseDate": "12/07/2023 11:07:00", "MOSAICO": "17/11/2022 10:32:40", "STEL": "17/11/2022 10:32:27", "SRD": "17/11/2022 10:32:28", "ICAO": "13/05/2022 08:25:59", "AISW": "13/05/2022 08:34:25", "AISG": "13/05/2022 08:26:34", "ANATEL": "12/07/2023 11:04:36", "AERONAUTICA": "12/07/2023 11:06:03"}, "fiscaliza": {"Version": "0.2.18", "ReleaseDate": "18/05/2022"}, "rfpye": {"Version": "0.2.3", "ReleaseDate": "03/11/2021"}}
+{
+    "appAnalise": {
+        "Version": "1.35",
+        "ReleaseDate": "28/06/2023"
+    },
+    "appColeta": {
+        "Version": "1.11",
+        "ReleaseDate": "01/12/2022"
+    },
+    "anateldb": {
+        "ReleaseDate": "12/07/2023 19:15:51",
+        "ANATEL": "12/07/2023 18:27:28",
+        "AERONAUTICA": "12/07/2023 18:37:26"
+    },
+    "fiscaliza": {
+        "Version": "0.2.20",
+        "ReleaseDate": "27/02/2023"
+    },
+    "rfpye": {
+        "Version": "0.2.3",
+        "ReleaseDate": "03/11/2021"
+    }
+}
