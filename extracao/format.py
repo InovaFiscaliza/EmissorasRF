@@ -149,66 +149,38 @@ def get_km_distance(row):
     return geodesic((row[0], row[1]), (row[2], row[3])).km
 
 
-def merge_on_frequency(
-    df_left: pd.DataFrame,  # DataFrame da esquerda a ser mesclado
-    df_right: pd.DataFrame,  # DataFrame da direira a ser mesclado
-    on: str = "Frequency",  # Coluna usada como chave de mesclagem
-    coords: Tuple[str] = ("Latitude", "Longitude"),
-    description: str = "Description",
-    suffixes: Tuple[str] = ("_x", "_y"),  # Sufixo para as colunas que foram criadas
-) -> pd.DataFrame:  # DataFrame resultante da mesclagem
-    df: pd.DataFrame = pd.merge(
-        df_left.astype("string"),
-        df_right.astype("string"),
-        on=on,
-        how="outer",
-        suffixes=suffixes,
-        indicator=True,
-        copy=False,
-    )
+def merge_on_frequency(df_left, df_right):
+    """Mescla os registros dos DataFrames `df_left` e `df_right` que estão a uma distância menor que MAX_DIST"""
+    df1 = df_left.copy().reset_index(drop=True)
+    df2 = df_right.copy().reset_index(drop=True)
+    columns = ["Frequency", "Latitude", "Longitude"]
+    for c in columns:
+        df1[c] = df1[c].astype("float")
+        df2[c] = df2[c].astype("float")
+    df1.sort_values(columns, inplace=True)
+    df2.sort_values(columns, inplace=True)
+    with Progress(transient=True, refresh_per_second=2) as progress:
+        task_left = progress.add_task(
+            "[red]Iterando Tabela Principal...", total=len(df1)
+        )
+        for left in df1.itertuples():
+            for right in df2[np.isclose(df2.Frequency, left.Frequency)].itertuples():
+                if (
+                    geodesic(
+                        (left.Latitude, left.Longitude),
+                        (right.Latitude, right.Longitude),
+                    ).km
+                    <= MAX_DIST
+                ):
+                    df1.loc[
+                        left.Index, "Description"
+                    ] = f"{left.Description} | {right.Description}"
+                    df2 = df2.drop(right.Index)
+                    break
+            progress.update(
+                task_left,
+                advance=1,
+                description=f"[green] Comparando Frequências {left.Frequency}MHz",
+            )
+        return pd.concat([df1, df2], ignore_index=True).astype('string')
 
-    x, y = suffixes
-    lat, long = coords
-
-    left_cols: List[str] = [c for c in df.columns if y not in c]
-
-    right_cols: List[str] = [c for c in df.columns if x not in c]
-
-    left = df._merge == "left_only"
-    right = df._merge == "right_only"
-    both = df._merge == "both"
-
-    only_left = df.loc[left, left_cols].drop_duplicates().reset_index(drop=True)
-    only_left.columns = [c.removesuffix(x) for c in left_cols]
-
-    only_right = df.loc[right, right_cols].drop_duplicates().reset_index(drop=True)
-    only_right.columns = [c.removesuffix(y) for c in right_cols]
-
-    both_columns = [f"{lat}{x}", f"{long}{x}", f"{lat}{y}", f"{long}{y}"]
-
-    df.loc[both, "Distance"] = df.loc[both, both_columns].apply(get_km_distance, axis=1)
-
-    close = df.loc[both, "Distance"] <= MAX_DIST
-    df_close = df.loc[(both & close)].drop_duplicates().reset_index(drop=True)
-    df_close[f"{description}{x}"] = (
-        df_close[f"{description}{x}"] + " | " + df_close[f"{description}{y}"]
-    )
-    df_close = df_close[left_cols]
-    df_close.columns = only_left.columns
-
-    df_far_left = (
-        df.loc[(both & ~close), left_cols].drop_duplicates().reset_index(drop=True)
-    )
-    df_far_left.columns = only_left.columns
-
-    df_far_right = (
-        df.loc[(both & ~close), right_cols].drop_duplicates().reset_index(drop=True)
-    )
-    df_far_right.columns = only_right.columns
-
-    merged_df = pd.concat(
-        [df_left, df_right, df_close, df_far_right, df_far_left], ignore_index=True
-    )
-    merged_df.drop(columns=["_merge"], inplace=True)
-    
-    return merged_df.astype('string')
