@@ -40,7 +40,7 @@ def read_srd(
     return update_srd(conn, folder) if conn else _read_df(folder, "srd")
 
 
-# %% ../nbs/reading.ipynb 14
+# %% ../nbs/reading.ipynb 10
 def read_telecom(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     conn: MongoClient = None,  # Objeto de Conexão com o banco MongoDB, atualiza os dados caso válido
@@ -49,7 +49,7 @@ def read_telecom(
     return update_telecom(conn, folder) if conn else _read_df(folder, "telecom")
 
 
-# %% ../nbs/reading.ipynb 20
+# %% ../nbs/reading.ipynb 14
 def read_radcom(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     conn: pyodbc.Connection = None,  # Objeto de conexão de banco, atualiza os dados caso válido
@@ -58,7 +58,7 @@ def read_radcom(
     return update_radcom(conn, folder) if conn else _read_df(folder, "radcom")
 
 
-# %% ../nbs/reading.ipynb 23
+# %% ../nbs/reading.ipynb 18
 def read_stel(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     conn: pyodbc.Connection = None,  # Objeto de conexão de banco. Atualiza os dados caso válido
@@ -69,7 +69,7 @@ def read_stel(
     return update_stel(conn, folder) if conn else _read_df(folder, "stel")
 
 
-# %% ../nbs/reading.ipynb 28
+# %% ../nbs/reading.ipynb 22
 def read_icao(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     update: bool = False,  # Atualiza os dados caso `True`
@@ -78,7 +78,7 @@ def read_icao(
     return get_icao if update else _read_df(folder, "icao")
 
 
-# %% ../nbs/reading.ipynb 29
+# %% ../nbs/reading.ipynb 23
 def read_aisw(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     update: bool = False,  # Atualiza os dados caso `True`
@@ -87,7 +87,7 @@ def read_aisw(
     return get_aisw() if update else _read_df(folder, "aisw")
 
 
-# %% ../nbs/reading.ipynb 30
+# %% ../nbs/reading.ipynb 24
 def read_aisg(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     update: bool = False,  # Atualiza os dados caso `True`
@@ -96,7 +96,7 @@ def read_aisg(
     return get_aisg() if update else _read_df(folder, "aisg")
 
 
-# %% ../nbs/reading.ipynb 31
+# %% ../nbs/reading.ipynb 25
 def read_redemet(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     update: bool = False,  # Atualiza os dados caso `True`
@@ -105,7 +105,7 @@ def read_redemet(
     return get_redemet() if update else _read_df(folder, "redemet")
 
 
-# %% ../nbs/reading.ipynb 32
+# %% ../nbs/reading.ipynb 26
 def read_aero(
     folder: Union[str, Path],  # Pasta onde ler/salvar os dados
     update: bool = False,  # Atualiza os dados caso `True`
@@ -114,7 +114,7 @@ def read_aero(
     return update_aero(folder) if update else _read_df(folder, "aero")
 
 
-# %% ../nbs/reading.ipynb 35
+# %% ../nbs/reading.ipynb 30
 def read_base(
     folder: Union[str, Path],
     conn: pyodbc.Connection = None,  # Objeto de conexão do banco SQL Server
