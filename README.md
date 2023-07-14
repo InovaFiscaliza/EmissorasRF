@@ -25,6 +25,12 @@ também em fiscalização de campo.
 Os dados em formato otimizado `.parquet.gzip` são disponibilizados junto
 ao repositório na pasta `dados`.
 
+``` python
+from fastcore.xtras import Path
+from extracao.main import get_db
+from nbdev.showdoc import *
+```
+
 ------------------------------------------------------------------------
 
 <a
