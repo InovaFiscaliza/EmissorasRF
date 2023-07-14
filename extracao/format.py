@@ -161,9 +161,11 @@ def merge_on_frequency(
     """Mescla os dataframes baseados na frequência
     É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
     """
+    df_left = df_left.astype("string").drop_duplicates(ignore_index=True)
+    df_right = df_right.astype("string").drop_duplicates(ignore_index=True)
     df: pd.DataFrame = pd.merge(
-        df_left.astype("string"),
-        df_right.astype("string"),
+        df_left,
+        df_right,
         on=on,
         how="outer",
         suffixes=suffixes,
@@ -182,14 +184,17 @@ def merge_on_frequency(
     left_cols: List[str] = [c for c in df.columns if y not in c]
     right_cols: List[str] = [c for c in df.columns if x not in c]
 
-    only_left = df.loc[left, left_cols].drop_duplicates(ignore_index=True)
+    only_left = df.loc[left, left_cols].drop_duplicates(subset=left_cols, ignore_index=True)
     only_left.columns = [c.removesuffix(x) for c in left_cols]
 
-    only_right = df.loc[right, right_cols].drop_duplicates(ignore_index=True)
+    only_right = df.loc[right, right_cols].drop_duplicates(subset=right_cols, ignore_index=True)
     only_right.columns = [c.removesuffix(y) for c in right_cols]
 
-    inner_left = len(df_left) - len(only_left)
-    inner_right = len(df_right) - len(only_right)
+    intersection_left = len(df_left) - len(only_left)
+    intersection_right = len(df_right) - len(only_right)
+
+    if not intersection_left or not intersection_right:
+        return pd.concat([df_left, df_right], ignore_index=True)
 
     both_columns = [f"{lat}{x}", f"{long}{x}", f"{lat}{y}", f"{long}{y}"]
     df.loc[both, "Distance"] = df.loc[both, both_columns].apply(get_km_distance, axis=1)
@@ -197,16 +202,16 @@ def merge_on_frequency(
     df_both = df[both].sort_values("Distance", ignore_index=True)
 
     filter_left_cols = df_both.columns[:len(df_left.columns)].to_list()
-    filter_right_cols = ['Frequency'] + df_both.columns[len(df_left.columns):-1].to_list() # the -1 is to eliminate the distance
+    filter_right_cols = listify(on) + df_both.columns[len(df_left.columns):-1].to_list() # the -1 is to eliminate the distance
    
     df_both_left = df_both.groupby(filter_left_cols, as_index=False).first()
     df_both_right = df_both.groupby(filter_right_cols, as_index=False).first()
 
-    assert len(df_both_left) == inner_left, f"Error: {len(df_both_left)}!= {inner_left}"
+    assert len(df_both_left) == intersection_left, f"O Agrupamento por colunas únicas não tem o comprimento esperado: {len(df_both_left)}!= {intersection_left}"
     
     assert (
-        len(df_both_right) == inner_right
-    ), f"Error: {len(df_both_right)}!= {inner_right}"
+        len(df_both_right) == intersection_right
+    ), f"Error: {len(df_both_right)}!= {intersection_right}"
 
     df_both_far_left = df_both_left[df_both_left.Distance > MAX_DIST]
     df_both_far_right = df_both_right[df_both_right.Distance > MAX_DIST]

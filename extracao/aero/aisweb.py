@@ -6,7 +6,6 @@ __all__ = ['SIGLA_AERO', 'URL', 'TYPE', 'COLUMNS', 'UNIQUE_COLS', 'convert_latit
 # %% ../../nbs/aisweb.ipynb 2
 import os
 import re
-import xml.etree.ElementTree as ET
 from typing import Iterable
 from functools import cached_property
 

@@ -34,7 +34,7 @@ def get_db(
     dest = Path(path)
     dest.mkdir(parents=True, exist_ok=True)
     print(":scroll:[green]Lendo as bases de dados da Anatel...")
-    df = read_base(path) #, connSQL, clientMongoDB)
+    df = read_base(path, connSQL, clientMongoDB)
     df = _filter_matlab(df)
     mod_times = {"ANATEL": datetime.now().strftime("%d/%m/%Y %H:%M:%S")}
     print(":airplane:[blue]Requisitando os dados da Aeronáutica.")

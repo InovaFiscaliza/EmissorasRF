@@ -11,6 +11,7 @@ from urllib.request import urlopen
 from typing import List
 from dotenv import load_dotenv, find_dotenv
 import pandas as pd
+from pathlib import Path
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -75,7 +76,7 @@ def _process_frequency(
     cols: List[str],  # Subconjunto de Colunas relevantes do DataFrame
 ) -> pd.DataFrame:  # Dataframe com os dados de frequência devidamente processados
     if cols == COLS_DME:
-        df_channels = pd.read_csv(os.environ["PATH_CHANNELS"], dtype="string")
+        df_channels = pd.read_csv(f'{Path(__file__).parent}/{os.environ["PATH_CHANNELS"]}', dtype="string")
         df = df.dropna(subset=[cols[0]])
         df["Channel"] = df[cols[0]].astype("int").astype("string") + df[cols[1]]
         df["Frequency"] = -1.0
