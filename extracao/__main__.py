@@ -21,7 +21,7 @@ def run_request(folder: str = os.environ["FOLDER"], update: bool = False) -> Non
     if update:
         conn = connect_db()
         mongo_client = MongoClient(os.environ["MONGO_URI"])
-    os.chdir(Path.cwd() / "extracao" / "aero")
+    os.chdir(Path(__file__).resolve().parent / "aero")
     get_db(folder, conn, mongo_client)
     source = Path(os.environ["FOLDER"])
     dest = str(Path(os.environ["DESTINATION"]))
