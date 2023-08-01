@@ -35,9 +35,6 @@ MONGO_SMP = {
         {"FreqInicialMHz": {"$nin": [None, "", 0]}},
         {"FreqCentralMHz": {"$nin": [None, "", 0]}},
         {"FreqFinalMHz": {"$nin": [None, "", 0]}},
-        # {"CodMunicipio": {"$nin": [None, ""]}}
-        # {"Latitude": {"$type": 1.0}},
-        # {"Longitude": {"$type": 1.0}}
     ]
 }
 
@@ -47,12 +44,12 @@ COLS_SMP = {
     "NomeEntidade": "Entidade",
     "SiglaUf": "UF",
     "NumEstacao": "Número_Estação",
-    "NomeMunicipio": "Município",
     "CodMunicipio": "Código_Município",
     "DataValidade": "Validade_RF",
     "FreqInicialMHz": "Frequência_Inicial",
     "FreqCentralMHz": "Frequência_Central",
     "FreqFinalMHz": "Frequência_Final",
+    "Tecnologia": "Tecnologia",
     "Latitude": "Latitude",
     "Longitude": "Longitude",
     "DesignacaoEmissao": "Designacao_Emissão",
@@ -81,6 +78,7 @@ DTYPE_SMP = {
     "FreqInicialMHz": "category",
     "FreqCentralMHz": "category",
     "FreqFinalMHz": "category",
+    "Tecnologia": "category",
     "Latitude": "float",
     "Longitude": "float",
     "DesignacaoEmissao": "category",
@@ -104,24 +102,26 @@ query = collection.find(MONGO_SMP, projection={k: 1.0 for k in COLS_SMP}, limit=
 df = pd.DataFrame(list(query))  # , columns=COLS_SMP.keys())
 df.drop(columns=["_id"], inplace=True)
 
-for k, v in DTYPE_SMP.items():
-    if "float" in v:
-        df[k] = pd.to_numeric(df[k], errors="coerce")
-    try:
-        df[k] = df[k].astype(v)
-    except Exception as e:
-        print(e)
-        print(k)
+# for k, v in DTYPE_SMP.items():
+#     if "float" in v:
+#         df[k] = pd.to_numeric(df[k], errors="coerce")
+#     try:
+#         df[k] = df[k].astype(v)
+#     except Exception as e:
+#         print(e)
+#         print(k)
 
+dados = Path(__file__).resolve().parent.parent / "dados"
+dados.mkdir(parents=True, exist_ok=True)
 
 df.astype("string").to_parquet(
-    "dados/smp_formated.parquet.gzip",
+    f"{dados}/smp_formated.parquet.gzip",
     compression="gzip",
     index=False,
 )
 
 profile = ProfileReport(df, minimal=True, title="Entidades SMP")
 
-profile.to_file("dados/relatorio_smp.html")
+profile.to_file(f"{dados}/relatorio_smp.html")
 
-print(f"Total time (asynchronous): {perf_counter() - start}")
+print(f"Total time (minutes): {(perf_counter() - start)/60}")
