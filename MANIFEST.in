@@ -2,5 +2,6 @@ include settings.ini
 include LICENSE
 include CONTRIBUTING.md
 include README.md
+include extracao/aero/arquivos/*
 include extracao/arquivos/*
 recursive-exclude * __pycache__

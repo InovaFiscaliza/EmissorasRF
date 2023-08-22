@@ -2,8 +2,8 @@
 
 d = { 'settings': { 'branch': 'master',
                 'doc_baseurl': '/',
-                'doc_host': 'https://ronaldokun.github.io/anateldb',
-                'git_url': 'https://github.com/ronaldokun/anateldb',
+                'doc_host': 'https://InovaFiscaliza.github.io/EmissorasRF',
+                'git_url': 'https://github.com/InovaFiscaliza/EmissorasRF',
                 'lib_path': 'extracao'},
   'syms': { 'extracao.aero.aisgeo': { 'extracao.aero.aisgeo._filter_df': ('aisgeo.html#_filter_df', 'extracao/aero/aisgeo.py'),
                                       'extracao.aero.aisgeo._process_frequency': ( 'aisgeo.html#_process_frequency',

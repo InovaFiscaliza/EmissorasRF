@@ -16,19 +16,19 @@ format:
 
 website:
   title: "Estações Licenciadas de Telecomunicações e Radiodifusão"
-  site-url: "https://ronaldokun.github.io/anateldb/"
+  site-url: "https://InovaFiscaliza.github.io/EmissorasRF/"
   description: "This repository hold automation scripts to fetch, clean and merge data from licensed telecomunications entities available at ANATEL Database Systems."
   twitter-card: true
   open-graph: true
   repo-branch: master
-  repo-url: "https://github.com/ronaldokun/anateldb"
+  repo-url: "https://github.com/InovaFiscaliza/EmissorasRF"
   repo-actions: [issue]
   navbar:
     background: primary
     search: true
     right:
       - icon: github
-        href: "https://github.com/ronaldokun/anateldb"
+        href: "https://github.com/InovaFiscaliza/EmissorasRF"
   sidebar:
     style: "floating"
 
