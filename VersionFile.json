@@ -7,10 +7,14 @@
         "Version": "1.11",
         "ReleaseDate": "01/12/2022"
     },
+    "appColetaV2": {
+        "Version": "1.41",
+        "ReleaseDate": "25/08/2023"
+    },
     "anateldb": {
-        "ReleaseDate": "12/07/2023 19:15:51",
-        "ANATEL": "12/07/2023 18:27:28",
-        "AERONAUTICA": "12/07/2023 18:37:26"
+        "ReleaseDate": "25/08/2023 08:56:21",
+        "ANATEL": "25/08/2023 08:53:59",
+        "AERONAUTICA": "25/08/2023 08:55:26"
     },
     "fiscaliza": {
         "Version": "0.2.20",
