@@ -32,7 +32,6 @@ from .format import _read_df, merge_on_frequency, parse_bw
 getcontext().prec = 5
 load_dotenv(find_dotenv())
 
-
 # %% ../nbs/02_updates.ipynb 4
 def connect_db(
     server: str = "ANATELBDRO05",  # Servidor do Banco de Dados
@@ -49,7 +48,6 @@ def connect_db(
         f"MultipleActiveResultSets={mult_results};",
         timeout=TIMEOUT,
     )
-
 
 # %% ../nbs/02_updates.ipynb 8
 def clean_mosaico(
@@ -73,7 +71,6 @@ def clean_mosaico(
     df.loc[:, "Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
     return df
 
-
 # %% ../nbs/02_updates.ipynb 10
 def _save_df(df: pd.DataFrame, folder: Union[str, Path], stem: str) -> pd.DataFrame:
     """Format, Save and return a dataframe"""
@@ -89,7 +86,6 @@ def _save_df(df: pd.DataFrame, folder: Union[str, Path], stem: str) -> pd.DataFr
     except (ArrowInvalid, ArrowTypeError) as e:
         raise e(f"Não possível salvar o arquivo parquet {file}") from e
     return df
-
 
 # %% ../nbs/02_updates.ipynb 12
 def update_radcom(
@@ -133,7 +129,6 @@ def _extract_radcom(
     df.drop(["Fase", "Situação"], axis=1, inplace=True)
     df = df.loc[:, COLUNAS]
     return _save_df(df, folder, "radcom")
-
 
 # %% ../nbs/02_updates.ipynb 17
 def update_stel(
@@ -180,7 +175,6 @@ def _extract_stel(
     stel = stel.loc[:, COLUNAS]
     return _save_df(stel, folder, "stel")
 
-
 # %% ../nbs/02_updates.ipynb 20
 def split_designacao(df: pd.DataFrame) -> pd.DataFrame:
     """Parse a bandwidth string to extract the numerical component and a character class"""
@@ -197,7 +191,6 @@ def split_designacao(df: pd.DataFrame) -> pd.DataFrame:
         ["Largura_Emissão(kHz)", "Classe_Emissão"]
     ].astype("string")
     return df.drop("Designação_Emissão", axis=1)
-
 
 # %% ../nbs/02_updates.ipynb 22
 def update_srd(
@@ -228,7 +221,6 @@ def update_srd(
         mosaico["Multiplicidade"] = 1
         mosaico = mosaico.loc[:, COLUNAS]
     return _save_df(mosaico, folder, "srd")
-
 
 # %% ../nbs/02_updates.ipynb 26
 def update_telecom(
@@ -284,7 +276,6 @@ def _process_telecom(
     df_sub = df_sub.loc[:, COLUNAS]
     return _save_df(df_sub, folder, "telecom")
 
-
 # %% ../nbs/02_updates.ipynb 29
 def update_aero(
     folder: Union[str, Path],  # Pasta onde salvar os arquivos
@@ -316,7 +307,6 @@ def update_aero(
 
     return _save_df(icao, folder, "aero")
 
-
 # %% ../nbs/02_updates.ipynb 32
 def validar_coords(
     row: pd.Series,  # Linha de um DataFrame
@@ -345,7 +335,6 @@ def validar_coords(
         del conn
     return [str(mun), str(lat), str(long), str(is_valid)]
 
-
 # %% ../nbs/02_updates.ipynb 33
 def update_cached_df(df: pd.DataFrame, df_cache: pd.DataFrame) -> pd.DataFrame:
     """Mescla ambos dataframes eliminando os excluídos (existentes somente em df_cache)"""
@@ -372,7 +361,6 @@ def update_cached_df(df: pd.DataFrame, df_cache: pd.DataFrame) -> pd.DataFrame:
     # # Drop the _merge column
     return df_cache.drop(columns="_merge")
 
-
 # %% ../nbs/02_updates.ipynb 34
 def _validar_coords_base(
     df: pd.DataFrame,  # DataFrame com os dados da Anatel
@@ -384,6 +372,17 @@ def _validar_coords_base(
     ibge = ["Município_IBGE", "Latitude_IBGE", "Longitude_IBGE", "Coords_Valida_IBGE"]
 
     df_cache = update_cached_df(df.astype("string"), df_cache.astype("string"))
+
+    municipios = pd.read_csv(
+        Path(__file__).parent / "arquivos" / "municipios_coordenadas.csv",
+        usecols=["codigo_ibge"],
+        dtype="string",
+    )
+
+    # valida os códigos de municípios
+    valid_cod_mun = df_cache.Código_Município.isin(municipios.codigo_ibge)
+
+    df_cache.loc[~valid_cod_mun, "Coords_Valida_IBGE"] = "-1"
 
     subset = df_cache.Coords_Valida_IBGE.isna()
 
@@ -407,7 +406,6 @@ def _validar_coords_base(
     df_cache.loc[df_cache.Coords_Valida_IBGE == "-1", "Coords_Valida_IBGE"] = pd.NA
 
     return df_cache
-
 
 # %% ../nbs/02_updates.ipynb 35
 def update_base(

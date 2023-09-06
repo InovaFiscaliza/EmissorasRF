@@ -18,7 +18,6 @@ load_dotenv(find_dotenv(), override=True)
 URL = "https://api-redemet.decea.mil.br/produtos/radar/maxcappi?api_key={}&{}"
 UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
 
-
 # %% ../../nbs/09_redemet.ipynb 6
 def get_redemet() -> (
     pd.DataFrame

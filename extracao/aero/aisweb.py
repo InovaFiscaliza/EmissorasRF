@@ -27,7 +27,6 @@ TYPE = ["COM", "NAV"]
 COLUMNS = ["Frequency", "Latitude", "Longitude", "Description"]
 UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
 
-
 # %% ../../nbs/07_aisweb.ipynb 6
 def convert_latitude(
     lat: str,  # Latitude
@@ -49,7 +48,6 @@ def convert_longitude(
     return multiplier * (
         float(lon[:3]) + float(lon[3:5]) / 60 + float(lon[6:8]) / 3600.0
     )
-
 
 # %% ../../nbs/07_aisweb.ipynb 7
 class AisWeb:
@@ -210,7 +208,6 @@ class AisWeb:
         )
         df = pd.concat(records).astype("string")
         return map_channels(df, "AISW").drop_duplicates(UNIQUE_COLS, ignore_index=True)
-
 
 # %% ../../nbs/07_aisweb.ipynb 8
 def get_aisw() -> pd.DataFrame:  # DataFrame com todos os dados do GEOAISWEB

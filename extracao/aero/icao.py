@@ -18,7 +18,6 @@ COLS_NAV = ["Frequency", "Latitude", "Longitude", "Facility", "Location", "NS", 
 COLS_COM = ["Frequency", "CoordLat", "CoordLong", "DOC", "Location", "NS", "WE"]
 UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
 
-
 # %% ../../nbs/06_icao.ipynb 6
 def convert_latitude(
     lat: str,  # Latitude
@@ -42,7 +41,6 @@ def convert_longitude(
         float(lon[1:3]) + float(lon[4:6]) / 60 + float(lon[7:9]) / 3600.0
     )
 
-
 # %% ../../nbs/06_icao.ipynb 8
 def _read_df(
     path: str,  # Caminho do arquivo
@@ -60,7 +58,6 @@ def _read_df(
     )
     df["Description"] = "[ICAO] " + df.Facility + ", " + df.Location
     return df[["Frequency", "Latitude", "Longitude", "Description"]]
-
 
 # %% ../../nbs/06_icao.ipynb 9
 def map_channels(
@@ -88,7 +85,6 @@ def map_channels(
                     )
                     df.loc[len(df)] = [c, row.Latitude, row.Longitude, description]
     return df
-
 
 # %% ../../nbs/06_icao.ipynb 10
 def get_icao() -> (

@@ -21,7 +21,6 @@ from .reading import read_aero, read_base
 
 load_dotenv(find_dotenv(), override=True)
 
-
 # %% ../nbs/05_main.ipynb 3
 def get_db(
     path: Union[str, Path],  # Pasta onde salvar os arquivos",
@@ -39,7 +38,10 @@ def get_db(
     mod_times = {"ANATEL": datetime.now().strftime("%d/%m/%Y %H:%M:%S")}
     print(":airplane:[blue]Requisitando os dados da Aeronáutica.")
     update = all([connSQL, clientMongoDB])
-    aero = read_aero(path, update=update)
+    try:
+        aero = read_aero(path, update=update)
+    except Exception:
+        aero = read_aero(path)
     mod_times["AERONAUTICA"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     print(":spoon:[yellow]Mesclando os dados da Aeronáutica.")
     df = _format_matlab(merge_on_frequency(df, aero))

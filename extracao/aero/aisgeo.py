@@ -51,7 +51,6 @@ COLS_DME = (
 
 UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
 
-
 # %% ../../nbs/08_aisgeo.ipynb 6
 def convert_frequency(
     freq: float,  # Frequência Central da emissão
@@ -70,7 +69,6 @@ def convert_frequency(
         case _:
             result = -1
     return result
-
 
 # %% ../../nbs/08_aisgeo.ipynb 7
 def _process_frequency(
@@ -100,7 +98,6 @@ def _process_frequency(
         )
     return df
 
-
 # %% ../../nbs/08_aisgeo.ipynb 8
 def _filter_df(df, cols):  # sourcery skip: use-fstring-for-concatenation
     df.fillna("", inplace=True)
@@ -116,7 +113,6 @@ def _filter_df(df, cols):  # sourcery skip: use-fstring-for-concatenation
             cols[3]: "Longitude",
         }
     )
-
 
 # %% ../../nbs/08_aisgeo.ipynb 9
 def get_geodf(
@@ -141,7 +137,6 @@ def get_geodf(
     ).filter(cols, axis=1)
     df = _process_frequency(df, cols)
     return _filter_df(df, cols)
-
 
 # %% ../../nbs/08_aisgeo.ipynb 13
 def get_aisg() -> pd.DataFrame:  # DataFrame com todos os dados do GEOAISWEB

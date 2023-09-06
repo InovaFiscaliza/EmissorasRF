@@ -6,7 +6,7 @@ __all__ = ['TIMEOUT', 'RELATORIO', 'ESTACAO', 'COLUNAS', 'APP_ANALISE_PT', 'APP_
            'BW_pattern', 'REGEX_ESTADOS', 'MIN_LAT', 'MAX_LAT', 'MIN_LONG', 'MAX_LONG']
 
 # %% ../nbs/01_constants.ipynb 2
-import re   
+import re
 
 # %% ../nbs/01_constants.ipynb 4
 TIMEOUT = 5
