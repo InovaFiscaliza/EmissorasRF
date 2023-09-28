@@ -10,7 +10,7 @@ from time import perf_counter
 import pandas as pd
 from pymongo import MongoClient
 from dotenv import find_dotenv, load_dotenv
-from ydata_profiling import ProfileReport
+# from ydata_profiling import ProfileReport
 
 start = perf_counter()
 
@@ -122,21 +122,24 @@ df.drop(columns=["_id"], inplace=True)
 dados = Path(__file__).resolve().parent.parent / "dados"
 dados.mkdir(parents=True, exist_ok=True)
 
+
+for k, v in DTYPE_SMP.items():
+    if v == "float":
+        df[k] = df[k].str.replace(",", ".").str.extract(r"([\d*\.?\d*])")
+        df.loc[df[k] == ".", k] = pd.NA
+        df[k] = pd.to_numeric(df[k], errors="coerce")
+
 df.astype("string").to_parquet(
     f"{dados}/smp_formated.parquet.gzip",
     compression="gzip",
     index=False,
 )
 
-for k, v in DTYPE_SMP.items():
-    if v == "float":
-        df[k] = df[k].str.replace(",", ".").str.extract(r"([\d*\.?\d*])")
-        df.loc[df[k] == ".", k] = pd.NA
 
-df = df.astype(DTYPE_SMP)
+# df = df.astype(DTYPE_SMP)
 
-profile = ProfileReport(df, minimal=True, title="Entidades SMP")
+# profile = ProfileReport(df, minimal=True, title="Entidades SMP")
 
-profile.to_file(f"{dados}/relatorio_smp.html")
+# profile.to_file(f"{dados}/relatorio_smp.html")
 
 print(f"Total time (minutes): {(perf_counter() - start)/60:.2f}")

@@ -1,0 +1,9 @@
+project:
+  type: website
+  output-dir: _docs
+
+website:
+  title: "RFDataHub"
+  site-url: "https://inovafiscaliza.github.io/EmissorasRF/"
+  description: "Pipeline de Dados de Emissores de RF Licenciados na Anatel e Aeronáutica"
+  repo-url: "https://github.com/InovaFiscaliza/EmissorasRF"

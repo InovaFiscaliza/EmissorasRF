@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['COLS_NAV', 'COLS_COM', 'UNIQUE_COLS', 'convert_latitude', 'convert_longitude', 'map_channels', 'get_icao']
 
-# %% ../../nbs/06_icao.ipynb 2
+# %% ../../nbs/06_icao.ipynb 3
 import os
 from pathlib import Path
 from typing import Iterable
@@ -13,12 +13,12 @@ from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv(), override=True)
 
-# %% ../../nbs/06_icao.ipynb 5
+# %% ../../nbs/06_icao.ipynb 6
 COLS_NAV = ["Frequency", "Latitude", "Longitude", "Facility", "Location", "NS", "WE"]
 COLS_COM = ["Frequency", "CoordLat", "CoordLong", "DOC", "Location", "NS", "WE"]
 UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
 
-# %% ../../nbs/06_icao.ipynb 6
+# %% ../../nbs/06_icao.ipynb 7
 def convert_latitude(
     lat: str,  # Latitude
     hemisphere: str,  # Hemisfério: N | S
@@ -41,7 +41,7 @@ def convert_longitude(
         float(lon[1:3]) + float(lon[4:6]) / 60 + float(lon[7:9]) / 3600.0
     )
 
-# %% ../../nbs/06_icao.ipynb 8
+# %% ../../nbs/06_icao.ipynb 10
 def _read_df(
     path: str,  # Caminho do arquivo
     usecols: Iterable[str],  # Subconjunto de colunas do arquivo
@@ -59,7 +59,7 @@ def _read_df(
     df["Description"] = "[ICAO] " + df.Facility + ", " + df.Location
     return df[["Frequency", "Latitude", "Longitude", "Description"]]
 
-# %% ../../nbs/06_icao.ipynb 9
+# %% ../../nbs/06_icao.ipynb 11
 def map_channels(
     df: pd.DataFrame,  # DataFrame dos dados de origem
     origem: str,  # Descrição da emissão a ser substituída
@@ -86,7 +86,7 @@ def map_channels(
                     df.loc[len(df)] = [c, row.Latitude, row.Longitude, description]
     return df
 
-# %% ../../nbs/06_icao.ipynb 10
+# %% ../../nbs/06_icao.ipynb 12
 def get_icao() -> (
     pd.DataFrame
 ):  # DataFrame com frequências, coordenadas e descrição das estações
