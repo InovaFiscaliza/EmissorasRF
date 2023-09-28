@@ -2,20 +2,88 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.0.38">
+<meta name="generator" content="quarto-1.2.280">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="description" content="Este módulo possui funções auxiliares de formatação dos dados das várias fontes.">
 
-<title>anateldb - Formatação</title>
+<title>Telecomunicações e Radiodifusão - Formatação</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -58,39 +126,46 @@ ul.task-list{list-style: none;}
 
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="anateldb - Formatação">
+<meta property="og:title" content="Telecomunicações e Radiodifusão - Formatação">
 <meta property="og:description" content="Este módulo possui funções auxiliares de formatação dos dados das várias fontes.">
-<meta property="og:site-name" content="anateldb">
-<meta name="twitter:title" content="anateldb - Formatação">
+<meta property="og:site-name" content="Telecomunicações e Radiodifusão">
+<meta name="twitter:title" content="Telecomunicações e Radiodifusão - Formatação">
 <meta name="twitter:description" content="Este módulo possui funções auxiliares de formatação dos dados das várias fontes.">
 <meta name="twitter:card" content="summary">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">anateldb</span>
-  </a>
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Telecomunicações e Radiodifusão</span>
+    </a>
+  </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./main.html">Principal</a>
+    <a class="nav-link" href="./main.html">
+ <span class="menu-text">Principal</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./reading.html">Leitura</a>
+    <a class="nav-link" href="./reading.html">
+ <span class="menu-text">Leitura</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./updates.html">Atualização</a>
+    <a class="nav-link" href="./updates.html">
+ <span class="menu-text">Atualização</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-api" role="button" data-bs-toggle="dropdown" aria-expanded="false">API</a>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-api" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">API</span>
+    </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-api">    
         <li>
     <a class="dropdown-item" href="./constants.html">
@@ -101,16 +176,30 @@ ul.task-list{list-style: none;}
  <span class="dropdown-text">Formatação</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./merging.html">
- <span class="dropdown-text">Mesclagem</span></a>
+    <a class="dropdown-item" href="./icao.html">
+ <span class="dropdown-text">ICAO</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./aisweb.html">
+ <span class="dropdown-text">AISWEB</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./aisgeo.html">
+ <span class="dropdown-text">AISGEO</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./redemet.html">
+ <span class="dropdown-text">REDEMET</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-ajuda" role="button" data-bs-toggle="dropdown" aria-expanded="false">Ajuda</a>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-ajuda" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Ajuda</span>
+    </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-ajuda">    
         <li>
-    <a class="dropdown-item" href="https://github.com/ronaldokun/anateldb/issues"><i class="bi bi-bug" role="img">
+    <a class="dropdown-item" href="https://github.com/InovaFiscaliza/EmissorasRF/issues"><i class="bi bi-bug" role="img">
 </i> 
  <span class="dropdown-text">Reporte um problema</span></a>
   </li>  
@@ -124,60 +213,38 @@ ul.task-list{list-style: none;}
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/ronaldokun/anateldb"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://twitter.com/ronaldokun"><i class="bi bi-twitter" role="img" aria-label="Twitter Author">
 </i> 
- </a>
-  </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/ronaldokun"><i class="bi bi-twitter" role="img" aria-label="Twitter Autor">
-</i> 
- </a>
+ <span class="menu-text"></span></a>
   </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-    <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Formatação</h1>
-      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
-</nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc">
+        <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#scrape_dataframe" id="toc-scrape_dataframe" class="nav-link active" data-scroll-target="#scrape_dataframe">scrape_dataframe</a></li>
-  <li><a href="#input_coordenates" id="toc-input_coordenates" class="nav-link" data-scroll-target="#input_coordenates">input_coordenates</a></li>
-  <li><a href="#parse_bw" id="toc-parse_bw" class="nav-link" data-scroll-target="#parse_bw">parse_bw</a></li>
-  <li><a href="#otimização-dos-tipos-de-dados" id="toc-otimização-dos-tipos-de-dados" class="nav-link" data-scroll-target="#otimização-dos-tipos-de-dados">Otimização dos Tipos de dados</a>
-  <ul class="collapse">
-  <li><a href="#optimize_floats" id="toc-optimize_floats" class="nav-link" data-scroll-target="#optimize_floats">optimize_floats</a></li>
-  <li><a href="#optimize_ints" id="toc-optimize_ints" class="nav-link" data-scroll-target="#optimize_ints">optimize_ints</a></li>
-  <li><a href="#optimize_objects" id="toc-optimize_objects" class="nav-link" data-scroll-target="#optimize_objects">optimize_objects</a></li>
-  <li><a href="#df_optimize" id="toc-df_optimize" class="nav-link" data-scroll-target="#df_optimize">df_optimize</a></li>
-  <li><a href="#format_types" id="toc-format_types" class="nav-link" data-scroll-target="#format_types">format_types</a></li>
-  </ul></li>
+  <li><a href="#parse_bw" id="toc-parse_bw" class="nav-link active" data-scroll-target="#parse_bw">parse_bw</a></li>
+  <li><a href="#mesclagem" id="toc-mesclagem" class="nav-link" data-scroll-target="#mesclagem">Mesclagem</a></li>
+  <li><a href="#merge_on_frequency" id="toc-merge_on_frequency" class="nav-link" data-scroll-target="#merge_on_frequency">merge_on_frequency</a></li>
+  <li><a href="#get_km_distance" id="toc-get_km_distance" class="nav-link" data-scroll-target="#get_km_distance">get_km_distance</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/ronaldokun/anateldb/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/InovaFiscaliza/EmissorasRF/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Formatação</h1>
+<h1 class="title">Formatação</h1>
 </div>
 
 <div>
@@ -190,6 +257,7 @@ ul.task-list{list-style: none;}
 <div class="quarto-title-meta">
 
     
+  
     
   </div>
   
@@ -198,12 +266,13 @@ ul.task-list{list-style: none;}
 
 <!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
 <hr>
-<section id="scrape_dataframe" class="level4">
-<h4 class="anchored" data-anchor-id="scrape_dataframe">scrape_dataframe</h4>
+<p><a href="https://github.com/InovaFiscaliza/EmissorasRF/blob/master/extracao/format.py#L35" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="parse_bw" class="level3">
+<h3 class="anchored" data-anchor-id="parse_bw">parse_bw</h3>
 <blockquote class="blockquote">
-<pre><code> scrape_dataframe (id_list:Iterable[str])</code></pre>
+<pre><code> parse_bw (bw:str)</code></pre>
 </blockquote>
-<p>Recebe uma lista de ids do Mosaico e retorna um dataframe com os dados raspados da página do MOSAICO</p>
+<p>Parse the bandwidth string</p>
 <table class="table">
 <colgroup>
 <col style="width: 9%">
@@ -219,94 +288,34 @@ ul.task-list{list-style: none;}
 </thead>
 <tbody>
 <tr class="odd">
-<td>id_list</td>
-<td>Iterable</td>
-<td>Lista de ids do Mosaico</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td><strong>Dataframe com os dados raspados da página do Mosaico</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="input_coordenates" class="level4">
-<h4 class="anchored" data-anchor-id="input_coordenates">input_coordenates</h4>
-<blockquote class="blockquote">
-<pre><code> input_coordenates (df:pandas.core.frame.DataFrame,
-                    pasta:Union[str,pathlib.Path])</code></pre>
-</blockquote>
-<p>Imputa os registros com coordenadas ausentes (NA’s) com as coordenadas do município</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>df</td>
-<td>DataFrame</td>
-<td>DataFrame a imputar coordenadas inválidas</td>
-</tr>
-<tr class="even">
-<td>pasta</td>
-<td>Union</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="parse_bw" class="level4">
-<h4 class="anchored" data-anchor-id="parse_bw">parse_bw</h4>
-<blockquote class="blockquote">
-<pre><code> parse_bw (bw:str)</code></pre>
-</blockquote>
-<p>Parse the bandwidth string</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
 <td>bw</td>
 <td>str</td>
-<td>Largura de Banda codificada como string</td>
+<td>Designação de Emissão (Largura + Classe) codificada como string</td>
 </tr>
 <tr class="even">
 <td><strong>Returns</strong></td>
-<td><strong>float</strong></td>
-<td><strong>Largura de Banda codificada como float</strong></td>
+<td><strong>Tuple</strong></td>
+<td><strong>Largura e Classe de Emissão</strong></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="otimização-dos-tipos-de-dados" class="level2">
-<h2 class="anchored" data-anchor-id="otimização-dos-tipos-de-dados">Otimização dos Tipos de dados</h2>
-<p>A serem criados dataframes, normalmente a tipo de data é aquele com maior resolução possível, nem sempre isso é necessário, os arquivos de espectro mesmo possuem somente uma casa decimal, portanto um <code>float16</code> já é suficiente para armazená-los. As funções a seguir fazem essa otimização</p>
-<p>Code below borrowed from https://medium.com/bigdatarepublic/advanced-pandas-optimize-speed-and-memory-a654b53be6c2</p>
+<section id="mesclagem" class="level3">
+<h3 class="anchored" data-anchor-id="mesclagem">Mesclagem</h3>
+<p>Função auxiliar para mesclar registros que são iguais das diversas bases, i.e.&nbsp;estão a uma distância menor que <code>MAX_DIST</code> e verificar a validade da mesclagem</p>
 <hr>
-<section id="optimize_floats" class="level4">
-<h4 class="anchored" data-anchor-id="optimize_floats">optimize_floats</h4>
+<p><a href="https://github.com/InovaFiscaliza/EmissorasRF/blob/master/extracao/format.py#L148" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="merge_on_frequency" class="level3">
+<h3 class="anchored" data-anchor-id="merge_on_frequency">merge_on_frequency</h3>
 <blockquote class="blockquote">
-<pre><code> optimize_floats (df:pandas.core.frame.DataFrame,
-                  exclude:Iterable[str]=None)</code></pre>
+<pre><code> merge_on_frequency (df_left:pandas.core.frame.DataFrame,
+                     df_right:pandas.core.frame.DataFrame,
+                     on:str='Frequency', coords:Tuple[str]=('Latitude',
+                     'Longitude'), description:str='Description',
+                     suffixes:Tuple[str]=('_x', '_y'))</code></pre>
 </blockquote>
-<p>Otimiza os floats do dataframe para reduzir o uso de memória</p>
+<p>Mescla os dataframes baseados na frequência É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado</p>
 <table class="table">
 <colgroup>
 <col style="width: 6%">
@@ -324,221 +333,71 @@ ul.task-list{list-style: none;}
 </thead>
 <tbody>
 <tr class="odd">
-<td>df</td>
+<td>df_left</td>
 <td>DataFrame</td>
 <td></td>
-<td>DataFrame a ser otimizado</td>
+<td>DataFrame da esquerda a ser mesclado</td>
 </tr>
 <tr class="even">
-<td>exclude</td>
-<td>Iterable</td>
-<td>None</td>
-<td>Colunas a serem excluidas da otimização</td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>DataFrame com as colunas do tipo <code>float</code> otimizadas</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="optimize_ints" class="level4">
-<h4 class="anchored" data-anchor-id="optimize_ints">optimize_ints</h4>
-<blockquote class="blockquote">
-<pre><code> optimize_ints (df:pandas.core.frame.DataFrame,
-                exclude:Iterable[str]=None)</code></pre>
-</blockquote>
-<p>Otimiza os ints do dataframe para reduzir o uso de memória</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>df</td>
+<td>df_right</td>
 <td>DataFrame</td>
 <td></td>
-<td>Dataframe a ser otimizado</td>
-</tr>
-<tr class="even">
-<td>exclude</td>
-<td>Iterable</td>
-<td>None</td>
-<td>Colunas a serem excluidas da otimização</td>
+<td>DataFrame da direira a ser mesclado</td>
 </tr>
 <tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>DataFrame com as colunas do tipo <code>int</code> otimizadas</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="optimize_objects" class="level4">
-<h4 class="anchored" data-anchor-id="optimize_objects">optimize_objects</h4>
-<blockquote class="blockquote">
-<pre><code> optimize_objects (df:pandas.core.frame.DataFrame,
-                   datetime_features:Iterable[str]=None,
-                   exclude:Iterable[str]=None)</code></pre>
-</blockquote>
-<p>Otimiza as colunas do tipo <code>object</code> no DataFrame para <code>category</code> ou <code>string</code> para reduzir a memória e tamanho de arquivo</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>df</td>
-<td>DataFrame</td>
-<td></td>
-<td>DataFrame a ser otimizado</td>
-</tr>
-<tr class="even">
-<td>datetime_features</td>
-<td>Iterable</td>
-<td>None</td>
-<td>Colunas que serão convertidas para datetime</td>
-</tr>
-<tr class="odd">
-<td>exclude</td>
-<td>Iterable</td>
-<td>None</td>
-<td>Colunas que não serão convertidas</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>DataFrame com as colunas do tipo <code>object</code> otimizadas</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="df_optimize" class="level4">
-<h4 class="anchored" data-anchor-id="df_optimize">df_optimize</h4>
-<blockquote class="blockquote">
-<pre><code> df_optimize (df:pandas.core.frame.DataFrame,
-              datetime_features:Iterable[str]=None,
-              exclude:Iterable[str]=None)</code></pre>
-</blockquote>
-<p>Função que encapsula as anteriores para otimizar os tipos de dados e reduzir o tamanho do arquivo e uso de memória</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>df</td>
-<td>DataFrame</td>
-<td></td>
-<td>DataFrame a ser otimizado</td>
-</tr>
-<tr class="even">
-<td>datetime_features</td>
-<td>Iterable</td>
-<td>None</td>
-<td>Colunas que serão convertidas para datetime</td>
-</tr>
-<tr class="odd">
-<td>exclude</td>
-<td>Iterable</td>
-<td>None</td>
-<td>Colunas que não serão convertidas</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>DataFrame com as colunas com tipos de dados otimizados</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="format_types" class="level4">
-<h4 class="anchored" data-anchor-id="format_types">format_types</h4>
-<blockquote class="blockquote">
-<pre><code> format_types (df:pandas.core.frame.DataFrame, stem:str=None)</code></pre>
-</blockquote>
-<p>Convert the columns of a dataframe to optimized types</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>df</td>
-<td>DataFrame</td>
-<td></td>
-<td>DataFrame a ser formatado</td>
-</tr>
-<tr class="even">
-<td>stem</td>
+<td>on</td>
 <td>str</td>
-<td>None</td>
-<td>Identificador do arquivo para otimização específica</td>
+<td>Frequency</td>
+<td>Coluna usada como chave de mesclagem</td>
+</tr>
+<tr class="even">
+<td>coords</td>
+<td>Tuple</td>
+<td>(‘Latitude’, ‘Longitude’)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>description</td>
+<td>str</td>
+<td>Description</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>suffixes</td>
+<td>Tuple</td>
+<td>(’_x’, ’_y’)</td>
+<td>Sufixo para as colunas que foram criadas</td>
 </tr>
 <tr class="odd">
 <td><strong>Returns</strong></td>
 <td><strong>DataFrame</strong></td>
 <td></td>
-<td><strong>DataFrame formatado</strong></td>
+<td><strong>DataFrame resultante da mesclagem</strong></td>
 </tr>
 </tbody>
 </table>
-
-
+<hr>
+<p><a href="https://github.com/InovaFiscaliza/EmissorasRF/blob/master/extracao/format.py#L144" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
+<section id="get_km_distance" class="level3">
+<h3 class="anchored" data-anchor-id="get_km_distance">get_km_distance</h3>
+<blockquote class="blockquote">
+<pre><code> get_km_distance (row)</code></pre>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>folder <span class="op">=</span> Path.cwd().parent <span class="op">/</span> <span class="st">"dados"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_left <span class="op">=</span> _filter_matlab(pd.read_parquet(folder <span class="op">/</span> <span class="st">"base.parquet.gzip"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_right <span class="op">=</span> pd.read_parquet(folder <span class="op">/</span> <span class="st">"aero.parquet.gzip"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> merge_on_frequency(df_left, df_right)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->
@@ -583,7 +442,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
     setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -611,31 +487,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   for (var i=0; i<noterefs.length; i++) {
     const ref = noterefs[i];
     tippyHover(ref, function() {
-      let href = ref.getAttribute('href');
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
     });
   }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
-    tippyHover(ref, function() {
-      var popup = window.document.createElement('div');
-      cites.forEach(function(cite) {
-        var citeDiv = window.document.createElement('div');
-        citeDiv.classList.add('hanging-indent');
-        citeDiv.classList.add('csl-entry');
-        var biblioDiv = window.document.getElementById('ref-' + cite);
-        if (biblioDiv) {
-          citeDiv.innerHTML = biblioDiv.innerHTML;
-        }
-        popup.appendChild(citeDiv);
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
       });
-      return popup.innerHTML;
-    });
+    }
   }
 });
 </script>

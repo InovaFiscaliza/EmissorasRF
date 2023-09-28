@@ -2,20 +2,24 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.0.38">
+<meta name="generator" content="quarto-1.2.280">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Este repositório concentra um conjunto de scripts para navegar e baixar informações dos principais bancos de dados da Anatel e as bases públicas da Aeronáutica como o AISWEB, GEOAISWEB e ICAO cruzadas com documentações técnicas internas. Cujo dados serão utilizados em tarefas fiscalizatórias. O público alvo são os servidores do órgão, uma vez que a maioria dos sistemas utilizados aqui necessitam de autenticação cujo acesso é restrito aos servidores da ANATEL.">
 
-<title>anateldb - Anatel - Consulta e Processamento do Banco de Dados</title>
+<title>Telecomunicações e Radiodifusão</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -54,7 +58,7 @@ code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
+code span.bu { color: #008000; } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -67,7 +71,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
+code span.im { color: #008000; font-weight: bold; } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -118,42 +122,52 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="anateldb - Anatel - Consulta e Processamento do Banco de Dados">
-<meta property="og:description" content="Este repositório concentra um conjunto de scripts para navegar e baixar informações dos principais bancos de dados da Anatel e as bases públicas da Aeronáutica como o AISWEB, GEOAISWEB e ICAO cruzadas com documentações técnicas internas. Cujo dados serão utilizados em tarefas fiscalizatórias. O público alvo são os servidores do órgão, uma vez que a maioria dos sistemas utilizados aqui necessitam de autenticação cujo acesso é restrito aos servidores da ANATEL.">
-<meta property="og:site-name" content="anateldb">
-<meta name="twitter:title" content="anateldb - Anatel - Consulta e Processamento do Banco de Dados">
-<meta name="twitter:description" content="Este repositório concentra um conjunto de scripts para navegar e baixar informações dos principais bancos de dados da Anatel e as bases públicas da Aeronáutica como o AISWEB, GEOAISWEB e ICAO cruzadas com documentações técnicas internas. Cujo dados serão utilizados em tarefas fiscalizatórias. O público alvo são os servidores do órgão, uma vez que a maioria dos sistemas utilizados aqui necessitam de autenticação cujo acesso é restrito aos servidores da ANATEL.">
+<meta property="og:title" content="">
+<meta property="og:description" content="Além de prover uma API que extrai, limpa, processa e padroniza os dados de estações licenciadas na Anatel - relevantes para a Identificação de Emissões no âmbito dos Planos de Monitoração - Outro…">
+<meta property="og:site-name" content="Telecomunicações e Radiodifusão">
+<meta name="twitter:title" content="">
+<meta name="twitter:description" content="Além de prover uma API que extrai, limpa, processa e padroniza os dados de estações licenciadas na Anatel - relevantes para a Identificação de Emissões no âmbito dos Planos de Monitoração - Outro…">
 <meta name="twitter:card" content="summary">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">anateldb</span>
-  </a>
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Telecomunicações e Radiodifusão</span>
+    </a>
+  </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./main.html">Principal</a>
+    <a class="nav-link" href="./main.html">
+ <span class="menu-text">Principal</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./reading.html">Leitura</a>
+    <a class="nav-link" href="./reading.html">
+ <span class="menu-text">Leitura</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./updates.html">Atualização</a>
+    <a class="nav-link" href="./updates.html">
+ <span class="menu-text">Atualização</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-api" role="button" data-bs-toggle="dropdown" aria-expanded="false">API</a>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-api" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">API</span>
+    </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-api">    
         <li>
     <a class="dropdown-item" href="./constants.html">
@@ -164,16 +178,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="dropdown-text">Formatação</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./merging.html">
- <span class="dropdown-text">Mesclagem</span></a>
+    <a class="dropdown-item" href="./icao.html">
+ <span class="dropdown-text">ICAO</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./aisweb.html">
+ <span class="dropdown-text">AISWEB</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./aisgeo.html">
+ <span class="dropdown-text">AISGEO</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./redemet.html">
+ <span class="dropdown-text">REDEMET</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-ajuda" role="button" data-bs-toggle="dropdown" aria-expanded="false">Ajuda</a>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-ajuda" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Ajuda</span>
+    </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-ajuda">    
         <li>
-    <a class="dropdown-item" href="https://github.com/ronaldokun/anateldb/issues"><i class="bi bi-bug" role="img">
+    <a class="dropdown-item" href="https://github.com/InovaFiscaliza/EmissorasRF/issues"><i class="bi bi-bug" role="img">
 </i> 
  <span class="dropdown-text">Reporte um problema</span></a>
   </li>  
@@ -187,1052 +215,1839 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/ronaldokun/anateldb"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://twitter.com/ronaldokun"><i class="bi bi-twitter" role="img" aria-label="Twitter Author">
 </i> 
- </a>
-  </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/ronaldokun"><i class="bi bi-twitter" role="img" aria-label="Twitter Autor">
-</i> 
- </a>
+ <span class="menu-text"></span></a>
   </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-    <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Anatel - Consulta e Processamento do Banco de Dados</h1>
-      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
-</nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc">
+        <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#instalação" id="toc-instalação" class="nav-link active" data-scroll-target="#instalação">Instalação</a></li>
-  <li><a href="#como-utilizar" id="toc-como-utilizar" class="nav-link" data-scroll-target="#como-utilizar">Como utilizar</a>
-  <ul class="collapse">
-  <li><a href="#consulta-à-base-de-dados-formatada-para-o-appanalise-de-anatel" id="toc-consulta-à-base-de-dados-formatada-para-o-appanalise-de-anatel" class="nav-link" data-scroll-target="#consulta-à-base-de-dados-formatada-para-o-appanalise-de-anatel">Consulta à base de dados formatada para o AppAnalise de Anatel</a>
-  <ul class="collapse">
-  <li><a href="#get_db" id="toc-get_db" class="nav-link" data-scroll-target="#get_db">get_db</a></li>
+  <li><a href="#rfdatahub" id="toc-rfdatahub" class="nav-link active" data-scroll-target="#rfdatahub">RFDataHub</a></li>
+  <li><a href="#bases-de-dados" id="toc-bases-de-dados" class="nav-link" data-scroll-target="#bases-de-dados">BASES DE DADOS</a></li>
+  <li><a href="#radcom" id="toc-radcom" class="nav-link" data-scroll-target="#radcom">RADCOM</a>
+  <ul>
+  <li><a href="#filtragem" id="toc-filtragem" class="nav-link" data-scroll-target="#filtragem">Filtragem ✂️</a></li>
+  <li><a href="#descrição" id="toc-descrição" class="nav-link" data-scroll-target="#descrição">Descrição 📊</a></li>
+  <li><a href="#pós-processamento" id="toc-pós-processamento" class="nav-link" data-scroll-target="#pós-processamento">Pós-Processamento 🛠️</a></li>
+  <li><a href="#dados-incorretos" id="toc-dados-incorretos" class="nav-link" data-scroll-target="#dados-incorretos">Dados Incorretos 🗑️</a></li>
   </ul></li>
-  <li><a href="#métodos-para-baixar-ou-atualizar-os-arquivos-das-bases-de-dados" id="toc-métodos-para-baixar-ou-atualizar-os-arquivos-das-bases-de-dados" class="nav-link" data-scroll-target="#métodos-para-baixar-ou-atualizar-os-arquivos-das-bases-de-dados">Métodos para baixar ou atualizar os arquivos das bases de dados</a></li>
-  <li><a href="#métodos-para-ler-as-bases-de-dados" id="toc-métodos-para-ler-as-bases-de-dados" class="nav-link" data-scroll-target="#métodos-para-ler-as-bases-de-dados">Métodos para ler as Bases de Dados</a></li>
+  <li><a href="#stel" id="toc-stel" class="nav-link" data-scroll-target="#stel">STEL</a>
+  <ul>
+  <li><a href="#filtragem-1" id="toc-filtragem-1" class="nav-link" data-scroll-target="#filtragem-1">Filtragem ✂️</a></li>
+  <li><a href="#descrição-1" id="toc-descrição-1" class="nav-link" data-scroll-target="#descrição-1">Descrição 📊</a></li>
+  <li><a href="#pós-processamento-1" id="toc-pós-processamento-1" class="nav-link" data-scroll-target="#pós-processamento-1">Pós-Processamento 🛠️</a></li>
+  <li><a href="#dados-incorretos-1" id="toc-dados-incorretos-1" class="nav-link" data-scroll-target="#dados-incorretos-1">Dados Incorretos 🗑️</a></li>
   </ul></li>
+  <li><a href="#mosaico---radiodifusão" id="toc-mosaico---radiodifusão" class="nav-link" data-scroll-target="#mosaico---radiodifusão">MOSAICO - Radiodifusão</a>
+  <ul>
+  <li><a href="#filtragem-2" id="toc-filtragem-2" class="nav-link" data-scroll-target="#filtragem-2">Filtragem ✂️</a></li>
+  <li><a href="#descrição-2" id="toc-descrição-2" class="nav-link" data-scroll-target="#descrição-2">Descrição 📊</a></li>
+  <li><a href="#pós-processamento-2" id="toc-pós-processamento-2" class="nav-link" data-scroll-target="#pós-processamento-2">Pós-Processamento 🛠️</a></li>
+  <li><a href="#dados-incorretos-2" id="toc-dados-incorretos-2" class="nav-link" data-scroll-target="#dados-incorretos-2">Dados Incorretos 🗑️</a></li>
+  </ul></li>
+  <li><a href="#mosaico---telecomunicações" id="toc-mosaico---telecomunicações" class="nav-link" data-scroll-target="#mosaico---telecomunicações">MOSAICO - Telecomunicações</a>
+  <ul>
+  <li><a href="#filtragem-3" id="toc-filtragem-3" class="nav-link" data-scroll-target="#filtragem-3">Filtragem ✂️</a></li>
+  <li><a href="#descrição-3" id="toc-descrição-3" class="nav-link" data-scroll-target="#descrição-3">Descrição 📊</a></li>
+  <li><a href="#pós-processamento-3" id="toc-pós-processamento-3" class="nav-link" data-scroll-target="#pós-processamento-3">Pós-Processamento 🛠️</a></li>
+  </ul></li>
+  <li><a href="#mosaico---serviço-móvel-pessoal" id="toc-mosaico---serviço-móvel-pessoal" class="nav-link" data-scroll-target="#mosaico---serviço-móvel-pessoal">MOSAICO - Serviço Móvel Pessoal</a>
+  <ul>
+  <li><a href="#filtragem-4" id="toc-filtragem-4" class="nav-link" data-scroll-target="#filtragem-4">Filtragem ✂️</a></li>
+  <li><a href="#descrição-4" id="toc-descrição-4" class="nav-link" data-scroll-target="#descrição-4">Descrição 📊</a></li>
+  <li><a href="#pós-processamento-4" id="toc-pós-processamento-4" class="nav-link" data-scroll-target="#pós-processamento-4">Pós-Processamento 🛠️</a></li>
+  </ul></li>
+  <li><a href="#aeronáutica" id="toc-aeronáutica" class="nav-link" data-scroll-target="#aeronáutica">AERONÁUTICA 🛬</a>
+  <ul>
+  <li><a href="#pós-processamento-5" id="toc-pós-processamento-5" class="nav-link" data-scroll-target="#pós-processamento-5">Pós-Processamento</a></li>
+  </ul></li>
+  <li><a href="#validação-de-coordenadas" id="toc-validação-de-coordenadas" class="nav-link" data-scroll-target="#validação-de-coordenadas">Validação de Coordenadas ✅</a></li>
+  <li><a href="#arquivo-final" id="toc-arquivo-final" class="nav-link" data-scroll-target="#arquivo-final">Arquivo Final🗄️</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/ronaldokun/anateldb/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/InovaFiscaliza/EmissorasRF/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Anatel - Consulta e Processamento do Banco de Dados</h1>
-</div>
 
-<div>
-  <div class="description">
-    Este repositório concentra um conjunto de scripts para navegar e baixar informações dos principais bancos de dados da Anatel e as bases públicas da Aeronáutica como o AISWEB, GEOAISWEB e ICAO cruzadas com documentações técnicas internas. Cujo dados serão utilizados em tarefas fiscalizatórias. O público alvo são os servidores do órgão, uma vez que a maioria dos sistemas utilizados aqui necessitam de autenticação cujo acesso é restrito aos servidores da ANATEL.
-  </div>
-</div>
-
-
-<div class="quarto-title-meta">
-
-    
-    
-  </div>
-  
-
-</header>
 
 <!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
-<p><a href="https://gitmoji.dev"> <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?style=flat-square" alt="Gitmoji"> </a></p>
+<section id="rfdatahub" class="level2">
+<h2 class="anchored" data-anchor-id="rfdatahub">RFDataHub</h2>
+<blockquote class="blockquote">
+<p>A presente biblioteca tem como intuito agregar dados de estações transmissoras de Radiofrequência</p>
+</blockquote>
+<ul>
+<li><p>O fluxo é concentrado nos dados licenciados junto à ANATEL de serviços públicos de Radiodifusão e Serviços Privados de Telecomunicações, além de dados de emissores aeronáuticos consumidos de diversas APIs e fontes documentais institucionais.</p></li>
+<li><p>Os diversos módulos presentes fazem a extração, limpeza, pós-processamento, validação, verificação de qualidade e agregação desses dados num formato consolidado para os planos de monitoração da ANATEL.</p></li>
+</ul>
+</section>
+<section id="bases-de-dados" class="level2">
+<h2 class="anchored" data-anchor-id="bases-de-dados">BASES DE DADOS</h2>
+<blockquote class="blockquote">
+<p>A Seguir são descritas as instâncias de banco, as bases de dados e as tabelas consultadas.</p>
+</blockquote>
+<ul>
+<li>Instância de Banco de Dados SQL - Server - <code>ANATELBDRO05</code>:
+<ul>
+<li>Base de Dados: <code>SITARWEB</code>:
+<ul>
+<li><code>STEL</code> - Serviços Privados de Telecomunicações<br>
+Base legada cujos registros, novos e antigos, estão sendo transferidos para o banco de dados <code>licenciamento</code> da instância <code>ANATELBDRO06</code></li>
+</ul></li>
+<li>Base de Dados: <code>SRD</code>:
+<ul>
+<li><code>RADCOM</code> - Serviço de Radiodifusão Comunitária</li>
+</ul></li>
+</ul></li>
+<li>Instância de Banco de Dados MongoDB - <code>ANATELBDRO06</code>:
+<ul>
+<li>Base de Dados: <code>sms</code>
+<ul>
+<li>Coleção: <code>srd</code>:
+<ul>
+<li><code>SRD</code> - Demais serviços de Radiodifusão, e.g.&nbsp;TV, RTV, RTVD, FM, AM, etc.</li>
+</ul></li>
+<li>Coleção: <code>licenciamento</code>:
+<ul>
+<li><code>TELECOM</code> - Serviços Privados de Telecomunicações, e.g.&nbsp;Limitado Privado.</li>
+<li><code>SMP</code> - Serviço Móvel Pessoal, e.g.&nbsp;4G e 5G</li>
+</ul></li>
+</ul></li>
+</ul>
+<blockquote class="blockquote">
+<p>A base de dados <code>sms</code>, e no geral a instância como um todo, é referida como <code>MOSAICO</code> por conta da plataforma web no qual são servidos esses dados para acesso.</p>
+</blockquote></li>
+<li><code>AERONAUTICA</code> - Consolidação de diversas bases de dados públicas da aeronáutica. Esses dados são enriquecidos com informações adicionais fornecidas por órgãos como o DECEA, além de emissões conhecidas provenientes de conhecimento técnico prévio consolidado na agência.</li>
+</ul>
+</section>
+<section id="radcom" class="level2">
+<h2 class="anchored" data-anchor-id="radcom">RADCOM</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pasta <span class="op">=</span> Path.cwd().parent <span class="op">/</span> <span class="st">'dados'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'radcom.parquet.gzip'</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Fistel</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Código_Município</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3168</th>
+      <td>104.9</td>
+      <td>ASSOCIACAO COMUNITARIA JOAIMENSE CULTURAL DE R...</td>
+      <td>50012640301</td>
+      <td>682812145</td>
+      <td>Joaíma</td>
+      <td>3136009</td>
+    </tr>
+    <tr>
+      <th>3345</th>
+      <td>104.9</td>
+      <td>ASSOCIACAO DE AMIGOS VALE DO GUAPORE</td>
+      <td>50013713175</td>
+      <td>683836722</td>
+      <td>Pontes e Lacerda</td>
+      <td>5106752</td>
+    </tr>
+    <tr>
+      <th>4433</th>
+      <td>105.9</td>
+      <td>ASSOCIACAO COMUNITARIA DE APOIO A CIDADANIA-ACAC</td>
+      <td>50013423096</td>
+      <td>683549529</td>
+      <td>Guarará</td>
+      <td>3128501</td>
+    </tr>
+    <tr>
+      <th>3169</th>
+      <td>104.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA EDUCATIVA DE JURAMENTO ...</td>
+      <td>50409156329</td>
+      <td>699282721</td>
+      <td>Juramento</td>
+      <td>3136801</td>
+    </tr>
+    <tr>
+      <th>457</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA E DE COMUNICAÇÃO SOCIAL...</td>
+      <td>50409272230</td>
+      <td>697612040</td>
+      <td>Salitre</td>
+      <td>2311959</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="filtragem" class="level3">
+<h3 class="anchored" data-anchor-id="filtragem">Filtragem ✂️</h3>
+<p>Os únicos filtros efetuados na <em>query</em> para os dados de RADCOM são:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;..</span>.<span class="op">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    SRD.IdtPlanoBasico <span class="kw">is</span> <span class="kw">not</span> <span class="kw">Null</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">and</span> SRD.IndFase <span class="kw">is</span> <span class="kw">not</span> <span class="kw">Null</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;..</span>.<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Esse filtro significa que a emissão está licenciada devidamente com o processo de outorga já concluído ou com funcionamento autorizado.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'A base RADCOM possui atualmente </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> registros ativos.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>A base RADCOM possui atualmente 4996 registros ativos.</code></pre>
+</div>
+</div>
+</section>
+<section id="descrição" class="level3">
+<h3 class="anchored" data-anchor-id="descrição">Descrição 📊</h3>
+<p>A seguir são descritas as colunas extraídas da base e o significado de cada uma</p>
+<ul>
+<li><code>Frequência</code>: Frequência de Transmissão da Estação</li>
+<li><code>Entidade</code>: Nome da Pessoa (Física | Jurídica) detentora da Outorga</li>
+<li><code>Fistel</code>: Código itentificador da Outorga de Serviço, um Fistel pode conter uma ou mais estações</li>
+<li><code>Número_Estação</code>: Código Identificador da Estação - Código não necessáriamente único, por vezes uma única estação possui diversos transmissores com características distintas</li>
+<li><code>Município</code>: Município de Outorga daquela estação</li>
+<li><code>Código_Município</code>: Código único do IBGE identificando univocamente o município, esse código é utilizado para validar a localização das coordenadas da estação</li>
+<li><code>UF</code>: Unidade Federativa ( Estado )</li>
+<li><code>Latitude</code>: Latitude em formato Decimal</li>
+<li><code>Longitude</code>: Longitude em formato Decimal</li>
+<li><code>Fase</code>: Fase do Processo de Licenciamento</li>
+<li><code>Situação</code>: Situação da Outorga</li>
+</ul>
+</section>
+<section id="pós-processamento" class="level3">
+<h3 class="anchored" data-anchor-id="pós-processamento">Pós-Processamento 🛠️</h3>
+<p>A seguir são descritas as colunas adicionadas à base extraída e o significado de cada uma</p>
+<blockquote class="blockquote">
+<p>As colunas <code>Fase</code> e <code>Situação</code> somente existem na base <code>RADCOM</code>, para normalizar esses dados e combinar com as demais bases, essas duas colunas são transformadas em uma única coluna chamada <code>Classe</code>, essa coluna tem o intuito em todas as tabelas de identificar o tipo de estação transmissora:</p>
+</blockquote>
+<ul>
+<li>Onde a informação de <code>Situação</code> é ausente, a <code>Classe</code> é igual a <code>Fase</code>, exemplos:
+<ul>
+<li><code>3</code></li>
+<li><code>P</code></li>
+</ul></li>
+<li>Onde ambas estão presentes a <code>Classe</code> é igual a <code>&lt;Fase&gt;-&lt;Situação&gt;</code>:
+<ul>
+<li><code>3-P</code></li>
+<li><code>P-A</code></li>
+</ul></li>
+<li><code>Num_Serviço</code>: Número identificador do serviço, no caso de <code>RADCOM</code> o valor é único: <code>231</code></li>
+<li><code>Classe_Emissão</code>: Dado ausente na base de <code>RADCOM</code> , inserido valores únicos nulos para normalizar com as demais bases</li>
+<li><code>Largura_Emissão(kHz)</code>: Largura de Banda da Emissão em kHz. Nessa coluna é imputado o valor de <code>256</code>, valor padrão para o serviço FM.</li>
+<li><code>Validade_RF</code>: Dado ausente na base de <code>RADCOM</code> , inserido valores únicos nulos para normalizar com as demais bases</li>
+<li><code>Status</code>: Dado ausente na base de <code>RADCOM</code> , inserido valor único <code>RADCOM</code> para normalizar com demais bases</li>
+<li><code>Fonte</code>: Fonte dos dados, nessa caso é inserido o nome da Tabela: <code>SRD</code></li>
+<li><code>Multiplicidade</code>: Contagem do Registro. Nesse caso o valor é somente <code>1</code> por conta de todos os registros serem únicos, i.e.&nbsp;são referentes a uma estação única</li>
+</ul>
+</section>
+<section id="dados-incorretos" class="level3">
+<h3 class="anchored" data-anchor-id="dados-incorretos">Dados Incorretos 🗑️</h3>
+<p>A seguir são exibidas informações sobre coordenadas ausentes ou facilmente identificadas como incorretas, nesse caso fora dos limites do Brasil. &gt; Uma validação precisa das coordenadas é feita antes de consolidar o arquivo final e será descrita posteriormente</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Número de coordenadas ausentes: </span><span class="sc">{</span>df[df.Latitude.isna() <span class="op">|</span> df.Longitude.isna()]<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Número de coordenadas ausentes: 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>bad <span class="op">=</span> df[<span class="op">~</span>(df.Latitude.between(MIN_LAT, MAX_LAT) <span class="op">&amp;</span> df.Longitude.between(MIN_LONG, MAX_LONG))]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Exemplo de coordenadas incorretas, fora dos limites do Brasil: "</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>bad.loc[:, [<span class="st">'Frequência'</span>, <span class="st">'Entidade'</span>, <span class="st">'Número_Estação'</span>, <span class="st">'Município'</span>, <span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Exemplo de coordenadas incorretas, fora dos limites do Brasil: </code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>64</th>
+      <td>87.5</td>
+      <td>ASSOCIAÇÃO SERRANA COMUNITÁRIA - ASERCOM</td>
+      <td>691861544</td>
+      <td>São Francisco de Paula</td>
+      <td>-50.572500</td>
+      <td>-29.446389</td>
+    </tr>
+    <tr>
+      <th>327</th>
+      <td>87.9</td>
+      <td>Associação de Radiodifusão Comunitária de Ipec...</td>
+      <td>1010974570</td>
+      <td>Ipecaetá</td>
+      <td>-0.205286</td>
+      <td>-0.655050</td>
+    </tr>
+    <tr>
+      <th>470</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA E CULTURAL DE BOA ESPER...</td>
+      <td>695516850</td>
+      <td>Boa Esperança</td>
+      <td>-36.535556</td>
+      <td>-79.833889</td>
+    </tr>
+    <tr>
+      <th>482</th>
+      <td>87.9</td>
+      <td>Associação Rural Jaguarense</td>
+      <td>1015029458</td>
+      <td>Jaguaré</td>
+      <td>-0.313650</td>
+      <td>-0.669211</td>
+    </tr>
+    <tr>
+      <th>638</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA DE SÃO LUIZ DO NORTE</td>
+      <td>695284665</td>
+      <td>São Luiz do Norte</td>
+      <td>-36.042222</td>
+      <td>-68.627222</td>
+    </tr>
+    <tr>
+      <th>736</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA VOZ DE SÃO PEDRO DOS CR...</td>
+      <td>691975078</td>
+      <td>São Pedro dos Crentes</td>
+      <td>-3.501111</td>
+      <td>-0.773333</td>
+    </tr>
+    <tr>
+      <th>1072</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO DOS AMIGOS DA CULTURA</td>
+      <td>691081085</td>
+      <td>Poços de Caldas</td>
+      <td>-45.838889</td>
+      <td>-21.923611</td>
+    </tr>
+    <tr>
+      <th>1267</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA IPIRANGUENSE</td>
+      <td>1014626029</td>
+      <td>Ipiranga do Norte</td>
+      <td>-0.203989</td>
+      <td>-0.935672</td>
+    </tr>
+    <tr>
+      <th>1330</th>
+      <td>87.9</td>
+      <td>FUNDAÇÃO DE ASSISTÊNCIA À FAMÍLIA ANTÔNIO CORR...</td>
+      <td>695446541</td>
+      <td>Irituia</td>
+      <td>-1.771389</td>
+      <td>-4.437222</td>
+    </tr>
+    <tr>
+      <th>1406</th>
+      <td>87.9</td>
+      <td>CENTRO INTEGRADO DE AÇÕES COMUNITÁRIAS PELA VIDA</td>
+      <td>1015253617</td>
+      <td>João Pessoa</td>
+      <td>-0.119872</td>
+      <td>-0.580836</td>
+    </tr>
+    <tr>
+      <th>1703</th>
+      <td>87.9</td>
+      <td>Associação Comunitária de Tamoios</td>
+      <td>1014984820</td>
+      <td>Cabo Frio</td>
+      <td>-0.376531</td>
+      <td>-0.700028</td>
+    </tr>
+    <tr>
+      <th>2103</th>
+      <td>87.9</td>
+      <td>ASSOCIAÇÃO DE MÍDIA COMUNITÁRIA DA CIDADE DE N...</td>
+      <td>1009018300</td>
+      <td>Nhandeara</td>
+      <td>-20.694167</td>
+      <td>-5.041111</td>
+    </tr>
+    <tr>
+      <th>2384</th>
+      <td>98.5</td>
+      <td>ASSOCIAÇÃO DE RÁDIO E CULTURA</td>
+      <td>691860033</td>
+      <td>Serra</td>
+      <td>-52.223611</td>
+      <td>-40.211389</td>
+    </tr>
+    <tr>
+      <th>2441</th>
+      <td>98.7</td>
+      <td>INSTITUTO DE RADIODIFUSÃO E DESENVOLVIMENTO CO...</td>
+      <td>1014997094</td>
+      <td>Sobral</td>
+      <td>-0.067903</td>
+      <td>-0.665706</td>
+    </tr>
+    <tr>
+      <th>2442</th>
+      <td>98.7</td>
+      <td>Centro Cultural de Comunicação de Jaibaras - CCCJ</td>
+      <td>1014529902</td>
+      <td>Sobral</td>
+      <td>-0.062869</td>
+      <td>-0.674886</td>
+    </tr>
+    <tr>
+      <th>2619</th>
+      <td>104.9</td>
+      <td>ASSOCIAÇÃO SEMEANDO PARA O FUTURO</td>
+      <td>1014898444</td>
+      <td>Belmonte</td>
+      <td>-0.264261</td>
+      <td>-0.647931</td>
+    </tr>
+    <tr>
+      <th>2934</th>
+      <td>104.9</td>
+      <td>ASSOCIAÇÃO DE RADIODIFUSÃO COMUNITÁRIA DE NENE...</td>
+      <td>1015020108</td>
+      <td>Quixeramobim</td>
+      <td>5.441389</td>
+      <td>-39.197500</td>
+    </tr>
+    <tr>
+      <th>3145</th>
+      <td>104.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA AMIGOS DE GUIDOVAL</td>
+      <td>1015168172</td>
+      <td>Guidoval</td>
+      <td>-0.352519</td>
+      <td>-0.713217</td>
+    </tr>
+    <tr>
+      <th>3329</th>
+      <td>104.9</td>
+      <td>ASSOCIAÇÃO COMUNITÁRIA E CULTURAL DE CONQUISTA...</td>
+      <td>699394678</td>
+      <td>Conquista D'Oeste</td>
+      <td>-14.537222</td>
+      <td>-29.546944</td>
+    </tr>
+    <tr>
+      <th>3421</th>
+      <td>104.9</td>
+      <td>ASSOCIAÇÃO DE RADIODIFUSÃO COMUNITÁRIA CAMPOS ...</td>
+      <td>1014527870</td>
+      <td>Tracuateua</td>
+      <td>-0.017892</td>
+      <td>-0.781681</td>
+    </tr>
+    <tr>
+      <th>4785</th>
+      <td>105.9</td>
+      <td>ASSOCIAÇÃO DE DESENVOLVIMENTO CULTURAL, ARTÍST...</td>
+      <td>692127186</td>
+      <td>Suzanápolis</td>
+      <td>-20.500833</td>
+      <td>-1.024444</td>
+    </tr>
+    <tr>
+      <th>4878</th>
+      <td>106.3</td>
+      <td>Associação Comunitária de Desenvolvimento Artí...</td>
+      <td>1014529481</td>
+      <td>Campo Grande</td>
+      <td>-0.340136</td>
+      <td>-0.909458</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="stel" class="level2">
+<h2 class="anchored" data-anchor-id="stel">STEL</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'stel.parquet.gzip'</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Fistel</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Código_Município</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>16415</th>
+      <td>156.675</td>
+      <td>PETROLEO BRASILEIRO S A PETROBRAS</td>
+      <td>50411168908</td>
+      <td>1008756757</td>
+      <td>Santos</td>
+      <td>3548500</td>
+    </tr>
+    <tr>
+      <th>25728</th>
+      <td>945.0</td>
+      <td>UNIVERSIDADE FEDERAL DO PARA</td>
+      <td>50416059716</td>
+      <td>1006864110</td>
+      <td>Acará</td>
+      <td>1500206</td>
+    </tr>
+    <tr>
+      <th>21282</th>
+      <td>450.4875</td>
+      <td>RADIO DIFUSORA COLMEIA DE PORTO UNIAO LTDA ME</td>
+      <td>14020348812</td>
+      <td>1002823339</td>
+      <td>União da Vitória</td>
+      <td>4128203</td>
+    </tr>
+    <tr>
+      <th>7963</th>
+      <td>156.5</td>
+      <td>HDG SERVICOS AMBIENTAIS LTDA</td>
+      <td>50405428871</td>
+      <td>1008115409</td>
+      <td>São Francisco do Conde</td>
+      <td>2929206</td>
+    </tr>
+    <tr>
+      <th>24272</th>
+      <td>902.6</td>
+      <td>UNIVERSIDADE FEDERAL DO PARA</td>
+      <td>50412323184</td>
+      <td>1001729843</td>
+      <td>Belém</td>
+      <td>1501402</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="filtragem-1" class="level3">
+<h3 class="anchored" data-anchor-id="filtragem-1">Filtragem ✂️</h3>
+<blockquote class="blockquote">
+<p>A base do <code>STEL</code> de estações outorgadas ativas originalmente era muito grande, comportando milhões de registros, gradualmente os registros ativos e novos registros foram migrados para a base <code>licenciamento</code> do <code>MOSAICO</code></p>
+</blockquote>
+<p>A seguir são descritos os filtros realizados na <em>query</em> do <code>STEL</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;..</span>.<span class="op">&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  HABILITACAO.NumServico <span class="op">&lt;&gt;</span> <span class="st">'010'</span> #<span class="dv">1</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> ESTACAO.DataExclusao <span class="kw">is</span> <span class="kw">null</span> #<span class="dv">2</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> ESTACAO.IndStatusEstacao <span class="op">=</span> <span class="st">'L'</span> #<span class="dv">3</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> Municipio.CodMunicipio <span class="kw">is</span> <span class="kw">not</span> <span class="kw">null</span> #<span class="dv">4</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> frequencia.MedTransmissaoInicial <span class="kw">is</span> <span class="kw">not</span> <span class="kw">null</span> #<span class="dv">5</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> frequencia.CodStatusRegistro <span class="op">=</span> <span class="st">'L'</span> #<span class="dv">6</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">and</span> contrato.DataValidadeRadiofrequencia <span class="kw">is</span> <span class="kw">not</span> <span class="kw">null</span> #<span class="dv">7</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Explicando a query acima linha a linha:</p>
+<ol type="1">
+<li>Excluir estações do Serviço Móvel Pessoal (SMP - 010)</li>
+<li>Incluir somente estações com <code>Data de Exclusão</code> nula, i.e.&nbsp;estações ativas</li>
+<li>Incluir somente estações com estado <code>L</code> (LICENCIADO)</li>
+<li>Excluir estações com o código do município ausente (Necessário para validar a localização)</li>
+<li>Excluir estações sem a frequência de transmissão atribuída</li>
+<li>Excluir estações cuja frequência atribuída esteja distinta do estado <code>L</code> ( LICENCIADO )</li>
+<li>Excluir estações cuja Validade de Radiofrequência esteja nula</li>
+</ol>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'A base STEL possui atualmente </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> registros ativos pelos filtros descritos.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>A base STEL possui atualmente 35417 registros ativos pelos filtros descritos.</code></pre>
+</div>
+</div>
+</section>
+<section id="descrição-1" class="level3">
+<h3 class="anchored" data-anchor-id="descrição-1">Descrição 📊</h3>
+<p>Abaixo são descritas as colunas que não foram descritas anteriormente na base de <code>RADCOM</code></p>
+<ul>
+<li><code>Classe</code>: String que identifica o tipo de estação , e.g <code>Fixa Aeronáutica</code>, <code>Fixa Base</code>, <code>Móvel</code>, <code>Transmissora</code> etc…</li>
+<li><code>Num_Serviço</code>: Código que identifica o Serviço Outorgado na Anatel, aqui existem diversos serviços: <code>604, 035, 507, 019</code></li>
+<li><code>Validade_RF</code>: Data de Validade da Radiofrequência</li>
+</ul>
+<p>As demais colunas foram descritas anteriormente para a base <code>RADCOM</code></p>
+</section>
+<section id="pós-processamento-1" class="level3">
+<h3 class="anchored" data-anchor-id="pós-processamento-1">Pós-Processamento 🛠️</h3>
+<blockquote class="blockquote">
+<p>Nas tabelas do banco de dados do STEL, na modelagem de banco as informações de <code>Classe_Emissão</code> e <code>Largura_Emissão</code> foram codificadas numa única string chamada <code>Designação de Emissão</code>, é efetuado o processamento dessa string para resgatar as informações individuais em 2 colunas:</p>
+</blockquote>
+<ul>
+<li><code>Classe_Emissão</code>: Código que identifica as característica da emissão daquela estação</li>
+<li><code>Largura_Emissão(kHz)</code>: Largura de Emissão em kHz</li>
+<li>A coluna <code>Validade_RF</code> é filtrada para constar somente a data, ela aparece no formato <code>datetime</code> nas tabelas do banco, no entanto com informação de hora nula</li>
+<li>A <code>Frequência</code> é normalizada para a unidade <code>MHz</code></li>
+<li><code>Status</code>: Essa coluna é criada para normalizar as colunas das bases do <code>MOSAICO</code>. É inserido um valor único <code>L</code></li>
+<li><code>Fonte</code>: Fonte dos dados, nessa caso é inserido o nome do Banco <code>STEL</code></li>
+<li><code>Multiplicidade</code>: Contagem do Registro. Nesse caso o valor é somente <code>1</code> por conta de todos os registros serem únicos, i.e.&nbsp;são referentes a uma estação única</li>
+</ul>
+</section>
+<section id="dados-incorretos-1" class="level3">
+<h3 class="anchored" data-anchor-id="dados-incorretos-1">Dados Incorretos 🗑️</h3>
+<p>A seguir são exibidas informações sobre coordenadas ausentes ou facilmente identificadas como incorretas, nesse caso fora dos limites do Brasil.</p>
+<blockquote class="blockquote">
+<p>Uma validação precisa das coordenadas é feita antes de consolidar o arquivo final e será descrita posteriormente</p>
+</blockquote>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Número de coordenadas ausentes: </span><span class="sc">{</span>df[df.Latitude.isna() <span class="op">|</span> df.Longitude.isna()]<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Número de coordenadas ausentes: 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>bad <span class="op">=</span> df[<span class="op">~</span>(df.Latitude.between(MIN_LAT, MAX_LAT) <span class="op">&amp;</span> df.Longitude.between(MIN_LONG, MAX_LONG))]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Exemplo de coordenadas incorretas, fora dos limites do Brasil: "</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>bad.loc[:, [<span class="st">'Frequência'</span>, <span class="st">'Entidade'</span>, <span class="st">'Número_Estação'</span>, <span class="st">'Município'</span>, <span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Exemplo de coordenadas incorretas, fora dos limites do Brasil: </code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1985</th>
+      <td>131.875</td>
+      <td>AZUL LINHAS AEREAS BRASILEIRAS S.A</td>
+      <td>1009302628</td>
+      <td>Porto Seguro</td>
+      <td>-16.440833</td>
+      <td>-30.081389</td>
+    </tr>
+    <tr>
+      <th>2874</th>
+      <td>153.57</td>
+      <td>RADIO SAO CARLOS LTDA.ME</td>
+      <td>3570061</td>
+      <td>São Carlos</td>
+      <td>-21.033333</td>
+      <td>-27.966667</td>
+    </tr>
+    <tr>
+      <th>2966</th>
+      <td>153.57</td>
+      <td>RADIO SAO CARLOS LTDA.ME</td>
+      <td>3570070</td>
+      <td>São Carlos</td>
+      <td>-22.033333</td>
+      <td>-27.966667</td>
+    </tr>
+    <tr>
+      <th>9239</th>
+      <td>156.525</td>
+      <td>LOC PILOT PRATICAGEM - EIRELI</td>
+      <td>1008355728</td>
+      <td>São Sebastião</td>
+      <td>-45.467519</td>
+      <td>-23.817844</td>
+    </tr>
+    <tr>
+      <th>9956</th>
+      <td>156.525</td>
+      <td>LOC PILOT PRATICAGEM - EIRELI</td>
+      <td>1008355710</td>
+      <td>Santos</td>
+      <td>-46.297125</td>
+      <td>-23.986986</td>
+    </tr>
+    <tr>
+      <th>10487</th>
+      <td>156.525</td>
+      <td>LOC PILOT PRATICAGEM - EIRELI</td>
+      <td>1008355728</td>
+      <td>São Sebastião</td>
+      <td>-45.467519</td>
+      <td>-23.817844</td>
+    </tr>
+    <tr>
+      <th>12559</th>
+      <td>156.5</td>
+      <td>AMBIPAR RESPONSE S/A</td>
+      <td>1010754715</td>
+      <td>Guamaré</td>
+      <td>-36.390586</td>
+      <td>-5.148578</td>
+    </tr>
+    <tr>
+      <th>13924</th>
+      <td>156.65</td>
+      <td>AMBIPAR RESPONSE S/A</td>
+      <td>1010754715</td>
+      <td>Guamaré</td>
+      <td>-36.390586</td>
+      <td>-5.148578</td>
+    </tr>
+    <tr>
+      <th>14702</th>
+      <td>156.525</td>
+      <td>LOC PILOT PRATICAGEM - EIRELI</td>
+      <td>1008355710</td>
+      <td>Santos</td>
+      <td>-46.297125</td>
+      <td>-23.986986</td>
+    </tr>
+    <tr>
+      <th>18343</th>
+      <td>156.8</td>
+      <td>AMBIPAR RESPONSE S/A</td>
+      <td>1010754715</td>
+      <td>Guamaré</td>
+      <td>-36.390586</td>
+      <td>-5.148578</td>
+    </tr>
+    <tr>
+      <th>30239</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898102</td>
+      <td>Porto Velho</td>
+      <td>9.269350</td>
+      <td>-64.642775</td>
+    </tr>
+    <tr>
+      <th>30247</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898080</td>
+      <td>Porto Velho</td>
+      <td>9.270789</td>
+      <td>-64.640611</td>
+    </tr>
+    <tr>
+      <th>30248</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898161</td>
+      <td>Porto Velho</td>
+      <td>9.245614</td>
+      <td>-64.646772</td>
+    </tr>
+    <tr>
+      <th>30249</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898188</td>
+      <td>Porto Velho</td>
+      <td>9.247097</td>
+      <td>-64.646789</td>
+    </tr>
+    <tr>
+      <th>31146</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898161</td>
+      <td>Porto Velho</td>
+      <td>9.245614</td>
+      <td>-64.646772</td>
+    </tr>
+    <tr>
+      <th>31147</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898188</td>
+      <td>Porto Velho</td>
+      <td>9.247097</td>
+      <td>-64.646789</td>
+    </tr>
+    <tr>
+      <th>31158</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898102</td>
+      <td>Porto Velho</td>
+      <td>9.269350</td>
+      <td>-64.642775</td>
+    </tr>
+    <tr>
+      <th>31655</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898080</td>
+      <td>Porto Velho</td>
+      <td>9.270789</td>
+      <td>-64.640611</td>
+    </tr>
+    <tr>
+      <th>31663</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898137</td>
+      <td>Porto Velho</td>
+      <td>9.248617</td>
+      <td>-64.646650</td>
+    </tr>
+    <tr>
+      <th>34111</th>
+      <td>950.125</td>
+      <td>RADIO TERRA NOVA FM LTDA</td>
+      <td>1005552212</td>
+      <td>Terra Nova</td>
+      <td>-38.618911</td>
+      <td>-12.405617</td>
+    </tr>
+    <tr>
+      <th>35367</th>
+      <td>25.375</td>
+      <td>ENERGIA SUSTENTAVEL DO BRASIL S.A.</td>
+      <td>699898137</td>
+      <td>Porto Velho</td>
+      <td>9.248617</td>
+      <td>-64.646650</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="mosaico---radiodifusão" class="level2">
+<h2 class="anchored" data-anchor-id="mosaico---radiodifusão">MOSAICO - Radiodifusão</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'srd.parquet.gzip'</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Fistel</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Código_Município</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6157</th>
+      <td>85.0</td>
+      <td>PREFEITURA MUNICIPAL DE SEARA</td>
+      <td>50400688832</td>
+      <td>323090346</td>
+      <td>Seara</td>
+      <td>4217501</td>
+    </tr>
+    <tr>
+      <th>23822</th>
+      <td>593.0</td>
+      <td>SOCIEDADE RADIO E TELEVISAO ALTEROSA S. A.</td>
+      <td>50441109144</td>
+      <td>1013206573</td>
+      <td>Pitangui</td>
+      <td>3151404</td>
+    </tr>
+    <tr>
+      <th>1588</th>
+      <td>85.0</td>
+      <td>PREFEITURA MUNICIPAL DE NOVA VENECIA</td>
+      <td>50400133296</td>
+      <td>5591031</td>
+      <td>Nova Venécia</td>
+      <td>3203908</td>
+    </tr>
+    <tr>
+      <th>16758</th>
+      <td>97.3</td>
+      <td>VALE COMUNICAÇÕES LTDA</td>
+      <td>50401377539</td>
+      <td>688751997</td>
+      <td>Diamantino</td>
+      <td>5103502</td>
+    </tr>
+    <tr>
+      <th>8657</th>
+      <td>479.0</td>
+      <td>RADIO E TELEVISAO BANDEIRANTES LTDA</td>
+      <td>50416827802</td>
+      <td>1007852310</td>
+      <td>Águas de Lindóia</td>
+      <td>3500501</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="filtragem-2" class="level3">
+<h3 class="anchored" data-anchor-id="filtragem-2">Filtragem ✂️</h3>
+<p>Os filtros efetuados diretamente no banco MongoDB do Mosaico são simples, a <em>query</em> completa ocupa somente 3 linhas:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="st">"frequency"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>, <span class="dv">0</span>], <span class="st">"$type"</span>: <span class="fl">1.0</span>},</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="st">"srd_planobasico.CodMunicipio"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>]},</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="st">"NumFistel"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>]},</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Excluir frequências nulas ou zeradas, e excluir registros não numéricos (<code>"$type": 1.0</code> )</li>
+<li>Excluir registros com código de município ausente ou inválido ( Necessário para validar as coordenadas)</li>
+<li>Excluir registros com número do Fistel Nulo ou Inválido</li>
+</ul>
+</section>
+<section id="descrição-2" class="level3">
+<h3 class="anchored" data-anchor-id="descrição-2">Descrição 📊</h3>
+<blockquote class="blockquote">
+<p>🤌 Não existem informações no MOSAICO de <code>Classe_Emissão</code> e tampouco <code>Largura_de_Emissão</code> para o serviço de Radiodifusão, assim essas colunas são preenchidas com valores nulos</p>
+</blockquote>
+<p>Adicionalmente são extraídas as seguintes colunas com informações técnicas das estações:</p>
+<ul>
+<li><code>Potência(W)</code></li>
+<li><code>Cod_TipoAntena</code></li>
+<li><code>Polarização</code></li>
+<li><code>Raio_Antena</code></li>
+<li><code>Ganho_Antena</code></li>
+<li><code>Frente_Costa_Antena</code></li>
+<li><code>Angulo_Meia_Potencia_Antena</code></li>
+<li><code>Ângulo_Elevação</code></li>
+<li><code>Azimute</code></li>
+<li><code>Altura_Antena</code></li>
+<li><code>Perdas_Acessorias</code></li>
+</ul>
+</section>
+<section id="pós-processamento-2" class="level3">
+<h3 class="anchored" data-anchor-id="pós-processamento-2">Pós-Processamento 🛠️</h3>
+<ul>
+<li><p>São mantidas somente estações nos estados autorizados a operar: <code>C1, C2, C3, C4, C7, C98</code></p></li>
+<li><p>Normalizada as frequências para a unidade <code>MHz</code></p></li>
+<li><p>Imputados os valores para <code>Largura_de_Emissão(kHz)</code>, e.g.&nbsp;<code>256kHz</code> para o canal estéreo de FM, <code>6MHz</code> para TV Digital etc.</p>
+<blockquote class="blockquote">
+<p>Apesar de não constar esses dados na base, os valores de referência são conhecidos pela natureza do Serviço.</p>
+</blockquote></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'A base do MOSAICO de Radiodifusão possui atualmente </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> registros ativos pelos filtros descritos.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>A base do MOSAICO de Radiodifusão possui atualmente 31012 registros ativos pelos filtros descritos.</code></pre>
+</div>
+</div>
+</section>
+<section id="dados-incorretos-2" class="level3">
+<h3 class="anchored" data-anchor-id="dados-incorretos-2">Dados Incorretos 🗑️</h3>
+<blockquote class="blockquote">
+<p>☝🏽 Os dados do MOSAICO de Radiodifusão são bastante incompletos em relação às coordenadas, praticamente metade dos registros após a filtragem e pós-processamento não possuem latitude e/ou longitude. No entanto esses dados não são excluídos deliberadamente porque nesses registros serão imputados as coordenadas centrais do município no qual se encontram na etapa de validação de coordenadas.</p>
+</blockquote>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bad <span class="op">=</span> df[<span class="op">~</span>(df.Latitude.between(MIN_LAT, MAX_LAT) <span class="op">&amp;</span> df.Longitude.between(MIN_LONG, MAX_LONG))]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Exemplo de coordenadas incorretas ou ausentes: "</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>bad.loc[:, [<span class="st">'Frequência'</span>, <span class="st">'Entidade'</span>, <span class="st">'Número_Estação'</span>, <span class="st">'Município'</span>, <span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Exemplo de coordenadas incorretas ou ausentes: </code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>207.0</td>
+      <td>REDE DE COMUNICACOES ACREANA LTDA</td>
+      <td>&lt;NA&gt;</td>
+      <td>Cruzeiro do Sul</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>539.0</td>
+      <td>X-MEDIAGROUP S.A.</td>
+      <td>&lt;NA&gt;</td>
+      <td>Mâncio Lima</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>593.0</td>
+      <td>FUNDACAO EDUCACIONAL E CULTURAL DAS AGUAS QUENTES</td>
+      <td>&lt;NA&gt;</td>
+      <td>Caldas Novas</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>665.0</td>
+      <td>GUARANI RADIODIFUSAO LTDA</td>
+      <td>&lt;NA&gt;</td>
+      <td>Caldas Novas</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>551.0</td>
+      <td>OCAN COMUNICACAO DIGITAL SE LTDA</td>
+      <td>1004428283</td>
+      <td>Santa Quitéria do Maranhão</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>31005</th>
+      <td>581.0</td>
+      <td>PREFEITURA MUNICIPAL DE APIUNA</td>
+      <td>&lt;NA&gt;</td>
+      <td>Apiúna</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>31006</th>
+      <td>593.0</td>
+      <td>PREFEITURA MUNICIPAL DE ALVINOPOLIS</td>
+      <td>&lt;NA&gt;</td>
+      <td>Alvinópolis</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>31007</th>
+      <td>635.0</td>
+      <td>PREFEITURA MUNICIPAL DE SAO TIAGO</td>
+      <td>&lt;NA&gt;</td>
+      <td>São Tiago</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>31008</th>
+      <td>503.0</td>
+      <td>PREFEITURA MUNICIPAL DE SAO TIAGO</td>
+      <td>&lt;NA&gt;</td>
+      <td>São Tiago</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>31009</th>
+      <td>491.0</td>
+      <td>PREFEITURA MUNICIPAL DE CAMPOS ALTOS</td>
+      <td>&lt;NA&gt;</td>
+      <td>Campos Altos</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>16005 rows × 6 columns</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="mosaico---telecomunicações" class="level2">
+<h2 class="anchored" data-anchor-id="mosaico---telecomunicações">MOSAICO - Telecomunicações</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'telecom.parquet.gzip'</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Fistel</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Código_Município</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>467215</th>
+      <td>148.71</td>
+      <td>TECON RIO GRANDE S/A</td>
+      <td>50001197975</td>
+      <td>1014986777</td>
+      <td>Rio Grande</td>
+      <td>4315602</td>
+    </tr>
+    <tr>
+      <th>561127</th>
+      <td>245.225</td>
+      <td>OI S.A. - EM RECUPERAÇÃO JUDICIAL</td>
+      <td>06030093525</td>
+      <td>691968292</td>
+      <td>&lt;NA&gt;</td>
+      <td>2914307</td>
+    </tr>
+    <tr>
+      <th>147545</th>
+      <td>165.99375</td>
+      <td>COMPANHIA ESTADUAL DE DISTRIBUICAO DE ENERGIA ...</td>
+      <td>50405704062</td>
+      <td>1003279950</td>
+      <td></td>
+      <td>4317301</td>
+    </tr>
+    <tr>
+      <th>492247</th>
+      <td>14.76</td>
+      <td>CLARO S.A.</td>
+      <td>50013414186</td>
+      <td>692458719</td>
+      <td>Jaboatão dos Guararapes</td>
+      <td>2607901</td>
+    </tr>
+    <tr>
+      <th>146266</th>
+      <td>383.65</td>
+      <td>CSP - COMPANHIA SIDERURGICA DO PECEM</td>
+      <td>50413236749</td>
+      <td>1003176000</td>
+      <td></td>
+      <td>2312403</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="filtragem-3" class="level3">
+<h3 class="anchored" data-anchor-id="filtragem-3">Filtragem ✂️</h3>
+<p>A <em>query</em> do MongoDB para a base LICENCIAMENTO é listada e descrita a seguir</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>{<span class="st">"DataExclusao"</span>: <span class="va">None</span>},</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>{<span class="st">"DataValidade"</span>: {<span class="st">"$nin"</span>: [<span class="st">""</span>, <span class="va">None</span>]}},</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>{<span class="st">"Status.state"</span>: <span class="st">"LIC-LIC-01"</span>},</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>{<span class="st">"NumServico"</span>: {<span class="st">"$nin"</span>: [<span class="st">"010"</span>, <span class="st">"045"</span>, <span class="st">"171"</span>, <span class="st">"450"</span>, <span class="st">"750"</span>, <span class="st">""</span>, <span class="va">None</span>]}},</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>{<span class="st">"FreqTxMHz"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>, <span class="dv">0</span>]}},</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>{<span class="st">"CodMunicipio"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>]}},</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>{<span class="st">"FreqTxMHz"</span>: {<span class="st">"$type"</span>: <span class="fl">1.0</span>}},</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>{<span class="st">"Latitude"</span>: {<span class="st">"$type"</span>: <span class="fl">1.0</span>}},</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>{<span class="st">"Longitude"</span>: {<span class="st">"$type"</span>: <span class="fl">1.0</span>}}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Registros cuja data de exclusão é Nula, i.e.&nbsp;registros ativos</li>
+<li>Data de Validade de Radiofrequência não nula ou vazia</li>
+<li>Estado <code>Licenciado</code></li>
+<li>Excluir serviços que não são de Radiodfusão ou não são relevantes pelos Planos de Monitoração atualmente, por exemplo <code>010 - SMP</code> é extraído separadamente.</li>
+<li>Frequência de Transmissão não nula, zerada ou vazia</li>
+<li>Código de Município não nulo ou vazio</li>
+<li>Frequência de Transmissão no formato numérico (eliminar registros com caracteres e texto)</li>
+<li>Latitude no formato numérico</li>
+<li>Longitude no formato numérico</li>
+</ul>
+</section>
+<section id="descrição-3" class="level3">
+<h3 class="anchored" data-anchor-id="descrição-3">Descrição 📊</h3>
+<blockquote class="blockquote">
+<p>A base do <code>MOSAICO - licenciamento</code>, da qual as tabelas de <code>Telecomunicações</code> e <code>Serviço Móvel Pessoal</code> são extraídas, é de longe a maior atualmente com milhões de registros ativos. As colunas extraídas para os serviços de telecomunicações são as mesmas descritas anteriormente no <code>MOSAICO - Radiodifusão</code>.</p>
+</blockquote>
+</section>
+<section id="pós-processamento-3" class="level3">
+<h3 class="anchored" data-anchor-id="pós-processamento-3">Pós-Processamento 🛠️</h3>
+<blockquote class="blockquote">
+<p>O pós-processamento do MOSAICO - LICENCIAMENTO é mais complexo por conta das escolhas na modelagem do Banco e faz uso extenso de funções da biblioteca <code>pandas</code></p>
+</blockquote>
+<ul>
+<li><p>A string <code>DesignacaoEmissão</code> é a concatenação das colunas <code>Largura_Emissão</code> e <code>Classe_Emissão</code> como constavam no STEL. Além do mais existem estações com múltiplas strings de <code>Emissão</code> na mesma coluna separadas por vírgula, os passos de processamento dessa colunas são os seguintes:</p>
+<ul>
+<li>Eliminação de espaços e normalização para maiúscula</li>
+<li>Expansão dos múltiplos registros separados por vírgula em linhas individuais, 1 por linha com as demais informações idênticas</li>
+<li>Processamento de cada string <code>Emissão</code> concatenada nas duas partes atômicas: <code>Largura_Emissão</code> e <code>Classe_Emissão</code></li>
+</ul></li>
+<li><p><code>Multiplicidade</code>: Contador do número de estações similares:</p>
+<ul>
+<li>Existem registros com todas as características anteriores idênticas, exceto o <code>Número_Estação</code> por exemplo.</li>
+<li>Estações possuem detalhes técnicos que não são considerados relevantes, pelo menos no escopo atual, para a Análise Espectral e Identificação de Emissões - como por exemplo:
+<ul>
+<li>Tipo de Antena</li>
+<li>Polarização: Horizontal ou Vertical.</li>
+<li>Altura da Antena</li>
+<li>Potência de Transmissão</li>
+</ul></li>
+</ul>
+<p>A seguir é mostrado um exemplo de estação desse tipo, com <strong>201</strong> estações com características técnicas idênticas conforme o quesito descrito no parágrafo anterior: <img src="index_files/figure-html/27294fb5-2-image.png" class="img-fluid" alt="image.png"></p>
+<blockquote class="blockquote">
+<p>Esses registros são considerados idênticos e são agrupados. É utilizado o primeiro número de estação que aparece na base como referência e o total de estações “idênticas” é registrado na coluna multiplicidade: <em>1 para estações “únicas” e qualquer valor maior que 1 descreve o número de estações similares agrupadas, como as 201 no exemplo anterior</em> <img src="index_files/figure-html/27294fb5-1-image-2.png" class="img-fluid" alt="image.png"></p>
+</blockquote></li>
+</ul>
+<p>Atualmente esse agrupamento de estações similares em um único registro reduz o número de registro para certa de 10% do original, em outras palavras, no pós-processamento são agregadas cerca de 90% das estações.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'A base do MOSAICO de Telecomunicações possui atualmente </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> registros ativos pelos filtros descritos.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>A base do MOSAICO de Telecomunicações possui atualmente 757142 registros ativos pelos filtros descritos.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="mosaico---serviço-móvel-pessoal" class="level2">
+<h2 class="anchored" data-anchor-id="mosaico---serviço-móvel-pessoal">MOSAICO - Serviço Móvel Pessoal</h2>
+<blockquote class="blockquote">
+<p>Como o serviço de telefonia e banda larga móvel é um serviço de extrema importância e aspecto distinto, com diferentes necessidades de pós-processamento. Esse serviço é extraído num fluxo específico.</p>
+</blockquote>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'smp_formated.parquet.gzip'</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'smp_processado.parquet.gzip'</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]] <span class="op">=</span> df[[<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]].astype(<span class="st">'float'</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>NumAto</th>
+      <th>DataValidade</th>
+      <th>NumFistel</th>
+      <th>NomeEntidade</th>
+      <th>NumEstacao</th>
+      <th>Latitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1853288</th>
+      <td>110062022.0</td>
+      <td>2023-04-20</td>
+      <td>50409146285</td>
+      <td>TELEFONICA BRASIL S.A.</td>
+      <td>1010971724</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1926821</th>
+      <td>29272013</td>
+      <td>2023-04-30</td>
+      <td>50409314250</td>
+      <td>TIM S A</td>
+      <td>1015051127</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1105173</th>
+      <td>125002022</td>
+      <td>2028-11-29</td>
+      <td>50409314250</td>
+      <td>TIM S A</td>
+      <td>688394825</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>616063</th>
+      <td>155832022</td>
+      <td>2028-11-29</td>
+      <td>50409146366</td>
+      <td>TELEFONICA BRASIL S.A.</td>
+      <td>1000130875</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>892766</th>
+      <td>46622011</td>
+      <td>2028-03-31</td>
+      <td>50409105090</td>
+      <td>CLARO S.A.</td>
+      <td>641099355</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="filtragem-4" class="level3">
+<h3 class="anchored" data-anchor-id="filtragem-4">Filtragem ✂️</h3>
+<blockquote class="blockquote">
+<p>A query para o serviço SMP, assim como o restante das bases do <code>MOSAICO</code> é a mais simples possível, uma vez que filtros e pós-processamento mais sofisticados são feitos diretamente no python utilizando o todo poderoso <code>pandas</code> 🐼</p>
+</blockquote>
+<div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>MONGO_SMP <span class="op">=</span> {</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"$and"</span>: [</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"DataValidade"</span>: {<span class="st">"$nin"</span>: [<span class="st">""</span>, <span class="va">None</span>]}},</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"Status.state"</span>: <span class="st">"LIC-LIC-01"</span>},</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"NumServico"</span>: <span class="st">"010"</span>},</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"FreqTxMHz"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>, <span class="dv">0</span>]}},</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"CodMunicipio"</span>: {<span class="st">"$nin"</span>: [<span class="va">None</span>, <span class="st">""</span>]}},</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"FreqTxMHz"</span>: {<span class="st">"$type"</span>: <span class="fl">1.0</span>}},</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Registros cuja data de exclusão é Nula, i.e.&nbsp;registros ativos</li>
+<li>Estado <code>Licenciado</code></li>
+<li>Extração de estações do serviço SMP - <code>010</code></li>
+<li>Frequência de Transmissão não nula, zerada ou vazia</li>
+<li>Código de Município não nulo ou vazio</li>
+<li>Frequência de Transmissão no formato numérico (eliminar registros com caracteres e texto)</li>
+</ul>
+</section>
+<section id="descrição-4" class="level3">
+<h3 class="anchored" data-anchor-id="descrição-4">Descrição 📊</h3>
+<blockquote class="blockquote">
+<p>As colunas extraídas são as mesmas já descritas anteriormente para as bases de Radiodifusão e Licenciamento.</p>
+</blockquote>
+</section>
+<section id="pós-processamento-4" class="level3">
+<h3 class="anchored" data-anchor-id="pós-processamento-4">Pós-Processamento 🛠️</h3>
+<blockquote class="blockquote">
+<p>O pós-processamento do <code>MOSAICO - Serviço Móvel Pessoal</code> envolve mais passos além do que já foi descrito para o <code>MOSAICO - Licenciamento</code>. As informações cadastradas são de responsabilidade das entidades, e portanto não há garantia de corretude das informações prestadas. Diversos problemas são encontrados, como dados ausentes e incorretos.</p>
+</blockquote>
+<ul>
+<li><p>A string <code>DesignacaoEmissão</code> é processada da mesma forma descrita no parágrafo anterior para a base <code>MOSAICO - Licenciamento</code>, dela é derivada a coluna <code>Classe_Emissão</code> e <code>Largura_Emissão(kHz)</code></p></li>
+<li><p>Os registros que possuem a <code>Frequência_Transmissão</code> inválida mas não nula ( lembre-se que esses casos já são filtrados pela <em>query</em> efetuada direto no <em>MongoDB</em>), tem essa coluna substituída pela <code>Frequência_Central</code> caso esta seja válida. Isso é feito para que um registro somente seja descartado quando não for possível fazer nenhum processamento para contornar.</p></li>
+<li><p><code>Largura_Emissão(kHz)</code>: Valores nulos são preenchidos com o valor 0</p></li>
+<li><p><code>Classe_Emissão</code>: Valores nulos são preenchidos com a string: <code>NI</code> ( Não Informado )</p></li>
+<li><p><code>Construção da Informação do Canal</code> &gt; Apesar da informação do canal estar cadastrada nas colunas <code>Frequência Inicial</code>, <code>Frequência Final</code>, muitos registros estão ausentes ou simplesmente incorretos. Portanto essas informações são descartadas e o canal é derivado à partir da <code>Frequência_Transmissão</code> e <code>Largura_Emissão(kHz)</code>.</p>
+<ul>
+<li>O Início e Fim do Canal são construídos da seguinte forma:
+<ul>
+<li><code>Início_Canal = Frequência_Transmissão - Largura_Emissão</code></li>
+<li><code>Fim_Canal = Frequência_Transmissão + Largura_Emissão</code></li>
+</ul></li>
+</ul></li>
+<li><p><code>Multiplicidade</code> ( Contagem de Estações com as mesmas características ) &gt; Os responsáveis técnicos pela supervisão dos Planos de Monitoração da Anatel definiram as seguintes colunas como índices para agrupar estações: <code>['UF', 'Código_Município', 'Fistel', 'Frequência_Transmissão', 'Largura_Emissão(kHz)', 'Classe_Emissão']</code> Em outras palavras, as estações que possuem essas características iguais, são essencialmente idênticas para os fins específicos de detecção no âmbito dos planos de monitoração.</p>
+<ol type="1">
+<li>Qualquer registro com algum desses dados ainda nulos é excluído - não é possível agrupar registro que possua alguma coluna com valor nulo</li>
+<li>O seguir os registros são agrupados segundo as colunas supracitadas e a contagem de cada grupo único é registrada na coluna <code>Multiplicidade</code></li>
+</ol></li>
+<li><p><code>Validação dos Canais</code></p>
+<ol type="1">
+<li>Carregado <em>arquivo de canalização</em> do serviço, previamente construído à partir da <a href="https://informacoes.anatel.gov.br/legislacao/resolucoes/2022/1760-resolucao-757">Resolução nº 757, de 08 de novembro de 2022</a></li>
+<li>Para cada registro da base já agregada a canalização é validada da seguinte forma:
+<ul>
+<li>O canal é cruzado com o <em>arquivo de canalização</em> e checado se o canal está contido num bloco único ou num conjunto de blocos adjacentes dentro de uma das faixas autorizadas. As seguintes informações adicionais são incluídas:
+<ol type="1">
+<li><code>Canalização</code>: <code>Válido | Inválido</code><br>
+</li>
+<li><code>Faixa</code>: Faixa na qual o canal pertence</li>
+<li><code>Blocos</code>: Bloco ou Blocos adjacentes que contém o canal</li>
+<li><code>Offset</code>: Anotado o <code>Offset</code> <em>Downlink</em> &lt;-&gt; <em>Uplink</em> do bloco ou blocos do Canal</li>
+</ol>
+<blockquote class="blockquote">
+<p>O registro nesse caso é referente ao <em>Downlink</em>, esse valor de <code>Offset</code> será usado para definirmos a frequência de <em>Uplink</em></p>
+</blockquote></li>
+</ul></li>
+</ol></li>
+<li><p><code>Derivação da Frequência de *Uplink*</code></p>
+<ol type="1">
+<li>Verificação da consistência dos blocos de <em>Downlink</em></li>
+</ol>
+<blockquote class="blockquote">
+<p>Para cada canal validado pelo, se estiver contido em mais de um bloco, os blocos devem ser adjacentes e possuir somente 1 valor de <code>Offset</code></p>
+</blockquote>
+<ol start="2" type="1">
+<li>Filtrados registros com canalização <code>Inválido</code></li>
+<li>Filtrados registros com <code>Offset=0</code> e|ou <code>Largura_Emissão=0</code></li>
+</ol>
+<blockquote class="blockquote">
+<p>Nesse caso a Frequência de <em>Uplink</em> é igual à Frequência de <em>Downlink</em> e o registro vale para ambos os casos</p>
+</blockquote>
+<ol start="4" type="1">
+<li>Criada Frequência de <em>Uplink</em>: <code>Frequência_Uplink = Frequência_Downlink - Offset</code></li>
+<li>Concatenado na base os registros derivados de <em>Uplink</em></li>
+</ol>
+<blockquote class="blockquote">
+<p>Nesse caso são os mesmos dados dos registros válidos de <em>Downlink</em> mas com a frequência ( orinalmente de <em>Downlink</em> ) substituída pela frequência derivada de <em>Uplink</em></p>
+</blockquote></li>
+<li><p><code>Substituição de Coordenadas para os registros agrupados</code></p>
+<ul>
+<li><p>Para os registros que possuem <code>Multiplicidade=1</code>, não houve agregação e a estação é única. Para esses a coordenada da estação é mantida.</p></li>
+<li><p>Para todos os demais registros as coordenadas são substituídas pela coordenada do município, à partir do <code>Código_Município</code> presente no registro.</p>
+<blockquote class="blockquote">
+<p>Outro tipo de processamento, como imputar uma média das coordenadas por exemplo, não agrega valor “fiscalizatório” porque gera uma coordenada que não existe. A substituição pela coordenada central do município tem o propósito simplesmente de dar a localidade na qual aquele conjunto de estações pertence.</p>
+</blockquote></li>
+</ul></li>
+<li><p><code>Formatação Final</code></p>
+<ul>
+<li><p>Concatenada a informação sobre a <code>Tecnologia</code> na coluna <code>Classe_Emissão</code></p></li>
+<li><p><code>Status</code>: Inserido nessa coluna um valor único <code>L</code> para indicar que é licenciada</p></li>
+<li><p><code>Fonte</code>: <code>MOS</code> ( MOSAICO ) para o <em>Downlink</em> e <code>DOC</code> para o <em>Uplink</em></p>
+<blockquote class="blockquote">
+<p>Esse valor <code>DOC</code> vem de Documentação, termo usado genericamente aqui para indicar todos os registros “criados” e não presentes numa base específica, como é o caso aqui dos valores de <em>Uplink</em></p>
+</blockquote></li>
+<li><p><code>Classe</code>: Inserido os valores <code>FB</code> (Fixa Base) e <code>ML</code> (Móvel) para os registros de <em>Downlink</em> e <em>Uplink</em> respectivamente</p></li>
+</ul></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'A base do MOSAICO - SMP possui atualmente </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> registros extraídos ativos'</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'e </span><span class="sc">{</span><span class="bu">len</span>(df2)<span class="sc">}</span><span class="ss"> registros resultados processados pelos critérios descritos.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>A base do MOSAICO - SMP possui atualmente 1977611 registros extraídos ativos
+e 293613 registros resultados processados pelos critérios descritos.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="aeronáutica" class="level2">
+<h2 class="anchored" data-anchor-id="aeronáutica">AERONÁUTICA 🛬</h2>
+<p>Além de prover uma API que extrai, limpa, processa e padroniza os dados de estações licenciadas na Anatel - relevantes para a Identificação de Emissões no âmbito dos Planos de Monitoração - Outro diferencial são os dados adicionais de emissões aeronáuticas extraídos e consolidados provenientes de diversas fontes, em sua maioria sem registro “oficial” na Anatel.</p>
+<p>As fontes de dados aeronáuticos são:</p>
+<ul>
+<li><p>ICAO - Através do Software <a href="https://www.icao.int/safety/FSMP/Documents/Forms/AllItems.aspx?RootFolder=%2fsafety%2ffsmp%2fdocuments%2ffrequencyfinder&amp;FolderCTID=0x012000B1461A5DA8C64241AA4DE4F91CB1D9AF%20%E2%80%8B"><em>Frequency Finder</em></a> são filtradas e exportadas as emissões do Brasil</p></li>
+<li><p><a href="https://documenter.getpostman.com/view/7201070/SzKQyg3H">API do AISWEB</a></p>
+<ul>
+<li>Todos as emissões de Aeródromos Públicos e Militares</li>
+</ul></li>
+<li><p><a href="https://geoaisweb.decea.mil.br/">API do GEOAISWEB</a></p>
+<ul>
+<li>Emissões do tipo <code>VOR</code>, <code>NDB</code> e <code>DME</code></li>
+</ul></li>
+<li><p><a href="https://ajuda.decea.mil.br/base-de-conhecimento/api-redemet-produtos-radar/">API do REDEMET</a></p>
+<ul>
+<li>Especificamente dados de radares meteorológicos</li>
+</ul></li>
+<li><p>Arquivo de Radares</p>
+<ul>
+<li>Dados adicionais de Radares Secundários nas frequências <code>1030MHz</code> e <code>1090MHz</code> com frequência e localização conhecida, disponível por documentação interna.</li>
+</ul></li>
+<li><p>Arquivo de Canalização</p>
+<ul>
+<li>Este arquivo, também criado por meio de documentação interna, mapeia os canais das frequências do tipo <code>VOR_ILSLoc</code>, nas frequências adicionais <code>ILS glide</code>, <code>DME Airborne</code> e <code>DME Ground</code>.</li>
+</ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="https://github.com/maxhumber/gazpacho"><img src="https://img.shields.io/badge/scraper-gazpacho-C6422C.png" class="img-fluid figure-img"></a></p>
-<p></p><figcaption class="figure-caption">scraper: gazpacho</figcaption><p></p>
+<p><img src="index_files/figure-html/8b784726-1-image.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">image.png</figcaption><p></p>
 </figure>
 </div>
-<section id="instalação" class="level2">
-<h2 class="anchored" data-anchor-id="instalação">Instalação</h2>
-<p><code>pip install anateldb</code></p>
-</section>
-<section id="como-utilizar" class="level2">
-<h2 class="anchored" data-anchor-id="como-utilizar">Como utilizar</h2>
-<section id="consulta-à-base-de-dados-formatada-para-o-appanalise-de-anatel" class="level3">
-<h3 class="anchored" data-anchor-id="consulta-à-base-de-dados-formatada-para-o-appanalise-de-anatel">Consulta à base de dados formatada para o AppAnalise de Anatel</h3>
-<p>A motivação original para a presente biblioteca foi disponibilizar os dados de diferentes fontes da Anatel - e posteriormente da Aeronáutica - programaticamente, para serem utilizadas pelo <a href="https://github.com/EricMagalhaesDelgado/appAnalise/releases/">AppAnalise</a> na identificação de emissões captadas pelos planos de monitoração e também em fiscalização de campo.</p>
-<p>Os dados no formato atual em excel são disponibilizados na pasta dados no repositório https://github.com/ronaldokun/anateldb.</p>
-<p>Os dados em formato otimizado <code>.parquet.gzip</code> são disponibilizados junto ao repositório na pasta <code>dados</code> juntamente com as versões das bases individuais. Futuramente o objetivo é descontinuar a liberação de arquivos em formato excel e disponibilizar apenas os dados em formato otimizado.</p>
-<hr>
-<section id="get_db" class="level4">
-<h4 class="anchored" data-anchor-id="get_db">get_db</h4>
 <blockquote class="blockquote">
-<pre><code> get_db (path:Union[str,pathlib.Path], up_base:bool=False,
-         up_icao:bool=False, up_pmec:bool=False, up_geo:bool=False,
-         dist:float=10)</code></pre>
-</blockquote>
-<p>Lê e opcionalmente atualiza as bases da Anatel, mescla as bases da Aeronáutica, salva e retorna o arquivo</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>path</td>
-<td>Union</td>
-<td></td>
-<td>Pasta onde salvar os arquivos”,</td>
-</tr>
-<tr class="even">
-<td>up_base</td>
-<td>bool</td>
-<td>False</td>
-<td>Atualizar as bases da Anatel?</td>
-</tr>
-<tr class="odd">
-<td>up_icao</td>
-<td>bool</td>
-<td>False</td>
-<td>Atualizar a base do ICAO?</td>
-</tr>
-<tr class="even">
-<td>up_pmec</td>
-<td>bool</td>
-<td>False</td>
-<td>Atualizar a base do AISWEB?</td>
-</tr>
-<tr class="odd">
-<td>up_geo</td>
-<td>bool</td>
-<td>False</td>
-<td>Atualizar a base do GeoAISWEB?</td>
-</tr>
-<tr class="even">
-<td>dist</td>
-<td>float</td>
-<td>10</td>
-<td>Distância máxima entre as coordenadas consideradas iguais</td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>Retorna o DataFrame com as bases da Anatel e da Aeronáutica</strong></td>
-</tr>
-</tbody>
-</table>
-</section>
-</section>
-<section id="métodos-para-baixar-ou-atualizar-os-arquivos-das-bases-de-dados" class="level3">
-<h3 class="anchored" data-anchor-id="métodos-para-baixar-ou-atualizar-os-arquivos-das-bases-de-dados">Métodos para baixar ou atualizar os arquivos das bases de dados</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> anateldb.updates <span class="im">import</span> update_mosaico, update_radcom, update_stel, update_base</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>A função seguinte baixa os dados diretamente da interface pública online do <a href="http://sistemas.anatel.gov.br/se/public/view/b/srd.php">Spectrum E</a></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>update_mosaico(pasta<span class="op">=</span><span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre><code>Baixando as Estações do Mosaico...
-Baixando o Plano Básico das Estações...
-Baixando o Histórico de Atualizações...
-Kbô
-Wall time: 8.12 s</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>update_radcom(<span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre><code>Lendo o Banco de Dados de Radcom
-Wall time: 1 s</code></pre>
-<p>A função <code>update_stel</code> é bem mais lenta que as demais, dado que o banco de dados do STEL é antigo e abarca todos os registros de outorga de serviços de telecomunicações da ANATEL, com mais de <strong>400.000</strong> registros ativos. Esse banco de dados é atualizado 1 vez ao dia à meia-noite e remete ao estado do dia anterior, portanto não faz sentido atualizá-lo mais de 1 vez por dia.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>update_stel(<span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>A função <a href="https://ronaldokun.github.io/anateldb\updates.html#update_base"><code>update_base</code></a> combina as 3 bases anteriores e uniformiza os campos:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>update_base(<span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="métodos-para-ler-as-bases-de-dados" class="level3">
-<h3 class="anchored" data-anchor-id="métodos-para-ler-as-bases-de-dados">Métodos para ler as Bases de Dados</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> anateldb.reading <span class="im">import</span> read_radcom, read_stel, read_mosaico, read_base</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>radcom <span class="op">=</span> read_radcom(pasta<span class="op">=</span><span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>) <span class="op">;</span> radcom.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Os registros presentes nas bases da aeronáutica, normalmente só contém registros das frequências <code>VOR_ILSLoc</code>, no entanto para os canais listados as demais frequências estão presentes e como parte do pós-processamento essas frequências são imputadas mantendo a mesma descrição e localização.</p>
+</blockquote></li>
+</ul>
+<section id="pós-processamento-5" class="level3">
+<h3 class="anchored" data-anchor-id="pós-processamento-5">Pós-Processamento</h3>
+<p>Não cabe descrever aqui como é implementado o código para consumir as APIs, alguns são um tanto complexos como o AISWEB, para tal basta consultar a documentação ou investigar diretamente os módulos python no entanto o processamento resultante é simples de descrever:</p>
+<ul>
+<li>Mapeamento das frequências <code>VOR_ILSLoc</code> no arquivo de canais. As frequências adicionais presentes nos canais são adicionadas no arquivo final.</li>
+<li>Como existe sobreposição de registros, i.e.&nbsp;as bases não são individualizadas, os registros são mapeados entre si e caso estejam a uma distância menor que uma distância de referência ( normalmente uma margem bem ampla de <code>10Km</code> ou <code>20Km</code>) os registros são mesclados, mantendo-se a coordenada do registro original do <code>icao</code> e a descrição de ambos é concatenada.</li>
+</ul>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'aero.parquet.gzip'</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> c <span class="kw">in</span> [<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]:</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    df[c] <span class="op">=</span> df[c].astype(<span class="st">'float'</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
 <div>
 
-
 <table class="dataframe table table-sm table-striped">
-<thead>
-<tr>
-<th>
-</th>
-<th>
-Frequência
-</th>
-<th>
-Unidade
-</th>
-<th>
-Latitude
-</th>
-<th>
-Longitude
-</th>
-<th>
-Fase
-</th>
-<th>
-Situação
-</th>
-<th>
-Numero da Estação
-</th>
-<th>
-CNPJ
-</th>
-<th>
-Fistel
-</th>
-<th>
-Entidade
-</th>
-<th>
-Município
-</th>
-<th>
-UF
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>
-0
-</th>
-<td>
-104.9
-</td>
-<td>
-MHz
-</td>
-<td>
--24.861389
-</td>
-<td>
--54.334722
-</td>
-<td>
-3
-</td>
-<td>
-A
-</td>
-<td>
-641168764
-</td>
-<td>
-00104477000117
-</td>
-<td>
-50011685115
-</td>
-<td>
-ACADEMIA CULTURAL DE SANTA HELENA - ACULT - ST…
-</td>
-<td>
-Santa Helena
-</td>
-<td>
-PR
-</td>
-</tr>
-<tr>
-<th>
-1
-</th>
-<td>
-87.9
-</td>
-<td>
-MHz
-</td>
-<td>
--7.074444
-</td>
-<td>
--36.731111
-</td>
-<td>
-3
-</td>
-<td>
-M
-</td>
-<td>
-682699349
-</td>
-<td>
-00284576000128
-</td>
-<td>
-50012524409
-</td>
-<td>
-ASSOCIACAO DOS MORADORES E PRODUT. RURAIS DE A…
-</td>
-<td>
-Assunção
-</td>
-<td>
-PB
-</td>
-</tr>
-<tr>
-<th>
-2
-</th>
-<td>
-87.9
-</td>
-<td>
-MHz
-</td>
-<td>
--20.323611
-</td>
-<td>
--44.246944
-</td>
-<td>
-3
-</td>
-<td>
-H
-</td>
-<td>
-659028590
-</td>
-<td>
-00575697000129
-</td>
-<td>
-50011824689
-</td>
-<td>
-ASSOCIACAO BONFIM ESPERANCA- ABESPE
-</td>
-<td>
-Bonfim
-</td>
-<td>
-MG
-</td>
-</tr>
-<tr>
-<th>
-3
-</th>
-<td>
-104.9
-</td>
-<td>
-MHz
-</td>
-<td>
--18.843611
-</td>
-<td>
--46.792778
-</td>
-<td>
-3
-</td>
-<td>
-B
-</td>
-<td>
-631410937
-</td>
-<td>
-00792795000118
-</td>
-<td>
-50011398132
-</td>
-<td>
-ASSOCIACAO DOS TRABALHADORES DE GUIMARANIA (ATG)
-</td>
-<td>
-Guimarânia
-</td>
-<td>
-MG
-</td>
-</tr>
-<tr>
-<th>
-4
-</th>
-<td>
-87.9
-</td>
-<td>
-MHz
-</td>
-<td>
--19.466667
-</td>
-<td>
--45.600000
-</td>
-<td>
-3
-</td>
-<td>
-M
-</td>
-<td>
-631412301
-</td>
-<td>
-00794510000188
-</td>
-<td>
-50011398990
-</td>
-<td>
-FUNDACAO ASSISTENCIAL LAR DA PAZ - FALP
-</td>
-<td>
-Dores do Indaiá
-</td>
-<td>
-MG
-</td>
-</tr>
-</tbody>
-
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequency</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2874</th>
+      <td>2800.0</td>
+      <td>-22.464277</td>
+      <td>-43.297478</td>
+      <td>[RMET] Radar - Pico do Couto/RJ</td>
+    </tr>
+    <tr>
+      <th>589</th>
+      <td>1164.0</td>
+      <td>-9.516666</td>
+      <td>-35.783333</td>
+      <td>[DOC] VOR/DME, MACEIO (Ground-based DME)</td>
+    </tr>
+    <tr>
+      <th>533</th>
+      <td>115.8</td>
+      <td>-21.984562</td>
+      <td>-47.344501</td>
+      <td>[AISG] VOR - PIRASSUNUNGA CH 105X</td>
+    </tr>
+    <tr>
+      <th>2375</th>
+      <td>131.6</td>
+      <td>-19.373888</td>
+      <td>-43.582779</td>
+      <td>[ICAO] AOC U 100/100, CONFINS</td>
+    </tr>
+    <tr>
+      <th>842</th>
+      <td>119.65</td>
+      <td>-19.373888</td>
+      <td>-43.582779</td>
+      <td>[ICAO] APP-U C-150/450, CONFINS</td>
+    </tr>
+  </tbody>
 </table>
 </div>
-<p>Se o argumento <code>update=True</code> for fornecido ou arquivo local não existir, a base de dados é atualizada por meio da função <code>update_radcom</code>.</p>
-<blockquote class="blockquote">
-<p><em>A função <code>update_radcom</code> somente irá funcionar caso o PC estiver plugado na rede interna cabeada da Anatel.</em></p>
-</blockquote>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>radcom <span class="op">=</span> read_radcom(pasta<span class="op">=</span><span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>, update<span class="op">=</span><span class="va">True</span>) <span class="op">;</span> radcom.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre><code>Lendo o Banco de Dados de Radcom</code></pre>
-<div>
-
-
-<table class="dataframe table table-sm table-striped">
-<thead>
-<tr>
-<th>
-</th>
-<th>
-Frequência
-</th>
-<th>
-Unidade
-</th>
-<th>
-Latitude
-</th>
-<th>
-Longitude
-</th>
-<th>
-Fase
-</th>
-<th>
-Situação
-</th>
-<th>
-Numero da Estação
-</th>
-<th>
-CNPJ
-</th>
-<th>
-Fistel
-</th>
-<th>
-Entidade
-</th>
-<th>
-Município
-</th>
-<th>
-UF
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>
-4639
-</th>
-<td>
-87.9
-</td>
-<td>
-MHz
-</td>
-<td>
--10.311667
-</td>
-<td>
--48.162222
-</td>
-<td>
-1
-</td>
-<td>
-K
-</td>
-<td>
-1011036964
-</td>
-<td>
-08931976000190
-</td>
-<td>
-50411347829
-</td>
-<td>
-ASSOCIACAO AMIGOS DA CULTURA E DO MEIO AMBIENT…
-</td>
-<td>
-Palmas
-</td>
-<td>
-TO
-</td>
-</tr>
-<tr>
-<th>
-4640
-</th>
-<td>
-104.9
-</td>
-<td>
-MHz
-</td>
-<td>
--10.005000
-</td>
-<td>
--48.988889
-</td>
-<td>
-1
-</td>
-<td>
-A
-</td>
-<td>
-1011037472
-</td>
-<td>
-19001721000144
-</td>
-<td>
-50416345301
-</td>
-<td>
-ASSOCIACAO RADIO COMUNITARIA MONTE SANTO FM
-</td>
-<td>
-Monte Santo do Tocantins
-</td>
-<td>
-TO
-</td>
-</tr>
-<tr>
-<th>
-4641
-</th>
-<td>
-104.9
-</td>
-<td>
-MHz
-</td>
-<td>
--5.586389
-</td>
-<td>
--48.061111
-</td>
-<td>
-P
-</td>
-<td>
-M
-</td>
-<td>
-1011044797
-</td>
-<td>
-19332116000156
-</td>
-<td>
-50416480004
-</td>
-<td>
-ASSOCIACAO RADIO COMUNITARIA TOP FM
-</td>
-<td>
-Araguatins
-</td>
-<td>
-TO
-</td>
-</tr>
-<tr>
-<th>
-4642
-</th>
-<td>
-98.3
-</td>
-<td>
-MHz
-</td>
-<td>
--28.682222
-</td>
-<td>
--53.610278
-</td>
-<td>
-2
-</td>
-<td>
-K
-</td>
-<td>
-1011044940
-</td>
-<td>
-97538346000180
-</td>
-<td>
-50416390609
-</td>
-<td>
-ASSOCIACAO DE RADIODIFUSAO CIDADE DE CRUZ ALTA
-</td>
-<td>
-Cruz Alta
-</td>
-<td>
-RS
-</td>
-</tr>
-<tr>
-<th>
-4643
-</th>
-<td>
-104.9
-</td>
-<td>
-MHz
-</td>
-<td>
--6.594722
-</td>
-<td>
--35.055278
-</td>
-<td>
-1
-</td>
-<td>
-K
-</td>
-<td>
-1011110250
-</td>
-<td>
-10877144000184
-</td>
-<td>
-50411382063
-</td>
-<td>
-ASSOCIAÇÃO DE DESENVOLVIMENTO CULTURAL DA RÁDI…
-</td>
-<td>
-Mataraca
-</td>
-<td>
-PB
-</td>
-</tr>
-</tbody>
-
-</table>
 </div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>stel <span class="op">=</span> read_stel(pasta<span class="op">=</span><span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>, update<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Os dados do Stel não serão ilustrados aqui por se tratar de dados de telecomunicação privados, os demais dados de radiodifusão são públicos e disponíveis para qualquer interessado consultar</strong></p>
-<p>Se o argumento <code>update=True</code> for fornecido ou arquivo local não existir, a base de dados é atualizada por meio da função <code>update_stel</code>.</p>
-<blockquote class="blockquote">
-<p><em>A função <code>update_stel</code> somente irá funcionar caso o PC estiver plugado na rede interna cabeada da Anatel.</em></p>
-</blockquote>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>mosaico <span class="op">=</span> read_mosaico(pasta<span class="op">=</span><span class="st">'D:\OneDrive - ANATEL\GR01FI3\BaseDados'</span>) <span class="op">;</span> mosaico.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre><code>Baixando as Estações do Mosaico...
-Baixando o Plano Básico das Estações...
-Baixando o Histórico de Atualizações...
-Kbô</code></pre>
-<div>
-
-
-<table class="dataframe table table-sm table-striped">
-<thead>
-<tr>
-<th>
-</th>
-<th>
-Serviço
-</th>
-<th>
-Situação
-</th>
-<th>
-Entidade
-</th>
-<th>
-Fistel
-</th>
-<th>
-CNPJ
-</th>
-<th>
-Município
-</th>
-<th>
-UF
-</th>
-<th>
-Id
-</th>
-<th>
-Número da Estação
-</th>
-<th>
-Classe
-</th>
-<th>
-Frequência
-</th>
-<th>
-Latitude
-</th>
-<th>
-Longitude
-</th>
-<th>
-Num_Ato
-</th>
-<th>
-Órgao
-</th>
-<th>
-Data_Ato
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>
-21146
-</th>
-<td>
-RTVD
-</td>
-<td>
-TV-C2
-</td>
-<td>
-M. V. L - COMMUNICARE TELECOMUNICACOES LTDA
-</td>
-<td>
-50419656170
-</td>
-<td>
-12071310000186
-</td>
-<td>
-Parauapebas
-</td>
-<td>
-PA
-</td>
-<td>
-5f2068e65ace5
-</td>
-<td>
-</td>
-<td>
-C
-</td>
-<td>
-503
-</td>
-<td>
--6,0678
-</td>
-<td>
--49,9037
-</td>
-<td>
-7588
-</td>
-<td>
-ORLE
-</td>
-<td>
-2020-12-10 18:21:09
-</td>
-</tr>
-<tr>
-<th>
-21147
-</th>
-<td>
-RTVD
-</td>
-<td>
-TV-C1
-</td>
-<td>
-MERCES COMUNICACOES LTDA
-</td>
-<td>
-50419663118
-</td>
-<td>
-11322505000199
-</td>
-<td>
-Delmiro Gouveia
-</td>
-<td>
-AL
-</td>
-<td>
-5f218fcfb0d84
-</td>
-<td>
-</td>
-<td>
-C
-</td>
-<td>
-545
-</td>
-<td>
--9,3853
-</td>
-<td>
--37,9987
-</td>
-<td>
-9430
-</td>
-<td>
-ORLE
-</td>
-<td>
-2017-06-09 00:00:00
-</td>
-</tr>
-<tr>
-<th>
-21148
-</th>
-<td>
-RTVD
-</td>
-<td>
-TV-C1
-</td>
-<td>
-FUNDACAO EDUCACIONAL E CULTURAL DE IPANEMA
-</td>
-<td>
-50433856696
-</td>
-<td>
-04608796000110
-</td>
-<td>
-Sabará
-</td>
-<td>
-MG
-</td>
-<td>
-5f32c1c918e6b
-</td>
-<td>
-</td>
-<td>
-C
-</td>
-<td>
-207
-</td>
-<td>
--19,89667
-</td>
-<td>
--43,80722
-</td>
-<td>
-3301
-</td>
-<td>
-ORLE
-</td>
-<td>
-2020-06-23 00:00:00
-</td>
-</tr>
-<tr>
-<th>
-21149
-</th>
-<td>
-FM
-</td>
-<td>
-FM-C2
-</td>
-<td>
-RADIO ITAPIRANGA LTDA
-</td>
-<td>
-50433860456
-</td>
-<td>
-84375872000124
-</td>
-<td>
-Itapiranga
-</td>
-<td>
-SC
-</td>
-<td>
-5f68d432841a5
-</td>
-<td>
-</td>
-<td>
-B1
-</td>
-<td>
-105,1
-</td>
-<td>
--27,15778
-</td>
-<td>
--53,69583
-</td>
-<td>
-567
-</td>
-<td>
-ORLE
-</td>
-<td>
-2021-01-26 17:20:30
-</td>
-</tr>
-<tr>
-<th>
-21150
-</th>
-<td>
-FM
-</td>
-<td>
-FM-C1
-</td>
-<td>
-EMISSORAS SUL BRASILEIRAS LTDA
-</td>
-<td>
-50433937009
-</td>
-<td>
-95818506000119
-</td>
-<td>
-Horizontina
-</td>
-<td>
-RS
-</td>
-<td>
-5f8dcc96f23f9
-</td>
-<td>
-</td>
-<td>
-B1
-</td>
-<td>
-100,3
-</td>
-<td>
--27,62833
-</td>
-<td>
--54,30528
-</td>
-<td>
-3166
-</td>
-<td>
-ORLE
-</td>
-<td>
-2020-06-13 00:00:00
-</td>
-</tr>
-</tbody>
-
-</table>
 </div>
-<p>Se o argumento <code>update=True</code> for fornecido ou o arquivo local não existir, a base de dados é atualizada por meio da função <code>update_mosaico</code>.</p>
-<blockquote class="blockquote">
-<p>A função <code>update_mosaico</code> usa a base de dados Pública do Spectrum E, portanto basta somente estar conectado na internet 😎.</p>
-</blockquote>
-<p>A função <a href="https://ronaldokun.github.io/anateldb\updates.html#update_base"><code>update_base</code></a> combina as 3 atualizações de base anteriormente descritas.</p>
-
-
 </section>
+</section>
+<section id="validação-de-coordenadas" class="level2">
+<h2 class="anchored" data-anchor-id="validação-de-coordenadas">Validação de Coordenadas ✅</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'base.parquet.gzip'</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> c <span class="kw">in</span> [<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]:</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    df[c] <span class="op">=</span> df[c].astype(<span class="st">'float'</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>).iloc[:, :<span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Frequência</th>
+      <th>Entidade</th>
+      <th>Fistel</th>
+      <th>Número_Estação</th>
+      <th>Município</th>
+      <th>Código_Município</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>176758</th>
+      <td>166.45625</td>
+      <td>CONCESSIONARIA BR-040 S.A.</td>
+      <td>50411716298</td>
+      <td>1000516528</td>
+      <td></td>
+      <td>3146107</td>
+    </tr>
+    <tr>
+      <th>788342</th>
+      <td>458.025</td>
+      <td>EMPRESA BRASILEIRA DE INFRA-ESTRUTURA AEROPORT...</td>
+      <td>11030016470</td>
+      <td>684830337</td>
+      <td></td>
+      <td>1100205</td>
+    </tr>
+    <tr>
+      <th>92400</th>
+      <td>157.45625</td>
+      <td>AMAZONAS DISTRIBUIDORA DE ENERGIA S/A</td>
+      <td>50403650801</td>
+      <td>1002539185</td>
+      <td></td>
+      <td>1302603</td>
+    </tr>
+    <tr>
+      <th>477613</th>
+      <td>407.1</td>
+      <td>Oi S.a. - em Recuperacao Judicial</td>
+      <td>04030120318</td>
+      <td>327632062</td>
+      <td>&lt;NA&gt;</td>
+      <td>3127354</td>
+    </tr>
+    <tr>
+      <th>739091</th>
+      <td>149.33</td>
+      <td>PREFEITURA DO MUNICIPIO DE VALINHOS</td>
+      <td>50012992097</td>
+      <td>683172255</td>
+      <td></td>
+      <td>3556206</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Vimos superficialmente nos parágrafos anteriores que além haver muitos registros sem coordenadas - como no MOSAICO - SRD - muitas coordenadas não são válidas, seja por inversão de sinal, lugar incorreto do divisor decimal, inversão da Latitude com a Longitude ou simplesmente não correspondem ao município no qual estão licenciadas.</p>
+<p>Os passos para validar as informações de localização são:</p>
+<ul>
+<li>Os arquivos descritos anteriormente são concatenados, exceto os dados da aeronáutica por não conter o <code>Código_Município</code></li>
+<li>Os registros com <code>Código_Município</code> ausentes são excluídos - este dado é necessário para validar se a coordenadas estão contidas corretamente no município.</li>
+<li>As dados de localização - a saber <code>Código_Município</code>, <code>Latitude</code>, <code>Longitude</code> - são repassados para uma <em>query</em> SQL que busca na base <code>CORPORATIVO.dbo.TB_IBGE_MUNICIPIO</code> e checa <strong>se as coordenadas estão contidas no polígono característico descrito pelo <code>Código_Município</code></strong>, retornando <code>Verdadeiro</code> caso positivo e <code>Falso</code> caso contrário:</li>
+</ul>
+<div class="sourceCode" id="cb33"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>        mun.NO_MUNICIPIO </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        , mun.NU_LONGITUDE </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        , mun.NU_LATITUDE         </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        , <span class="fu">CONVERT</span>(<span class="dt">int</span>, </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>            (mun.GE_POLIGONO.STIntersects(geometry:<span class="ch">:STGeomFromText</span>(</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">'POINT({} {})'</span>, </span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>                mun.GE_POLIGONO.STSrid)</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>            )) </span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>        )<span class="kw">AS</span> COORD_VALIDA</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> </span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>        CORPORATIVO.dbo.TB_IBGE_MUNICIPIO mun</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>        MUN.CO_MUNICIPIO <span class="op">=</span> {}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Além disso é retornado o nome padronizado do <code>Município</code> e suas coordenadas como registrado oficialmente no IBGE</li>
+</ul>
+</section>
+<section id="arquivo-final" class="level2">
+<h2 class="anchored" data-anchor-id="arquivo-final">Arquivo Final🗄️</h2>
+<p>O Arquivo final disponibilizado para as atividades de monitoração é formatado da seguinte forma:</p>
+<ul>
+<li>Arquivo base com os dados da Anatel com as seguintes colunas:
+<ul>
+<li><code>Frequência</code></li>
+<li><code>Número_Serviço</code></li>
+<li><code>Número_Estação</code></li>
+<li><code>Classe_Emissão</code></li>
+<li><code>Largura_Emissão(kHz)</code></li>
+</ul></li>
+<li>Para simplificação de como os dados são apresentados, é criada a coluna <code>Descrição</code> com as seguintes colunas aglutinadas:
+<ul>
+<li><p><code>Fonte</code> - <em>Qual das bases acima é originário o registro</em></p></li>
+<li><p><code>Status</code></p></li>
+<li><p><code>Classe</code></p></li>
+<li><p><code>Entidade</code></p></li>
+<li><p><code>Fistel</code></p></li>
+<li><p><code>#Estação</code> - <code>Número_Estação</code>+ <code>Multiplicidade</code></p></li>
+<li><p><code>Município_IBGE</code></p></li>
+<li><p><code>UF</code><br>
+A coluna <code>Município</code> é substituída pela coluna <code>Município_IBGE</code>, por esta estar completa e validada através do <code>Código_Município</code></p></li>
+<li><p>Os registros que não possuem coordenadas ou estas foram considerados inválidas têm suas coordenadas substituídas pela coordenada do município.</p>
+<blockquote class="blockquote">
+<p>Para esses registros, é inserido o sinal <code>*</code> ao final da <code>Descrição</code>.</p>
+</blockquote></li>
+</ul></li>
+<li>Arquivo pós-processado com os dados aeronáuticos</li>
+<li>Mesclagem dos dados aeronáuticos com os registros da Anatel, nos mesmos moldes que os dados aeronáuticos foram mesclados entre si. Nesse caso os dados da Anatel são mantidos e a Descrição da estação aeronáutica concatenada com a Descrição da estação da Anatel.</li>
+<li>Adição de uma coluna numérica identificadora da emissão: <code>#1, #2, #3, ...</code></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(pasta <span class="op">/</span> <span class="st">'AnatelDB.parquet.gzip'</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> c <span class="kw">in</span> [<span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]:</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    df[c] <span class="op">=</span> df[c].astype(<span class="st">'float'</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Id</th>
+      <th>Frequency</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Description</th>
+      <th>Service</th>
+      <th>Station</th>
+      <th>Class</th>
+      <th>BW</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>237679</th>
+      <td>#237680</td>
+      <td>167.81875</td>
+      <td>-19.867044</td>
+      <td>-43.925735</td>
+      <td>[MOS] L, FX, Policia Militar Do Estado De Mina...</td>
+      <td>19</td>
+      <td>1001757839</td>
+      <td>F1E</td>
+      <td>8.1</td>
+    </tr>
+    <tr>
+      <th>293084</th>
+      <td>#293085</td>
+      <td>168.18125</td>
+      <td>-28.566111</td>
+      <td>-48.792500</td>
+      <td>[MOS] L, FB, Fundo De Melhoria Do Corpo De Bom...</td>
+      <td>19</td>
+      <td>1012937884</td>
+      <td>F1D</td>
+      <td>7.6</td>
+    </tr>
+    <tr>
+      <th>102419</th>
+      <td>#102420</td>
+      <td>156.75000</td>
+      <td>-22.873041</td>
+      <td>-43.110451</td>
+      <td>[STEL] L, FP, Pilot Boat Transportes Maritimos...</td>
+      <td>604</td>
+      <td>1007270346</td>
+      <td>F3E</td>
+      <td>11.0</td>
+    </tr>
+    <tr>
+      <th>385774</th>
+      <td>#385775</td>
+      <td>245.47500</td>
+      <td>-4.163056</td>
+      <td>-42.013611</td>
+      <td>[MOS] L, FX, Telemar Norte Leste S.A. Em Recup...</td>
+      <td>175</td>
+      <td>691448892</td>
+      <td>F3E</td>
+      <td>16.0</td>
+    </tr>
+    <tr>
+      <th>30865</th>
+      <td>#30866</td>
+      <td>87.90000</td>
+      <td>-9.851666</td>
+      <td>-57.824165</td>
+      <td>[SRD] RADCOM, 1-A, Associação Comunitária De N...</td>
+      <td>231</td>
+      <td>1015224919</td>
+      <td>NI</td>
+      <td>256.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->
@@ -1277,7 +2092,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
     setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -1305,31 +2137,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   for (var i=0; i<noterefs.length; i++) {
     const ref = noterefs[i];
     tippyHover(ref, function() {
-      let href = ref.getAttribute('href');
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
     });
   }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
-    tippyHover(ref, function() {
-      var popup = window.document.createElement('div');
-      cites.forEach(function(cite) {
-        var citeDiv = window.document.createElement('div');
-        citeDiv.classList.add('hanging-indent');
-        citeDiv.classList.add('csl-entry');
-        var biblioDiv = window.document.getElementById('ref-' + cite);
-        if (biblioDiv) {
-          citeDiv.innerHTML = biblioDiv.innerHTML;
-        }
-        popup.appendChild(citeDiv);
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
       });
-      return popup.innerHTML;
-    });
+    }
   }
 });
 </script>
