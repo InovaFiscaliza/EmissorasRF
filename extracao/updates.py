@@ -74,9 +74,7 @@ def clean_mosaico(
 # %% ../nbs/02_updates.ipynb 11
 def _save_df(df: pd.DataFrame, folder: Union[str, Path], stem: str) -> pd.DataFrame:
     """Format, Save and return a dataframe"""
-    df = df.copy()  # Impedir a alteração do df original
-    for c in df.columns:
-        df[c] = df[c].astype("string").str.strip()
+    df = df.copy().astype("string")  # Impedir a alteração do df original
     df = df.drop_duplicates(keep="first").reset_index(drop=True)
     if "Código_Município" in df:
         df = df[df.Código_Município.notna()].reset_index(drop=True)
@@ -261,6 +259,7 @@ def _process_telecom(
         "Classe_Emissão",
         "Largura_Emissão(kHz)",
     ]
+    df.to_parquet(folder / "telecom_raw.parquet.gzip", compression="gzip", index=False)
     df.dropna(subset=subset, axis=0, inplace=True)
     df_sub = (
         df[~df.duplicated(subset=subset, keep="first")].reset_index(drop=True).copy()
@@ -276,7 +275,7 @@ def _process_telecom(
     df_sub = df_sub.loc[:, COLUNAS]
     return _save_df(df_sub, folder, "telecom")
 
-# %% ../nbs/02_updates.ipynb 30
+# %% ../nbs/02_updates.ipynb 31
 def update_aero(
     folder: Union[str, Path],  # Pasta onde salvar os arquivos
 ) -> pd.DataFrame:  # DataFrame com os dados atualizados
@@ -307,7 +306,7 @@ def update_aero(
 
     return _save_df(icao, folder, "aero")
 
-# %% ../nbs/02_updates.ipynb 33
+# %% ../nbs/02_updates.ipynb 34
 def validar_coords(
     row: pd.Series,  # Linha de um DataFrame
     connector: pyodbc.Connection = None,  # Conector de Banco de Dados
@@ -335,7 +334,7 @@ def validar_coords(
         del conn
     return [str(mun), str(lat), str(long), str(is_valid)]
 
-# %% ../nbs/02_updates.ipynb 34
+# %% ../nbs/02_updates.ipynb 35
 def update_cached_df(df: pd.DataFrame, df_cache: pd.DataFrame) -> pd.DataFrame:
     """Mescla ambos dataframes eliminando os excluídos (existentes somente em df_cache)"""
 
@@ -361,7 +360,7 @@ def update_cached_df(df: pd.DataFrame, df_cache: pd.DataFrame) -> pd.DataFrame:
     # # Drop the _merge column
     return df_cache.drop(columns="_merge")
 
-# %% ../nbs/02_updates.ipynb 35
+# %% ../nbs/02_updates.ipynb 36
 def _validar_coords_base(
     df: pd.DataFrame,  # DataFrame com os dados da Anatel
     df_cache: pd.DataFrame,  # DataFrame validado anteriormente, usado como cache
@@ -411,7 +410,7 @@ def _validar_coords_base(
 
     return df_cache
 
-# %% ../nbs/02_updates.ipynb 36
+# %% ../nbs/02_updates.ipynb 37
 def update_base(
     conn: pyodbc.Connection,  # Objeto de conexão de banco
     clientMongoDB: MongoClient,  # Objeto de conexão com o MongoDB

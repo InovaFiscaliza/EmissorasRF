@@ -2,8 +2,9 @@
 
 # %% auto 0
 __all__ = ['TIMEOUT', 'RELATORIO', 'ESTACAO', 'COLUNAS', 'APP_ANALISE_PT', 'APP_ANALISE_EN', 'ESTADOS', 'SIGLAS', 'BW', 'BW_MAP',
-           'COLS_TELECOM', 'COLS_SRD', 'SQL_RADCOM', 'SQL_STEL', 'SQL_VALIDA_COORD', 'MONGO_TELECOM', 'MONGO_SRD',
-           'BW_pattern', 'REGEX_ESTADOS', 'MIN_LAT', 'MAX_LAT', 'MIN_LONG', 'MAX_LONG']
+           'COLS_TELECOM', 'COLS_SRD', 'PROJECTION_SRD', 'COLS_SMP', 'SQL_RADCOM', 'SQL_STEL', 'SQL_VALIDA_COORD',
+           'MONGO_TELECOM', 'MONGO_SRD', 'MONGO_SMP', 'REGEX_ESTADOS', 'RE_BW', 'MIN_LAT', 'MAX_LAT', 'MIN_LONG',
+           'MAX_LONG']
 
 # %% ../nbs/00_constants.ipynb 2
 import re
@@ -151,16 +152,61 @@ COLS_SRD = {
     "frequency": "Frequência",
     "licensee": "Entidade",
     "NumFistel": "Fistel",
-    "estacao.NumEstacao": "Número_Estação",
-    "srd_planobasico.NomeMunicipio": "Município",
-    "srd_planobasico.CodMunicipio": "Código_Município",
-    "srd_planobasico.SiglaUF": "UF",
-    "estacao.MedLatitudeDecimal": "Latitude",
-    "estacao.MedLongitudeDecimal": "Longitude",
+    "NumEstacao": "Número_Estação",
+    "NomeMunicipio": "Município",
+    "CodMunicipio": "Código_Município",
+    "SiglaUF": "UF",
+    "MedLatitudeDecimal": "Latitude",
+    "MedLongitudeDecimal": "Longitude",
     "stnClass": "Classe",
     "NumServico": "Num_Serviço",
-    "habilitacao.DataValFreq": "Validade_RF",
-    "Status.state": "Status",
+    "DataValFreq": "Validade_RF",
+    "state": "Status",
+}
+
+PROJECTION_SRD = {
+    "frequency": 1.0,
+    "licensee": 1.0,
+    "NumFistel": 1.0,
+    "estacao.NumEstacao": 1.0,
+    # flatten the nested fields with dot notation
+    "srd_planobasico.NomeMunicipio": "$srd_planobasico.NomeMunicipio",
+    "srd_planobasico.CodMunicipio": "$srd_planobasico.CodMunicipio",
+    "srd_planobasico.SiglaUF": "$srd_planobasico.SiglaUF",
+    "estacao.MedLatitudeDecimal": "$estacao.MedLatitudeDecimal",
+    "estacao.MedLongitudeDecimal": "$estacao.MedLongitudeDecimal",
+    "stnClass": 1.0,
+    "NumServico": 1.0,
+    "habilitacao.DataValFreq": 1.0,
+    "Status.state": "$Status.state",
+}
+
+COLS_SMP = {
+    "NumAto": "Num_Ato",
+    "NumFistel": "Fistel",
+    "NomeEntidade": "Entidade",
+    "SiglaUf": "UF",
+    "NumEstacao": "Número_Estação",
+    "CodMunicipio": "Código_Município",
+    "DataValidade": "Validade_RF",
+    "FreqTxMHz": "Frequência_Transmissão",
+    "FreqRxMHz": "Frequência_Recepção",
+    "formId": "Tipo_Estação",
+    "Tecnologia": "Tecnologia",
+    "Latitude": "Latitude",
+    "Longitude": "Longitude",
+    "DesignacaoEmissao": "Designacao_Emissão",
+    "PotenciaTransmissorWatts": "Potência(W)",
+    "CodTipoAntena": "Cod_TipoAntena",
+    "Polarizacao": "Polarização",
+    "RaioAntena": "Raio_Antena",
+    "GanhoAntena": "Ganho_Antena",
+    "FrenteCostaAntena": "FC_Antena",
+    "AnguloMeiaPotenciaAntena": "Ang_MP_Antena",
+    "AnguloElevacao": "Ângulo_Elevação",
+    "Azimute": "Azimute",
+    "AlturaAntena": "Altura_Antena",
+    "PerdasAcessorias": "Perdas_Acessorias",
 }
 
 # %% ../nbs/00_constants.ipynb 10
@@ -282,9 +328,19 @@ MONGO_SRD = {
     ]
 }
 
+MONGO_SMP = {
+    "$and": [
+        {"DataValidade": {"$nin": ["", None]}},
+        {"Status.state": "LIC-LIC-01"},
+        {"NumServico": "010"},
+        {"FreqTxMHz": {"$nin": [None, "", 0]}},
+        {"FreqTxMHz": {"$type": 1.0}},
+    ]
+}
+
 # %% ../nbs/00_constants.ipynb 15
-BW_pattern = re.compile("^(\d{1,3})([HKMG])(\d{0,2})(\w{0,3})")
 REGEX_ESTADOS = f'({"|".join(ESTADOS)})'
+RE_BW = re.compile("^(\d{1,3})([HKMG])(\d{0,2})(\w{0,3})")
 
 # %% ../nbs/00_constants.ipynb 17
 MIN_LAT = -33.7509907  # Arroio Chuy RS

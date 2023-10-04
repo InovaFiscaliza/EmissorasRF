@@ -154,5 +154,8 @@ checklink/cookies.txt
 
 *desktop.ini
 
+# Quarto Files
 _docs/
+_proc/
+index_files/
 sidebar.yml
