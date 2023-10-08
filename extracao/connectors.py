@@ -8,7 +8,10 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
 import pyodbc
+
 from pymongo import MongoClient
+
+# from motor.motor_asyncio import AsyncIOMotorClient
 
 # %% ../nbs/01a_connectors.ipynb 4
 @dataclass
@@ -48,5 +51,5 @@ class MongoDB(DBConnector):
     mongo_uri: str
 
     def connect(self):
-        # This method returns a connected MongoClient object
+        # This method returns a connected AsyncIOMotorClient object
         return MongoClient(self.mongo_uri)

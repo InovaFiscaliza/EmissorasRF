@@ -19,15 +19,20 @@ from pyarrow import ArrowInvalid, ArrowTypeError
 
 from .connectors import MongoDB, SQLServer
 from extracao.constants import (
+    AGG_LICENCIAMENTO,
+    AGG_SMP,
     BW,
     BW_MAP,
-    COLS_SMP,
-    COLS_SRD,
-    COLS_TELECOM,
+    CHANNELS,
+    COLS_LICENCIAMENTO,
     COLUNAS,
+    DICT_LICENCIAMENTO,
+    DICT_SRD,
+    IBGE,
     MONGO_SMP,
     MONGO_SRD,
     MONGO_TELECOM,
+    PROJECTION_LICENCIAMENTO,
     PROJECTION_SRD,
     RE_BW,
 )
@@ -64,30 +69,64 @@ class Base:
             raise e(f"Error when reading {file}") from e
         return df
 
-    @cached_property
-    def df(self):
-        raise NotImplementedError
-
-    @cached_property
-    def extract(self):
-        raise NotImplementedError
-
-    def _format(self, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError
-
-    def update(self):
-        raise NotImplementedError
-
-    def save(self, folder: Union[str, Path]) -> pd.DataFrame:
+    def _save(
+        self, df: pd.DataFrame, folder: Union[str, Path], stem: str
+    ) -> pd.DataFrame:
         """Format, Save and return a dataframe"""
-        df = self.df.astype("string")
-        df = df.drop_duplicates(keep="first", ignore_index=True)
+        df = df.astype("string").drop_duplicates(
+            keep="first", ignore_index=True
+        )  # TODO: Save this for later
         try:
-            file = Path(f"{folder}/{self.stem}.parquet.gzip")
+            file = Path(f"{folder}/{stem}.parquet.gzip")
             df.to_parquet(file, compression="gzip", index=False)
         except (ArrowInvalid, ArrowTypeError) as e:
             raise e(f"Não foi possível salvar o arquivo parquet {file}") from e
         return df
+
+    @cached_property
+    def df(self) -> pd.DataFrame:
+        try:
+            df = self._read(self.stem)
+        except (ArrowInvalid, FileNotFoundError):
+            df = self._format(self.extract)
+        return df
+
+    @cached_property
+    def discarded(self) -> pd.DataFrame:
+        return pd.DataFrame(columns=self.columns)
+
+    @property
+    def columns(self):
+        raise NotImplementedError(
+            "Subclasses devem implementar a propriedade 'columns'"
+        )
+
+    @property
+    def cols_mapping(self):
+        raise NotImplementedError(
+            "Subclasses devem implementar a propriedade 'cols_mapping'"
+        )
+
+    @property
+    def stem(self):
+        raise NotImplementedError("Subclasses devem setar a propriedade stem!")
+
+    def extract(self) -> pd.DataFrame:
+        raise NotImplementedError("Subclasses devem implementar o método extract")
+
+    def _format(
+        self,
+        df: pd.DataFrame,  # DataFrame com os dados de Estações
+    ) -> pd.DataFrame:  # DataFrame formatado
+        """Formata, limpa e padroniza os dados provenientes da query no banco"""
+        raise NotImplementedError("Subclasses devem implementar o método _format")
+
+    def update(self):
+        self.df = self._format(self.extract)
+
+    def save(self):
+        self._save(self.df, self.folder, self.stem)
+        self._save(self.discarded, self.folder, self.stem + "_discarded")
 
 # %% ../nbs/01b_datasources.ipynb 7
 class Sitarweb(Base, GetAttr):
@@ -99,6 +138,22 @@ class Mosaico(Base, GetAttr):
     def __init__(self, mongo_uri: str = MONGO_URI):
         self.database = "sms"
         self.default = MongoDB(mongo_uri)
+
+    @property
+    def collection(self):
+        raise NotImplementedError(
+            "Subclasses devem implementar a propriedade 'collection'"
+        )
+
+    @property
+    def query(self):
+        raise NotImplementedError("Subclasses devem implementar a propriedade 'query'")
+
+    @property
+    def projection(self):
+        raise NotImplementedError(
+            "Subclasses devem implementar a propriedade 'projection'"
+        )
 
     def _extract(self, collection: str, pipeline: list):
         client = self.connect()
@@ -145,24 +200,36 @@ class Mosaico(Base, GetAttr):
         ].astype("string")
         return df.drop("Designação_Emissão", axis=1)
 
-    def extract(self) -> pd.DataFrame:
-        raise NotImplementedError
-
 # %% ../nbs/01b_datasources.ipynb 9
-class SRD(GetAttr):
+class SRD(Mosaico):
     """Classe para encapsular a lógica de extração de Radiodifusão"""
 
     def __init__(self, mongo_uri: str = MONGO_URI) -> None:
-        self.stem = "srd"
-        self.default = Mosaico(mongo_uri)
-        self.collection = "srd"
-        self.query = MONGO_SRD
-        self.projection = PROJECTION_SRD
-        self.columns = COLS_SRD
+        super().__init__(mongo_uri)
 
-    @cached_property
-    def df(self) -> pd.DataFrame:
-        return self._read(self.stem)
+    @property
+    def stem(self):
+        return "srd"
+
+    @property
+    def collection(self):
+        return "srd"
+
+    @property
+    def query(self):
+        return MONGO_SRD
+
+    @property
+    def projection(self):
+        return PROJECTION_SRD
+
+    @property
+    def columns(self):
+        return COLUNAS
+
+    @property
+    def cols_mapping(self):
+        return DICT_SRD
 
     @cached_property
     def extract(self) -> pd.DataFrame:
@@ -183,10 +250,11 @@ class SRD(GetAttr):
 
     def _format(
         self,
-        df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
-    ) -> pd.DataFrame:  # DataFrame com os dados mesclados e limpos
-        """Clean the merged dataframe with the data from the MOSAICO page"""
-        df = df.rename(columns=self.columns)
+        df: pd.DataFrame,  # DataFrame com o resultantes do banco de dados
+    ) -> pd.DataFrame:  # DataFrame formatado
+        """Formata, limpa e padroniza os dados provenientes da query no banco"""
+
+        df = df.rename(columns=self.cols_mapping)
         df = df[
             df.Status.str.contains("-C1$|-C2$|-C3$|-C4$|-C7|-C98$", na=False)
         ].reset_index(drop=True)
@@ -198,37 +266,314 @@ class SRD(GetAttr):
             df["Num_Serviço"] == "205", "Frequência"
         ].apply(lambda x: Decimal(x) / Decimal(1000))
         df["Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
-        df["Fonte"] = "MOS"
+        df["Fonte"] = "MOSAICO"
         df["Num_Serviço"] = df["Num_Serviço"].fillna("")
         df["Designação_Emissão"] = (
             df.Num_Serviço.astype("string").fillna("").map(BW_MAP)
         )
         df = self.split_designacao(df)
         df["Multiplicidade"] = 1
-        return df.loc[:, COLUNAS]
+        return df.loc[:, self.columns]
 
-    def update(self):
-        self.df = self._format(self.extract)
-
-# %% ../nbs/01b_datasources.ipynb 14
-class Telecom(GetAttr):
+# %% ../nbs/01b_datasources.ipynb 10
+class Telecom(Mosaico):
     """Classe para encapsular a lógica de extração dos serviços de Telecomunições distintos de SMP"""
 
-    def __init__(self, mongo_uri: str = MONGO_URI) -> None:
-        self.default = Mosaico(mongo_uri)
-        self.collection = "licenciamento"
-        self.query = MONGO_TELECOM
-        self.columns = COLS_TELECOM
+    def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
+        super().__init__(mongo_uri)
+        self.limit = limit
 
-    def format(self):
-        pass
+    @property
+    def stem(self):
+        return "telecom"
 
-# %% ../nbs/01b_datasources.ipynb 15
-class SMP(GetAttr):
+    @property
+    def collection(self):
+        return "licenciamento"
+
+    @property
+    def query(self):
+        return MONGO_TELECOM
+
+    @property
+    def projection(self):
+        return PROJECTION_LICENCIAMENTO
+
+    @property
+    def columns(self):
+        return COLS_LICENCIAMENTO
+
+    @property
+    def cols_mapping(self):
+        return DICT_LICENCIAMENTO
+
+    @cached_property
+    def extract(self) -> pd.DataFrame:
+        pipeline = [
+            {"$match": self.query},
+            {"$project": self.projection},
+            {"$limit": self.limit},
+        ]
+        df = self._extract(self.collection, pipeline)
+        # Substitui strings vazias e somente com espaços por nulo
+        return df.replace(r"^\s*$", pd.NA, regex=True)
+
+    def _format(
+        self,
+        df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
+    ) -> pd.DataFrame:  # DataFrame com os dados mesclados e limpos
+        """Clean the merged dataframe with the data from the MOSAICO page"""
+        df = df.rename(columns=self.cols_mapping)
+        df = self.split_designacao(df)
+        df_copy = df.copy()
+        duplicated = df.duplicated(subset=AGG_LICENCIAMENTO, keep="first")
+        df_sub = df_copy[~duplicated].reset_index(drop=True)
+        df_copy = df_copy[duplicated].reset_index(drop=True)
+        df_copy[
+            "Log"
+        ] = f'[("Registro", {AGG_LICENCIAMENTO},  ("Processamento", "Duplicado considerando os registros")]'
+
+        self.discarded = df_copy
+        df_sub["Multiplicidade"] = (
+            df.groupby(AGG_LICENCIAMENTO, sort=False).size().tolist()
+        )
+        df_sub["Status"] = "L"
+        df_sub["Fonte"] = "MOSAICO"
+        return df_sub.loc[:, self.columns]
+
+# %% ../nbs/01b_datasources.ipynb 18
+class SMP(Mosaico):
     """Classe para encapsular a lógica de extração do SMP"""
 
-    def __init__(self, mongo_uri: str = MONGO_URI) -> None:
-        self.default = Mosaico(mongo_uri)
-        self.collection = "licenciamento"
-        self.query = MONGO_SMP
-        self.columns = COLS_SMP
+    def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
+        super().__init__(mongo_uri)
+        self.limit = limit
+
+    @property
+    def stem(self):
+        return "smp"
+
+    @property
+    def collection(self):
+        return "licenciamento"
+
+    @property
+    def query(self):
+        return MONGO_SMP
+
+    @property
+    def projection(self):
+        return PROJECTION_LICENCIAMENTO
+
+    @property
+    def columns(self):
+        return COLS_LICENCIAMENTO
+
+    @property
+    def cols_mapping(self):
+        return DICT_LICENCIAMENTO
+
+    @cached_property
+    def extract(self) -> pd.DataFrame:
+        pipeline = [{"$match": self.query}, {"$project": self.projection}]
+        if self.limit > 0:
+            pipeline.append({"$limit": self.limit})
+        df = self._extract(self.collection, pipeline)
+        # Substitui strings vazias e somente com espaços por nulo
+        return df.replace(r"^\s*$", pd.NA, regex=True)
+
+    def exclude_duplicated(
+        self,
+        df: pd.DataFrame,  # DataFrame com os dados de Estações
+    ) -> pd.DataFrame:  # DataFrame com os dados duplicados excluídos
+        f"""Exclui os registros duplicados
+        O subconjunto de colunas consideradas é {AGG_SMP}
+        """
+        df["Número_Estação"] = df["Número_Estação"].astype("int")
+        df = df.sort_values("Número_Estação", ignore_index=True)
+        df["Largura_Emissão(kHz)"] = pd.to_numeric(
+            df["Largura_Emissão(kHz)"], errors="coerce"
+        )
+        df["Largura_Emissão(kHz)"] = df["Largura_Emissão(kHz)"].fillna(0)
+        df["Classe_Emissão"] = df["Classe_Emissão"].fillna("NI")
+        df["Tecnologia"] = df["Tecnologia"].fillna("NI")
+        duplicated = df.duplicated(subset=AGG_SMP, keep="first")
+        df_sub = df[~duplicated].copy().reset_index(drop=True)
+        df_sub = df_sub.dropna(subset=AGG_SMP)
+        df_sub["Multiplicidade"] = df.groupby(AGG_SMP, sort=False).size().tolist()
+        df_sub[
+            "Log"
+        ] = '[("Registro", "Todos",  ("Processamento", "Duplicado considerando os registros")]'
+        df = df[duplicated].reset_index(drop=True)
+        df[
+            "Log"
+        ] = f'[("Registro", {AGG_SMP},  ("Processamento", "Duplicado considerando os registros")]'
+        df_sub["Status"] = "L"
+        df_sub["Fonte"] = "MOSAICO"
+        self.discarded = pd.concat([self.discarded, df], ignore_index=True)
+        return df_sub
+
+    @staticmethod
+    def read_channels():
+        channels = pd.read_csv(CHANNELS, dtype="string")
+        channels[["Downlink_Inicial", "Downlink_Final"]] = channels[
+            ["Downlink_Inicial", "Downlink_Final"]
+        ].astype(float)
+        channels[["Uplink_Inicial", "Uplink_Final"]] = channels[
+            ["Uplink_Inicial", "Uplink_Final"]
+        ].astype(float)
+        channels = channels.sort_values(["Downlink_Inicial"], ignore_index=True)
+        channels["N_Bloco"] = channels["N_Bloco"].str.strip()
+        channels["Faixa"] = channels["Faixa"].str.strip()
+        return channels
+
+    def exclude_invalid_channels(self, df):
+        df_sub = df[df.Canalização == "Downlink"].copy().reset_index(drop=True)
+        for flag in ["Uplink", "Inválida"]:
+            discarded = df[df.Canalização == flag]
+            if not discarded.empty:
+                discarded[
+                    "Log"
+                ] = f'[("Registro", ("Frequência", "Largura_Emissão(kHz)")),  ("Processamento", "Canalização {flag}")]'
+        self.discarded = pd.concat([self.discarded, discarded], ignore_index=True)
+        return df_sub
+
+    def validate_channels(
+        self,
+        df,  # DataFrame with the original channels info
+    ) -> pd.DataFrame:  # DataFrame with the channels validated and added info
+        """Read the SMP channels file, validate and merge the channels present in df"""
+        bw = df["Largura_Emissão(kHz)"].astype("float") / 2000  # Unidade em kHz
+        df["Início_Canal_Down"] = df.Frequência.astype(float) - bw
+        df["Fim_Canal_Down"] = df.Frequência.astype(float) + bw
+        channels = self.read_channels()
+        grouped_channels = df.groupby(
+            ["Início_Canal_Down", "Fim_Canal_Down"], as_index=False
+        ).size()
+        grouped_channels.sort_values(
+            "size", ascending=False, inplace=True, ignore_index=True
+        )
+        grouped_channels["Canalização"] = "Inválida"
+        for row in grouped_channels.itertuples():
+            interval = channels[
+                (row.Início_Canal_Down < channels["Downlink_Final"])
+                & (row.Fim_Canal_Down > channels["Downlink_Inicial"])
+            ]
+            faixa = "Downlink"
+            if interval.empty:
+                interval = channels[
+                    (row.Início_Canal_Down < channels["Uplink_Final"])
+                    & (row.Fim_Canal_Down > channels["Uplink_Inicial"])
+                ]
+                if interval.empty:
+                    continue
+                faixa = "Uplink"
+
+            down = " | ".join(
+                interval[["Downlink_Inicial", "Downlink_Final"]].apply(
+                    lambda x: f"{x[0]}-{x[1]}", axis=1
+                )
+            )
+            faixas = " | ".join(interval.Faixa.unique())
+            offset = " | ".join(interval.Offset.unique())
+            grouped_channels.loc[
+                row.Index, ["Blocos_Downlink", "Faixas", "Canalização", "Offset"]
+            ] = (down, faixas, faixa, offset)
+        grouped_channels = grouped_channels[
+            [
+                "Início_Canal_Down",
+                "Fim_Canal_Down",
+                "Blocos_Downlink",
+                "Faixas",
+                "Canalização",
+                "Offset",
+            ]
+        ]
+        df = pd.merge(
+            df, grouped_channels, how="left", on=["Início_Canal_Down", "Fim_Canal_Down"]
+        )
+        return self.exclude_invalid_channels(df)
+
+    def generate_uplink(self, df):
+        df["Offset"] = pd.to_numeric(df["Offset"], errors="coerce")
+        valid = (
+            (df.Offset.notna()) & (df.Offset != 0) & (df["Largura_Emissão(kHz)"] != 0)
+        )
+        df.loc[:, ["Frequência", "Offset"]] = df.loc[
+            :, ["Frequência", "Offset"]
+        ].astype("float")
+        df.loc[valid, "Frequência_Recepção"] = (
+            df.loc[valid, "Frequência"] - df.loc[valid, "Offset"]
+        ).astype("string")
+        return df
+
+    def substitute_coordenates(self, df):
+        ibge = pd.read_csv(
+            IBGE,
+            dtype="string",
+            usecols=["codigo_ibge", "nome", "latitude", "longitude"],
+        )
+        ibge.columns = ["Código_Município", "Município", "Latitude", "Longitude"]
+        coords = pd.merge(
+            df.loc[df.Multiplicidade != "1", "Código_Município"],
+            ibge[["Código_Município", "Latitude", "Longitude"]],
+            on="Código_Município",
+            how="left",
+        )
+        df.loc[df.Multiplicidade != "1", ["Latitude", "Longitude"]] = coords[
+            ["Latitude", "Longitude"]
+        ].values
+        df.loc[
+            df.Multiplicidade != "1", "Log"
+        ] = '[("Registro", ("Latitude", "Longitude")), ("Processamento", "Coordenadas do Município - Registros Agrupados")]'
+        return df
+
+    def input_fixed_columns(self, df):
+        df["Status"] = "L"
+        df["Num_Serviço"] = "010"
+        down = df.copy().drop("Frequência_Recepção", axis=1)
+        down["Fonte"] = "MOSAICO"
+        down["Classe"] = "FB"
+        up = df.copy().drop("Frequência", axis=1)
+        up = up.rename(columns={"Frequência_Recepção": "Frequência"})
+        up["Fonte"] = "CANALIZACAO"
+        up["Classe"] = "ML"
+        return pd.concat([down, up], ignore_index=True)
+
+    def _format(
+        self,
+        df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
+    ) -> pd.DataFrame:  # DataFrame com os dados mesclados e limpos
+        """Clean the merged dataframe with the data from the MOSAICO page"""
+        df = df.rename(columns=self.cols_mapping)
+        df = self.split_designacao(df)
+        df = self.exclude_duplicated(df)
+        df = self.validate_channels(df)
+        df = self.generate_uplink(df)
+        df = self.substitute_coordenates(df)
+        df = self.input_fixed_columns(df)
+        return df.loc[:, self.columns]
+
+
+if __name__ == "__main__":
+    import time
+
+    start = time.perf_counter()
+
+    l = SMP()
+
+    l.update()
+
+    print(l.df)
+
+    print(150 * "=")
+
+    print(l.discarded[["Frequência", "Entidade", "Log"]])
+
+    print(150 * "=")
+
+    print(l.df.Multiplicidade.sum())
+
+    l.save()
+
+    print(f"Elapsed time: {time.perf_counter() - start} seconds")

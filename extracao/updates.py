@@ -200,11 +200,11 @@ def update_srd(
     with console.status("Consolidando os dados do Mosaico...", spinner="runner"):
         database = mongo_client["sms"]
         collection = database["srd"]
-        list_data = list(collection.find(MONGO_SRD, projection=COLS_SRD.keys()))
+        list_data = list(collection.find(MONGO_SRD, projection=DICT_SRD.keys()))
         mosaico = pd.json_normalize(list_data)
         mosaico = mosaico.drop(columns=["estacao"])
-        mosaico = mosaico[list(COLS_SRD.keys())]
-        mosaico.rename(COLS_SRD, axis=1, inplace=True)
+        mosaico = mosaico[list(DICT_SRD.keys())]
+        mosaico.rename(DICT_SRD, axis=1, inplace=True)
         mosaico = clean_mosaico(mosaico, folder)
         mosaico["Fonte"] = "MOS"
         mosaico["Num_Serviço"].fillna("", inplace=True)
@@ -230,12 +230,12 @@ def update_telecom(
     database = mongo_client["sms"]
     collection = database["licenciamento"]
     query = collection.find(
-        MONGO_TELECOM, projection={k: 1.0 for k in COLS_TELECOM.keys()}, limit=0
+        MONGO_TELECOM, projection={k: 1.0 for k in DICT_LICENCIAMENTO.keys()}, limit=0
     )
     print(
         "[red] :warning: Executando a query na base licenciamento do Mosaico, processo demorado! :warning:"
     )
-    df = pd.DataFrame(list(query), columns=COLS_TELECOM.keys(), dtype="string")
+    df = pd.DataFrame(list(query), columns=DICT_LICENCIAMENTO.keys(), dtype="string")
     return _process_telecom(df, folder)
 
 
@@ -245,7 +245,7 @@ def _process_telecom(
 ) -> pd.DataFrame:
     """Formata e pós-processa e mescla os dados de Telecomunicações do Mosaico"""
     # df.drop("_id", axis=1, inplace=True)
-    df.rename(COLS_TELECOM, axis=1, inplace=True)
+    df.rename(DICT_LICENCIAMENTO, axis=1, inplace=True)
     df = split_designacao(df)
     subset = [
         "Frequência",
