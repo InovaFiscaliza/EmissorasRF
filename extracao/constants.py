@@ -16,8 +16,8 @@ TIMEOUT = 5
 RELATORIO = "http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id={id}&state={state}"
 ESTACAO = "http://sistemas.anatel.gov.br/se/public/view/b/srd.php?wfid=estacoes&id={}"
 
-CHANNELS = Path(__file__).parent / "arquivos" / "canalizacao_smp.csv"
-IBGE = Path(__file__).parent / "arquivos" / "municipios.csv"
+CHANNELS = Path(__file__).parent / "datasources" / "arquivos" / "canalizacao_smp.csv"
+IBGE = Path(__file__).parent / "datasources" / "arquivos" / "municipios.csv"
 
 # %% ../nbs/00_constants.ipynb 6
 COLUNAS = [
@@ -38,6 +38,7 @@ COLUNAS = [
     "Status",
     "Fonte",
     "Multiplicidade",
+    "Log",
 ]
 
 COLS_LICENCIAMENTO = [

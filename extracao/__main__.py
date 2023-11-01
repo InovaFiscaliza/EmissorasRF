@@ -5,7 +5,6 @@ from datetime import datetime
 import typer
 from pymongo import MongoClient
 from fastcore.xtras import Path
-from extracao.updates import connect_db
 from extracao.main import get_db
 
 warnings.filterwarnings("ignore")
