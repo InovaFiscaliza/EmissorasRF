@@ -30,7 +30,7 @@ class Base:
         try:
             df = pd.read_parquet(file)
         except (ArrowInvalid, FileNotFoundError) as e:
-            raise e(f"Error when reading {file}") from e
+            raise ValueError(f"Error when reading {file}") from e
         return df
 
     def _save(
@@ -72,6 +72,7 @@ class Base:
     def discarded(self) -> pd.DataFrame:
         df = pd.DataFrame(columns=self.columns)
         df["Log"] = "[]"
+        return df
 
     def append2discarded(self, dfs: Union[pd.DataFrame, List]) -> None:
         """Receives one of more dataframes and append to the discarded dataframe"""

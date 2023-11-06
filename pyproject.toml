@@ -1,0 +1,10 @@
+[tool.ruff.lint]
+select = ["PL"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"
+

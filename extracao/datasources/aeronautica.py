@@ -6,32 +6,83 @@ __all__ = ['Aero']
 # %% ../../nbs/03b_aero.ipynb 3
 import os
 from typing import List, Union
+from functools import cached_property
+
 
 import numpy as np
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
+from fastcore.xtras import Path
+from fastcore.parallel import parallel
+
 from .icao import get_icao
 from .aisweb import get_aisw
 from .aisgeo import get_aisg
 from .redemet import get_redemet
 from .base import Base
+from ..format import merge_on_frequency
 
 # %% ../../nbs/03b_aero.ipynb 4
 load_dotenv(find_dotenv())
 
-# %% ../../nbs/03b_aero.ipynb 5
+# %% ../../nbs/03b_aero.ipynb 6
 class Aero(Base):
-    pass
+    """Classe auxiliar para agregar os dados das APIs aeronáuticas"""
 
-# %% ../../nbs/03b_aero.ipynb 9
+    @property
+    def stem(self):
+        return "aero"
+
+    @property
+    def columns(self):
+        return ["Frequency", "Latitude", "Longitude", "Description"]
+
+    @cached_property
+    def extraction(self) -> pd.DataFrame:
+        func = lambda f: f()
+        radares = pd.read_csv(Path(__file__).parent / "arquivos" / "radares.csv")
+        sources = [get_icao, get_aisw, get_aisg, get_redemet]
+        dfs = parallel(func, sources, threadpool=True, progress=True)
+        dfs.append(radares)
+        return dfs
+
+    def _format(
+        self,
+        dfs: List,  # List with the individual API sources
+    ) -> pd.DataFrame:  # Processed DataFrame
+        if dfs:
+            icao = dfs.pop(0)
+            for df in dfs:
+                icao = merge_on_frequency(icao, df)
+
+            icao = icao.sort_values(by=icao.columns.to_list(), ignore_index=True)
+            icao = icao.drop_duplicates(
+                subset=["Frequency", "Latitude", "Longitude"],
+                keep="last",
+                ignore_index=True,
+            )
+            icao = icao.astype(
+                {
+                    "Frequency": "float64",
+                    "Latitude": "float32",
+                    "Longitude": "float32",
+                    "Description": "string",
+                }
+            )
+            icao.loc[np.isclose(icao.Longitude, -472.033447), "Longitude"] = -47.2033447
+            icao.loc[np.isclose(icao.Longitude, 69.934998), "Longitude"] = -69.934998
+            return icao
+
+# %% ../../nbs/03b_aero.ipynb 7
 if __name__ == "__main__":
     print(f'{50*"="}ICAO{50*"="}')
     icao = get_icao()
     display(icao)
     print(f'{50*"="}AISWEB{50*"="}')
-    aisw = get_aisw()
-    display(aisw)
+    # aisw = get_aisw()
+    # display(aisw)
     print(f'{50*"="}AISGEO{50*"="}')
     aisg = get_aisg()
     print(f'{50*"="}REDEMET{50*"="}')
     redemet = get_redemet()
+    display(redemet)

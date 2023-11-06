@@ -171,12 +171,12 @@ def merge_on_frequency(
     only_left = df.loc[left, left_cols].drop_duplicates(
         subset=left_cols, ignore_index=True
     )
-    only_left.columns = [c.removesuffix(x) for c in left_cols]
+    only_left.columns = [c.replace(x, "") for c in left_cols]
 
     only_right = df.loc[right, right_cols].drop_duplicates(
         subset=right_cols, ignore_index=True
     )
-    only_right.columns = [c.removesuffix(y) for c in right_cols]
+    only_right.columns = [c.replace(y, "") for c in right_cols]
 
     intersection_left = len(df_left) - len(only_left)
     intersection_right = len(df_right) - len(only_right)

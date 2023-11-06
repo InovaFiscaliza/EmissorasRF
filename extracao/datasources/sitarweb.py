@@ -86,7 +86,16 @@ class Radcom(Sitarweb):
             + df.loc[~a, "Situação"].astype("string")
         )
         df.drop(["Fase", "Situação"], axis=1, inplace=True)
-        df["Log"] = pd.NA
+        df["Log"] = ""
+        df["Frequência"] = pd.to_numeric(df["Frequência"], errors="coerce").astype(
+            "float"
+        )
+        discarded = df[df.Frequência.isna()].copy()
+        if not discarded.empty:
+            log = f"""[("Colunas", "Frequência"),  
+            ("Processamento", "Valor Nulo")]"""
+            self.append2discarded(self.register_log(discarded, log))
+        df.dropna(subset=["Frequência"])
         return df.loc[:, self.columns]
 
 # %% ../../nbs/01c_sitarweb.ipynb 8
@@ -115,6 +124,7 @@ class Stel(Sitarweb):
         )
         df.drop(["Largura_Emissão", "_"], axis=1, inplace=True)
         df.loc[:, "Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
+        df["Frequência"] = df["Frequência"].astype("float")
         df.loc[df.Unidade == "kHz", "Frequência"] = df.loc[
             df.Unidade == "kHz", "Frequência"
         ].apply(lambda x: Decimal(x) / Decimal(1000))
@@ -123,5 +133,35 @@ class Stel(Sitarweb):
         ].apply(lambda x: Decimal(x) * Decimal(1000))
         df.drop("Unidade", axis=1, inplace=True)
         df["Multiplicidade"] = 1
-        df["Log"] = pd.NA
+        df["Log"] = ""
         return df.loc[:, self.columns]
+
+# %% ../../nbs/01c_sitarweb.ipynb 9
+if __name__ == "__main__":
+    import time
+
+    start = time.perf_counter()
+
+    data = Stel()
+
+    data.update()
+
+    print("STEL")
+
+    display(data.df)
+
+    data.save()
+
+    print(150 * "=")
+
+    data = Radcom()
+
+    data.update()
+
+    print("STEL")
+
+    display(data.df)
+
+    data.save()
+
+    print(f"Elapsed time: {time.perf_counter() - start} seconds")

@@ -17,7 +17,7 @@ from .base import Base
 load_dotenv(find_dotenv())
 
 # %% ../../nbs/01d_mosaico.ipynb 6
-MONGO_URI = os.environ.get("MONGO_URI")
+MONGO_URI: str = os.environ.get("MONGO_URI")
 
 # %% ../../nbs/01d_mosaico.ipynb 7
 class Mosaico(Base, GetAttr):
@@ -46,9 +46,9 @@ class Mosaico(Base, GetAttr):
         database = client[self.database]
         collection = database[collection]
         result = collection.aggregate(pipeline)
-        df = pd.DataFrame(list(result))
-        df = df.drop(columns=["_id"])
-        return df
+        return pd.DataFrame(list(result))
+        # df = df.drop(columns=["_id"])
+        # return df
 
     @staticmethod
     def split_designacao(

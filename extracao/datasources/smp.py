@@ -8,6 +8,7 @@ import os
 from functools import cached_property
 
 import pandas as pd
+import numpy as np
 from dotenv import find_dotenv, load_dotenv
 
 from extracao.constants import (
@@ -185,16 +186,22 @@ class SMP(Mosaico):
         self,
         df: pd.DataFrame,  # DataFrame de Origem
     ) -> pd.DataFrame:  # DataFrame com os canais de Uplink adicionados
-        df["Offset"] = pd.to_numeric(df["Offset"], errors="coerce")
+        df["Offset"] = pd.to_numeric(df["Offset"], errors="coerce").astype("float")
+        df["Largura_Emissão(kHz)"] = pd.to_numeric(
+            df["Largura_Emissão(kHz)"], errors="coerce"
+        ).astype("float")
         valid = (
-            (df.Offset.notna()) & (df.Offset != 0) & (df["Largura_Emissão(kHz)"] != 0)
+            (df.Offset.notna())
+            & (~np.isclose(df.Offset, 0))
+            & (df["Largura_Emissão(kHz)"].notna())
+            & (~np.isclose(df["Largura_Emissão(kHz)"], 0))
         )
         df.loc[:, ["Frequência", "Offset"]] = df.loc[
             :, ["Frequência", "Offset"]
         ].astype("float")
         df.loc[valid, "Frequência_Recepção"] = (
             df.loc[valid, "Frequência"] - df.loc[valid, "Offset"]
-        ).astype("string")
+        )
         return df
 
     def substitute_coordenates(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -225,10 +232,10 @@ class SMP(Mosaico):
     ):  # DataFrame com os canais de downlink e uplink contenados e formatados
         df["Status"] = "L"
         df["Num_Serviço"] = "010"
-        down = df.copy().drop("Frequência_Recepção", axis=1)
+        down = df.drop("Frequência_Recepção", axis=1)
         down["Fonte"] = "MOSAICO"
         down["Classe"] = "FB"
-        up = df.copy().drop("Frequência", axis=1)
+        up = df.drop("Frequência", axis=1)
         up = up.rename(columns={"Frequência_Recepção": "Frequência"})
         up["Fonte"] = "CANALIZACAO-SMP"
         up["Classe"] = "ML"
@@ -254,7 +261,7 @@ if __name__ == "__main__":
 
     start = time.perf_counter()
 
-    data = SMP(limit=100000)
+    data = SMP()
 
     data.update()
 

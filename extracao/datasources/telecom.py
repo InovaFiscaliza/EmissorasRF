@@ -20,6 +20,8 @@ from extracao.constants import (
 
 from .mosaico import Mosaico
 
+from line_profiler import profile
+
 # %% ../../nbs/01f_telecom.ipynb 4
 load_dotenv(find_dotenv())
 
@@ -64,10 +66,11 @@ class Telecom(Mosaico):
         if self.limit > 0:
             pipeline.append({"$limit": self.limit})
         df = self._extract(self.collection, pipeline)
-        df["Log"] = "[]"
+        df["Log"] = ""
         # Substitui strings vazias e somente com espaços por nulo
         return df.replace(r"^\s*$", pd.NA, regex=True)
 
+    @profile
     def _format(
         self,
         df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
@@ -97,7 +100,7 @@ if __name__ == "__main__":
 
     start = time.perf_counter()
 
-    data = Telecom(limit=100000)
+    data = Telecom()
 
     data.update()
 
