@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     start = time.perf_counter()
 
-    data = Outorgadas(limit=50000)
+    data = Outorgadas()
 
     data.update()
 

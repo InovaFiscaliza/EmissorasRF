@@ -6,6 +6,7 @@ __all__ = ['MONGO_URI', 'Telecom']
 # %% ../../nbs/01f_telecom.ipynb 3
 import os
 from functools import cached_property
+import gc
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
@@ -83,15 +84,19 @@ class Telecom(Mosaico):
         discarded = df[duplicated].reset_index(drop=True)
         log = f"""[("Colunas", {AGG_LICENCIAMENTO}),  
         ("Processamento", "Registro agrupado e descartado do arquivo final")]"""
-        discarded = self.register_log(discarded, log)
+        self.append2discarded(self.register_log(discarded, log))
+        del discarded
+        gc.collect()
+        # .count() drop the NaN from the subset, not keeping them
+        # df.dropna(subset=AGG_LICENCIAMENTO, axis=1, inplace=True)
         df_sub["Multiplicidade"] = (
-            df.groupby(AGG_LICENCIAMENTO, sort=False).size().tolist()
+            df.groupby(AGG_LICENCIAMENTO, sort=False).count().tolist()
         )
         log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
         df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)
         df_sub["Status"] = "L"
         df_sub["Fonte"] = "MOSAICO"
-        self.append2discarded([self.discarded, discarded])
+
         return df_sub.loc[:, self.columns]
 
 # %% ../../nbs/01f_telecom.ipynb 8
