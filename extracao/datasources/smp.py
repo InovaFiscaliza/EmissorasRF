@@ -142,6 +142,19 @@ class SMP(Mosaico):
             "size", ascending=False, inplace=True, ignore_index=True
         )
         grouped_channels["Canalização"] = "Inválida"
+        grouped_channels.loc[:, "Offset"] = np.nan
+        grouped_channels.loc[:, ["Blocos_Downlink", "Faixas"]] = pd.NA
+        grouped_channels.loc[
+            :, ["Blocos_Downlink", "Faixas", "Canalização"]
+        ] = grouped_channels.loc[
+            :, ["Blocos_Downlink", "Faixas", "Canalização"]
+        ].astype(
+            "string"
+        )
+        grouped_channels.loc[:, "Offset"] = grouped_channels.loc[:, "Offset"].astype(
+            "float"
+        )
+
         for row in grouped_channels.itertuples():
             interval = channels[
                 (row.Início_Canal_Down < channels["Downlink_Final"])
@@ -159,14 +172,15 @@ class SMP(Mosaico):
 
             down = " | ".join(
                 interval[["Downlink_Inicial", "Downlink_Final"]].apply(
-                    lambda x: f"{x[0]}-{x[1]}", axis=1
+                    lambda x: f"{x.iloc[0]}-{x.iloc[1]}", axis=1
                 )
             )
             faixas = " | ".join(interval.Faixa.unique())
-            offset = " | ".join(interval.Offset.unique())
+            if len(offset := interval.Offset.unique()) != 1:
+                continue
             grouped_channels.loc[
                 row.Index, ["Blocos_Downlink", "Faixas", "Canalização", "Offset"]
-            ] = (down, faixas, faixa, offset)
+            ] = (down, faixas, faixa, float(offset[0]))
         grouped_channels = grouped_channels[
             [
                 "Início_Canal_Down",
@@ -237,6 +251,7 @@ class SMP(Mosaico):
         down["Classe"] = "FB"
         up = df.drop("Frequência", axis=1)
         up = up.rename(columns={"Frequência_Recepção": "Frequência"})
+        up.dropna(subset="Frequência", inplace=True)
         up["Fonte"] = "CANALIZACAO-SMP"
         up["Classe"] = "ML"
         return pd.concat([down, up], ignore_index=True)

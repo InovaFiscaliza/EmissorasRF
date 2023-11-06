@@ -71,7 +71,7 @@ class Base:
     @cached_property
     def discarded(self) -> pd.DataFrame:
         df = pd.DataFrame(columns=self.columns)
-        df["Log"] = "[]"
+        df["Log"] = ""
         return df
 
     def append2discarded(self, dfs: Union[pd.DataFrame, List]) -> None:

@@ -69,8 +69,8 @@ class Outorgadas(Base):
     def extraction(self) -> L:
         sources = [
             # Aero(),
-            Stel(self.sql_params),
-            Radcom(self.sql_params),
+            #            Stel(self.sql_params),
+            #            Radcom(self.sql_params),
             SRD(self.mongo_uri),
             Telecom(self.mongo_uri, self.limit),
             SMP(self.mongo_uri, self.limit),

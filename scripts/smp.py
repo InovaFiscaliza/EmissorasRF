@@ -7,13 +7,13 @@ if __name__ == "__main__":
 
     start = time.perf_counter()
 
-    data = SMP()
+    data = SMP(limit=50000)
 
     data.update()
 
     print("DATA")
 
-    pprint(data.df)
+    pprint(data.df.loc[data.df.Frequência.notna()].drop('Log', axis=1))
 
     print(150 * "=")
 

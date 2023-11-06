@@ -103,7 +103,8 @@ class SRD(Mosaico):
         df = df.dropna(subset="Frequência", ignore_index=True)
         df.loc[df["Num_Serviço"] == "205", "Frequência"] = df.loc[
             df["Num_Serviço"] == "205", "Frequência"
-        ].apply(lambda x: Decimal(x) / Decimal(1000))
+        ].apply(lambda x: float(Decimal(x) / Decimal(1000)))
+        df["Frequência"] = df["Frequência"].astype("float")
         df["Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
         df["Fonte"] = "MOSAICO"
         df["Num_Serviço"] = df["Num_Serviço"].fillna("")
