@@ -31,10 +31,10 @@ class SQLServer(DBConnector):
 
     def connect(self):
         # This method returns a pyodbc connection object according to the platform
-        connection_string = f"""DRIVER={self.sql_params.get('driver')};
-                                SERVER={self.sql_params.get('server')};
-                                DATABASE={self.sql_params.get('database')};
-                                timeout={self.sql_params.get('timeout')}"""
+        connection_string = f"""Driver={self.sql_params.get('driver')};
+                                Server={self.sql_params.get('server')};
+                                Database={self.sql_params.get('database')};
+                                Encrypt=no;"""
         if self.sql_params.get("trusted_conn"):
             connection_string += f"""MultipleActiveResultSets={self.sql_params.get('mult_results')};
                                   Trusted_Connection=yes;"""
@@ -43,7 +43,9 @@ class SQLServer(DBConnector):
                                   PWD={self.sql_params.get('password')};
                                   Trusted_Connection=no;"""
         try:
-            return pyodbc.connect(connection_string)
+            return pyodbc.connect(
+                connection_string, timeout=self.sql_params.get("timeout", 10000)
+            )
         except pyodbc.OperationalError as e:
             raise ConnectionError(
                 "Não foi possível abrir uma conexão com o SQL Server. Esta conexão somente funciona da rede cabeada!"

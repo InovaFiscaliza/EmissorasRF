@@ -66,9 +66,8 @@ class SMP(Mosaico):
         if self.limit > 0:
             pipeline.append({"$limit": self.limit})
         df = self._extract(self.collection, pipeline)
-        df["Log"] = "[]"
-        # Substitui strings vazias e somente com espaços por nulo
-        return df.replace(r"^\s*$", pd.NA, regex=True)
+        df["Log"] = ""
+        return df
 
     def exclude_duplicated(
         self,

@@ -4,6 +4,7 @@
 __all__ = ['SQLSERVER_PARAMS', 'Sitarweb', 'Radcom', 'Stel']
 
 # %% ../../nbs/01c_sitarweb.ipynb 3
+import os
 from decimal import Decimal, getcontext
 from functools import cached_property
 
@@ -21,7 +22,7 @@ from .connectors import SQLServer
 
 # %% ../../nbs/01c_sitarweb.ipynb 4
 getcontext().prec = 5
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01c_sitarweb.ipynb 6
 SQLSERVER_PARAMS = dict(
@@ -30,8 +31,9 @@ SQLSERVER_PARAMS = dict(
     database="SITARWEB",
     trusted_conn=True,
     mult_results=True,
-    username=None,
-    password=None,
+    encrypt=False,
+    username=os.environ["USERNAME"],
+    password=os.environ["PASSWORD"],
     timeout=1000,
 )
 
@@ -127,10 +129,10 @@ class Stel(Sitarweb):
         df["Frequência"] = df["Frequência"].astype("float")
         df.loc[df.Unidade == "kHz", "Frequência"] = df.loc[
             df.Unidade == "kHz", "Frequência"
-        ].apply(lambda x: Decimal(x) / Decimal(1000))
+        ].apply(lambda x: float(Decimal(x) / Decimal(1000)))
         df.loc[df.Unidade == "GHz", "Frequência"] = df.loc[
             df.Unidade == "GHz", "Frequência"
-        ].apply(lambda x: Decimal(x) * Decimal(1000))
+        ].apply(lambda x: float(Decimal(x) * Decimal(1000)))
         df.drop("Unidade", axis=1, inplace=True)
         df["Multiplicidade"] = 1
         df["Log"] = ""

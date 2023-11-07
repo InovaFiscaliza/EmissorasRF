@@ -9,6 +9,7 @@ import os
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import GetAttr
+from tqdm.auto import tqdm
 
 from .connectors import MongoDB
 from .base import Base
@@ -45,10 +46,9 @@ class Mosaico(Base, GetAttr):
         client = self.connect()
         database = client[self.database]
         collection = database[collection]
-        result = collection.aggregate(pipeline)
-        return pd.DataFrame(list(result))
-        # df = df.drop(columns=["_id"])
-        # return df
+        df = pd.DataFrame(list(collection.aggregate(pipeline)), dtype="string[pyarrow]")
+        # Substitui strings vazias e somente com espaços por nulo
+        return df.replace(r"^\s*$", pd.NA, regex=True)
 
     @staticmethod
     def split_designacao(

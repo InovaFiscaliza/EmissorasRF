@@ -21,8 +21,6 @@ from extracao.constants import (
 
 from .mosaico import Mosaico
 
-from line_profiler import profile
-
 # %% ../../nbs/01f_telecom.ipynb 4
 load_dotenv(find_dotenv())
 
@@ -68,10 +66,8 @@ class Telecom(Mosaico):
             pipeline.append({"$limit": self.limit})
         df = self._extract(self.collection, pipeline)
         df["Log"] = ""
-        # Substitui strings vazias e somente com espaços por nulo
-        return df.replace(r"^\s*$", pd.NA, regex=True)
+        return df
 
-    @profile
     def _format(
         self,
         df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
@@ -88,9 +84,9 @@ class Telecom(Mosaico):
         del discarded
         gc.collect()
         # .count() drop the NaN from the subset, not keeping them
-        # df.dropna(subset=AGG_LICENCIAMENTO, axis=1, inplace=True)
+        df.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
         df_sub["Multiplicidade"] = (
-            df.groupby(AGG_LICENCIAMENTO, sort=False).count().tolist()
+            df.groupby(AGG_LICENCIAMENTO, sort=False).size().values
         )
         log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
         df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)

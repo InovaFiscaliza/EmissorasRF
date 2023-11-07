@@ -66,17 +66,14 @@ class SRD(Mosaico):
             # project the fields that you want to keep
             {"$project": self.projection},
         ]
-        df = self._extract(self.collection, pipeline).astype(
-            "string"
-        )  # Necessária a conversão nesse ponto
+        df = self._extract(self.collection, pipeline)
         df.loc[df["estacao"] == "[]", "estacao"] = "{}"
         cols = ["srd_planobasico", "estacao", "habilitacao", "Status"]
         for col in cols:
             df = df.join(pd.json_normalize(df[col].apply(eval)))
-        df = df.drop(columns=cols)
+        df = df.drop(columns=cols, inplace=True)
         df["Log"] = ""
-        # Substitui strings vazias e somente com espaços por nulo
-        return df.replace(r"^\s*$", pd.NA, regex=True)
+        return df
 
     def _format(
         self,

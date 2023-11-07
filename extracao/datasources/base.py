@@ -71,19 +71,24 @@ class Base:
     @cached_property
     def discarded(self) -> pd.DataFrame:
         df = pd.DataFrame(columns=self.columns)
-        df["Log"] = ""
+        # df["Log"] = ""
         return df
 
     def append2discarded(self, dfs: Union[pd.DataFrame, List]) -> None:
         """Receives one of more dataframes and append to the discarded dataframe"""
-        self.discarded = pd.concat([self.discarded] + listify(dfs), ignore_index=True)
+        dfs = listify(dfs)
+        if not self.discarded.empty:
+            dfs.append(self.discarded)
+        self.discarded = pd.concat(dfs, ignore_index=True)
 
     @staticmethod
     def register_log(df: pd.DataFrame, log: str, row_filter: pd.Series = None):
         """Register a log in the dataframe"""
         if row_filter is None:
             row_filter = pd.Series(True, index=df.index)
-        df.loc[row_filter, "Log"] = df.loc[row_filter, "Log"] + "|" + log
+        df.loc[row_filter, "Log"] = (
+            df.loc[row_filter, "Log"].astype("string") + "|" + log
+        )
         return df
 
     @property

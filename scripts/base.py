@@ -1,5 +1,25 @@
+import os
+import warnings
+from dotenv import find_dotenv, load_dotenv
+
 from extracao.anatel import Outorgadas
 from pprint import pprint
+
+load_dotenv(find_dotenv(), override=True)
+warnings.simplefilter('ignore')
+
+SQLSERVER_PARAMS = dict(
+    driver="{ODBC Driver 17 for SQL Server}",
+    server="ANATELBDRO05",
+    database="SITARWEB",
+    trusted_conn=False,
+    mult_results=True,
+    encrypt=False,
+    username=os.environ['USERNAME'],
+    password=os.environ['PASSWORD'],
+    timeout=1000,
+)
+
 
 
 if __name__ == "__main__":
@@ -7,7 +27,7 @@ if __name__ == "__main__":
 
     start = time.perf_counter()
 
-    data = Outorgadas()
+    data = Outorgadas(sql_params=SQLSERVER_PARAMS, limit=1000000)
 
     data.update()
 
@@ -15,11 +35,13 @@ if __name__ == "__main__":
 
     pprint(data.df)
 
-    # print(150 * "=")
+    print("DISCARDED!")
 
-    # print("Coordenadas!")
+    print(data.discarded[["Frequência", "Entidade", "Log"]])
 
-    # display(data.Coords_Valida_IBGE.value_counts())
+    print(150 * "=")
+
+    print(data.df.Multiplicidade.sum())
 
     data.save()
 
