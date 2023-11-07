@@ -71,7 +71,7 @@ class SRD(Mosaico):
         cols = ["srd_planobasico", "estacao", "habilitacao", "Status"]
         for col in cols:
             df = df.join(pd.json_normalize(df[col].apply(eval)))
-        df = df.drop(columns=cols, inplace=True)
+        df.drop(columns=cols, inplace=True)
         df["Log"] = ""
         return df
 

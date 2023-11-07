@@ -5,19 +5,19 @@ if __name__ == "__main__":
 
     start = time.perf_counter()
 
-    data = Telecom(limit=1000000)
+    data = Telecom(limit=2000000)
 
     data.update()
 
     print("DATA")
 
-    # print(data.extraction.info())
+    print(data.df)
 
-    print(150 * "=")
+    # print(150 * "=")
 
-    print("DISCARDED!")
+    # print("DISCARDED!")
 
-    print(data.discarded[["Frequência", "Entidade", "Log"]])
+    # print(data.discarded[["Frequência", "Entidade", "Log"]])
 
     print(150 * "=")
 

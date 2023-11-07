@@ -32,8 +32,8 @@ SQLSERVER_PARAMS = dict(
     trusted_conn=True,
     mult_results=True,
     encrypt=False,
-    username=os.environ["USERNAME"],
-    password=os.environ["PASSWORD"],
+    username=os.environ.get("USERNAME"),
+    password=os.environ.get("PASSWORD"),
     timeout=1000,
 )
 
@@ -97,7 +97,7 @@ class Radcom(Sitarweb):
             log = f"""[("Colunas", "Frequência"),  
             ("Processamento", "Valor Nulo")]"""
             self.append2discarded(self.register_log(discarded, log))
-        df.dropna(subset=["Frequência"])
+        df.dropna(subset=["Frequência"], inplace=True)
         return df.loc[:, self.columns]
 
 # %% ../../nbs/01c_sitarweb.ipynb 8
