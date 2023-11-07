@@ -77,16 +77,16 @@ class Telecom(Mosaico):
         df = self.split_designacao(df)
         duplicated = df.duplicated(subset=AGG_LICENCIAMENTO, keep="first")
         df_sub = df[~duplicated].reset_index(drop=True)
-        discarded = df[duplicated].reset_index(drop=True)
-        log = f"""[("Colunas", {AGG_LICENCIAMENTO}),  
-        ("Processamento", "Registro agrupado e descartado do arquivo final")]"""
-        self.append2discarded(self.register_log(discarded, log))
-        del discarded
-        gc.collect()
+        # discarded = df[duplicated].reset_index(drop=True)
+        # log = f"""[("Colunas", {AGG_LICENCIAMENTO}),
+        # ("Processamento", "Registro agrupado e descartado do arquivo final")]"""
+        # self.append2discarded(self.register_log(discarded, log))
+        # del discarded
+        # gc.collect()
         # .count() drop the NaN from the subset, not keeping them
-        df.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
+        # df.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
         df_sub["Multiplicidade"] = (
-            df.groupby(AGG_LICENCIAMENTO, sort=False).size().values
+            df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False).size().values
         )
         log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
         df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)

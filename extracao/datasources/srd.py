@@ -83,21 +83,21 @@ class SRD(Mosaico):
 
         df = df.rename(columns=self.cols_mapping)
         status = df.Status.str.contains("-C1$|-C2$|-C3$|-C4$|-C7|-C98$", na=False)
-        discarded = df[~status].copy()
-        log = """[("Registro", "Status"), 
-                ("Processamento", "Registro com Status não considerado para fins de monitoração")]"""
-        discarded = self.register_log(discarded, log)
+        # discarded = df[~status].copy()
+        # log = """[("Registro", "Status"),
+        #         ("Processamento", "Registro com Status não considerado para fins de monitoração")]"""
+        # discarded = self.register_log(discarded, log)
         df = df[
             df.Status.str.contains("-C1$|-C2$|-C3$|-C4$|-C7|-C98$", na=False)
         ].reset_index(drop=True)
         df["Frequência"] = (
             df.Frequência.astype("string").str.replace(",", ".").astype("float")
         )
-        discarded_with_na = df[df.Frequência.isna()].copy()
-        log = """[("Registro", "Frequência"), 
-                ("Processamento", "Registro com valor nulo presente")]"""
-        discarded_with_na = self.register_log(discarded_with_na, log)
-        df = df.dropna(subset="Frequência", ignore_index=True)
+        # discarded_with_na = df[df.Frequência.isna()].copy()
+        # log = """[("Registro", "Frequência"),
+        #         ("Processamento", "Registro com valor nulo presente")]"""
+        # discarded_with_na = self.register_log(discarded_with_na, log)
+        df.dropna(subset="Frequência", ignore_index=True, inplace=True)  # type: ignore
         df.loc[df["Num_Serviço"] == "205", "Frequência"] = df.loc[
             df["Num_Serviço"] == "205", "Frequência"
         ].apply(lambda x: float(Decimal(x) / Decimal(1000)))
@@ -110,7 +110,7 @@ class SRD(Mosaico):
         )
         df = self.split_designacao(df)
         df["Multiplicidade"] = 1
-        self.append2discarded([self.discarded, discarded, discarded_with_na])
+        # self.append2discarded([self.discarded, discarded, discarded_with_na])
         return df.loc[:, self.columns]
 
 # %% ../../nbs/01e_srd.ipynb 8

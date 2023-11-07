@@ -86,17 +86,19 @@ class SMP(Mosaico):
         df["Tecnologia"] = df["Tecnologia"].fillna("NI")
         duplicated = df.duplicated(subset=AGG_SMP, keep="first")
         df_sub = df[~duplicated].copy().reset_index(drop=True)
-        discarded = df[duplicated].copy().reset_index(drop=True)
-        log = f"""[("Colunas", {AGG_SMP}),  
-                ("Processamento", "Registro agrupado e descartado do arquivo final")]"""
-        self.append2discarded(self.register_log(discarded, log))
-        for col in AGG_SMP:
-            discarded_with_na = df_sub[df_sub[col].isna()]
-            log = f"""[("Colunas", {col}),  
-                    ("Processamento", "Registro com valor nulo presente")]"""
-            self.append2discarded(self.register_log(discarded_with_na, log))
-        df_sub = df_sub.dropna(subset=AGG_SMP)
-        df_sub["Multiplicidade"] = df.groupby(AGG_SMP, sort=False).size().tolist()
+        # discarded = df[duplicated].copy().reset_index(drop=True)
+        # log = f"""[("Colunas", {AGG_SMP}),
+        #         ("Processamento", "Registro agrupado e descartado do arquivo final")]"""
+        # self.append2discarded(self.register_log(discarded, log))
+        # for col in AGG_SMP:
+        #     discarded_with_na = df_sub[df_sub[col].isna()]
+        #     log = f"""[("Colunas", {col}),
+        #             ("Processamento", "Registro com valor nulo presente")]"""
+        #     self.append2discarded(self.register_log(discarded_with_na, log))
+        # df_sub = df_sub.dropna(subset=AGG_SMP)
+        df_sub["Multiplicidade"] = (
+            df.groupby(AGG_SMP, dropna=True, sort=False).size().tolist()
+        )
         df_sub["Status"] = "L"
         df_sub["Fonte"] = "MOSAICO"
         log = f'[("Colunas", {AGG_SMP}), ("Processamento", "Agrupamento")]'
