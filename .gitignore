@@ -147,7 +147,11 @@ checklink/cookies.txt
 *.parquet.gzip
 *.xlsx
 *.html
-
+*.shp
+*.shx
+*.cpg
+*.dbf
+*.prj
 
 # VSCODE Files
 .virtual_documents

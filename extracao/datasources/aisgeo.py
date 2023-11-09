@@ -13,6 +13,7 @@ from urllib.request import urlopen
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
+from ..constants import VOR_ILS_DME
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -75,9 +76,7 @@ def _process_frequency(
     cols: List[str],  # Subconjunto de Colunas relevantes do DataFrame
 ) -> pd.DataFrame:  # Dataframe com os dados de frequência devidamente processados
     if cols == COLS_DME:
-        df_channels = pd.read_csv(
-            f'{Path(__file__).parent}/{os.environ["PATH_CHANNELS"]}', dtype="string"
-        )
+        df_channels = pd.read_csv(VOR_ILS_DME, dtype="string", dtype_backend="pyarrow")
         df = df.dropna(subset=[cols[0]])
         df["Channel"] = df[cols[0]].astype("int").astype("string") + df[cols[1]]
         df["Frequency"] = -1.0

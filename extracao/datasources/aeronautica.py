@@ -71,7 +71,9 @@ class Aero(Base):
             )
             icao.loc[np.isclose(icao.Longitude, -472.033447), "Longitude"] = -47.2033447
             icao.loc[np.isclose(icao.Longitude, 69.934998), "Longitude"] = -69.934998
-            return icao
+            return icao.rename(
+                columns={"Frequency": "Frequência", "Description": "Entidade"}
+            )
 
 # %% ../../nbs/03b_aero.ipynb 7
 if __name__ == "__main__":

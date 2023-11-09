@@ -95,9 +95,9 @@ class SMP(Mosaico):
         #     log = f"""[("Colunas", {col}),
         #             ("Processamento", "Registro com valor nulo presente")]"""
         #     self.append2discarded(self.register_log(discarded_with_na, log))
-        # df_sub = df_sub.dropna(subset=AGG_SMP)
+        df_sub.dropna(subset=AGG_SMP, inplace=True)
         df_sub["Multiplicidade"] = (
-            df.groupby(AGG_SMP, dropna=True, sort=False).size().tolist()
+            df.groupby(AGG_SMP, dropna=True, sort=False).size().values
         )
         df_sub["Status"] = "L"
         df_sub["Fonte"] = "MOSAICO"

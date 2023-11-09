@@ -10,7 +10,7 @@ from typing import Iterable
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
-from ..constants import FILES
+from ..constants import PATH_NAV, PATH_COM, VOR_ILS_DME
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -66,10 +66,7 @@ def map_channels(
     origem: str,  # Descrição da emissão a ser substituída
 ) -> pd.DataFrame:
     """Mapeia os canais contidos em `df` e adiciona os registros ILS/DME caso houver"""
-    chs = pd.read_csv(
-        FILES / "VHF_NAV.csv",
-        dtype="string[pyarrow]",
-    )
+    chs = pd.read_csv(VOR_ILS_DME, dtype="string[pyarrow]", dtype_backend="pyarrow")
     for row in df[df.Description.str.contains("ILS|DME")].itertuples():
         if not (ch := chs[(chs.VOR_ILSloc == row.Frequency)]).empty:
             for i, c in enumerate(ch.values[0][2:]):
@@ -93,10 +90,8 @@ def get_icao() -> (
     pd.DataFrame
 ):  # DataFrame com frequências, coordenadas e descrição das estações
     """Lê, concatena e pós-processa os arquivos do ICAO"""
-    path_nav: str = f'{Path(__file__).resolve().parent}/{os.environ["PATH_NAV"]}'
-    path_com: str = f'{Path(__file__).resolve().parent}/{os.environ["PATH_COM"]}'
     df = pd.concat(
-        _read_df(p, c) for p, c in zip([path_nav, path_com], [COLS_NAV, COLS_COM])
+        _read_df(p, c) for p, c in zip([PATH_NAV, PATH_COM], [COLS_NAV, COLS_COM])
     )
     df = df.astype("string")
     return map_channels(df, "ICAO").drop_duplicates(UNIQUE_COLS, ignore_index=True)

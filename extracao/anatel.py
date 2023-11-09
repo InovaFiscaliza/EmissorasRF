@@ -68,12 +68,12 @@ class Outorgadas(Base):
     @cached_property
     def extraction(self) -> L:
         sources = [
-            Aero(),
-            Stel(self.sql_params),
-            Radcom(self.sql_params),
-            SRD(self.mongo_uri),
             Telecom(self.mongo_uri, self.limit),
             SMP(self.mongo_uri, self.limit),
+            SRD(self.mongo_uri),
+            # Stel(self.sql_params),
+            # Radcom(self.sql_params),
+            Aero(),
         ]
 
         return parallel(
@@ -84,18 +84,21 @@ class Outorgadas(Base):
     def verify_shapefile_folder():
         # Convert the file paths to Path objects
         shapefile_path = Path(IBGE_POLIGONO)
-        zip_file_path = shapefile_path.parent.with_suffix(".zip")
+        parent_folder = shapefile_path.parent
+        parent_folder.mkdir(exist_ok=True, parents=True)
+        zip_file_path = parent_folder.with_suffix(".zip")
 
         # Check if all required files exist
         required_files = L(".cpg", ".dbf", ".prj", ".shx").map(
             shapefile_path.with_suffix
         )
         if not all(required_files.map(Path.is_file)):
-            shutil.rmtree(str(shapefile_path.parent), ignore_errors=True)
+            # shutil.rmtree(str(shapefile_path.parent), ignore_errors=True)
+            parent_folder.ls().map(Path.unlink)
             # Download and unzip the zipped folder
             urllib.request.urlretrieve(MALHA_IBGE, zip_file_path)
             with ZipFile(zip_file_path, "r") as zip_ref:
-                zip_ref.extractall(shapefile_path.parent.parent)
+                zip_ref.extractall(parent_folder)
             zip_file_path.unlink()
 
     def fill_nan_coordinates(
@@ -139,6 +142,7 @@ class Outorgadas(Base):
         self, df: pd.DataFrame, check_municipio: bool = True
     ):
         regions = gpd.read_file(IBGE_POLIGONO)
+
         # Convert pandas dataframe to geopandas df with geometry point given coordinates
         gdf_points = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.Longitude, df.Latitude)
@@ -203,8 +207,8 @@ class Outorgadas(Base):
         self,
         dfs: List,  # List with the individual API sources
     ) -> pd.DataFrame:  # Processed DataFrame
-        aero = self.validate_coordinates(dfs.pop(0), False)
-        anatel = self.validate_coordinates(pd.concat(dfs, ignore_index=True))
+        # aero = self.validate_coordinates(dfs.pop(), False)
+        return self.validate_coordinates(pd.concat(dfs, ignore_index=True))
         return pd.concat([aero, anatel], ignore_index=True).sort_values(
             ["Frequência", "Latitude", "Longitude"], ignore_index=True
         )

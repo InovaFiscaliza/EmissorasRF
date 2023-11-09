@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = Outorgadas(sql_params=SQLSERVER_PARAMS, limit=10000)
+	data = Outorgadas(sql_params=SQLSERVER_PARAMS, limit=2000000)
 
 	data.update()
 
@@ -34,13 +34,21 @@ if __name__ == '__main__':
 
 	pprint(data.df)
 
-	print('DISCARDED!')
+	pprint(150 * '=')
 
-	print(data.discarded[['Frequência', 'Entidade', 'Log']])
+	# print('DISCARDED!')
+
+	# print(data.discarded[['Frequência', 'Entidade', 'Log']])
+
+	pprint(data.df.info())
 
 	print(150 * '=')
 
-	print(data.df.Multiplicidade.sum())
+	pprint(data.df.Log.value_counts())
+
+	print(150 * '=')
+
+	pprint(data.df.Multiplicidade.sum())
 
 	data.save()
 
