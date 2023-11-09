@@ -99,11 +99,13 @@ def _process_frequency(
 # %% ../../nbs/02c_aisgeo.ipynb 8
 def _filter_df(df, cols):  # sourcery skip: use-fstring-for-concatenation
     df.fillna("", inplace=True)
-    df["Description"] = (
-        "[AISG] " + df[cols[4]] + " - " + df[cols[5]] + " " + df[cols[6]]
-    ).astype("string")
+    df["Description"] = (df[cols[4]] + " - " + df[cols[5]] + " " + df[cols[6]]).astype(
+        "string"
+    )
 
-    df = df[["Frequency", cols[2], cols[3], "Description"]]
+    df["Fonte"] = "AISGEO"
+
+    df = df[["Frequency", cols[2], cols[3], "Description", "Fonte"]]
 
     return df.rename(
         columns={

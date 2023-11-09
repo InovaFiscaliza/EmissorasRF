@@ -57,8 +57,9 @@ def _read_df(
     df["Longitude"] = df.apply(
         lambda x: convert_longitude(x["Longitude"], x["WE"]), axis=1
     )
-    df["Description"] = "[ICAO] " + df.Facility + ", " + df.Location
-    return df[["Frequency", "Latitude", "Longitude", "Description"]]
+    df["Description"] = df.Facility + ", " + df.Location
+    df["Fonte"] = "ICAO"
+    return df[["Frequency", "Latitude", "Longitude", "Description", "Fonte"]]
 
 # %% ../../nbs/02a_icao.ipynb 11
 def map_channels(
@@ -79,10 +80,14 @@ def map_channels(
                         freq_type = "Ground-based DME"
                     else:
                         raise ValueError("No additional frequency to map on channel")
-                    description = (
-                        f"{row.Description.replace(origem , 'DOC')} ({freq_type})"
-                    )
-                    df.loc[len(df)] = [c, row.Latitude, row.Longitude, description]
+                    description = row.Description + f"({freq_type})"
+                    df.loc[len(df)] = [
+                        c,
+                        row.Latitude,
+                        row.Longitude,
+                        description,
+                        "CANALIZACAO-VOR",
+                    ]
     return df
 
 # %% ../../nbs/02a_icao.ipynb 12

@@ -35,7 +35,7 @@ class Aero(Base):
 
     @property
     def columns(self):
-        return ["Frequency", "Latitude", "Longitude", "Description"]
+        return ["Frequency", "Latitude", "Longitude", "Description", "Fonte"]
 
     @cached_property
     def extraction(self) -> pd.DataFrame:
@@ -76,15 +76,4 @@ class Aero(Base):
             )
 
 # %% ../../nbs/03b_aero.ipynb 7
-if __name__ == "__main__":
-    print(f'{50*"="}ICAO{50*"="}')
-    icao = get_icao()
-    display(icao)
-    print(f'{50*"="}AISWEB{50*"="}')
-    # aisw = get_aisw()
-    # display(aisw)
-    print(f'{50*"="}AISGEO{50*"="}')
-    aisg = get_aisg()
-    print(f'{50*"="}REDEMET{50*"="}')
-    redemet = get_redemet()
-    display(redemet)
+# | export

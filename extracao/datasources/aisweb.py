@@ -24,7 +24,7 @@ load_dotenv(find_dotenv(), override=True)
 SIGLA_AERO = ["MIL", "PRIV/PUB", "PUB", "PUB/MIL", "PUB/REST"]
 URL = "http://aisweb.decea.gov.br/api/?apiKey={}&apiPass={}&area=rotaer&rowend=10000"
 TYPE = ["COM", "NAV"]
-COLUMNS = ["Frequency", "Latitude", "Longitude", "Description"]
+COLUMNS = ["Frequency", "Latitude", "Longitude", "Description", "Fonte"]
 UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
 
 # %% ../../nbs/02b_aisweb.ipynb 6
@@ -151,13 +151,13 @@ class AisWeb:
         df.loc[df["Longitude"] == "", "Longitude"] = airport_data.lng
         if not df.empty:
             df["Description"] = (
-                r"[AISW] "
-                + str(airport_data["AeroCode"])
+                str(airport_data["AeroCode"])
                 + "-"
                 + df["Description"]
                 + ", "
                 + str(airport_data["name"])
             )
+            df["Fonte"] = "AISWEB"
         return df
 
     def _process_data(

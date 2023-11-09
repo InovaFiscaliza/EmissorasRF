@@ -40,9 +40,10 @@ def get_redemet() -> (
         data_json["data"]["radar"][0],
     )
     df["Frequency"] = "2800"
-    df["Description"] = "[RMET] " + df.nome.astype("string")
+    df["Description"] = df.nome.astype("string")
     df = df[["Frequency", "lat_center", "lon_center", "Description"]].astype(
         "string", copy=False
     )
+    df["Fonte"] = "REDEMET"
     df = df.rename(columns={"lat_center": "Latitude", "lon_center": "Longitude"})
     return df.drop_duplicates(UNIQUE_COLS, ignore_index=True)
