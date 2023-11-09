@@ -10,6 +10,7 @@ from typing import Iterable
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
+from ..constants import FILES
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -66,8 +67,8 @@ def map_channels(
 ) -> pd.DataFrame:
     """Mapeia os canais contidos em `df` e adiciona os registros ILS/DME caso houver"""
     chs = pd.read_csv(
-        f'{Path(__file__).resolve().parent}/{os.environ["PATH_CHANNELS"]}',
-        dtype="string",
+        FILES / "VHF_NAV.csv",
+        dtype="string[pyarrow]",
     )
     for row in df[df.Description.str.contains("ILS|DME")].itertuples():
         if not (ch := chs[(chs.VOR_ILSloc == row.Frequency)]).empty:
