@@ -71,8 +71,8 @@ class Outorgadas(Base):
             Telecom(self.mongo_uri, self.limit),
             SMP(self.mongo_uri, self.limit),
             SRD(self.mongo_uri),
-            # Stel(self.sql_params),
-            # Radcom(self.sql_params),
+            Stel(self.sql_params),
+            Radcom(self.sql_params),
             Aero(),
         ]
 
@@ -152,26 +152,20 @@ class Outorgadas(Base):
         gdf_points.crs = regions.crs
 
         # Spatial join points to the regions
-        points_with_regions = gpd.sjoin(
-            gdf_points, regions, how="inner", predicate="within"
-        )
+        gdf = gpd.sjoin(gdf_points, regions, how="inner", predicate="within")
 
         if check_municipio:
             # Check correctness of Coordinates
-            check_coords = (
-                points_with_regions.Código_Município != points_with_regions.CD_MUN
-            )
+            check_coords = gdf.Código_Município != gdf.CD_MUN
 
             log = """[("Colunas", ["Código_Município", "Município", "UF"]),
 					("Processamento", "Informações substituídas  pela localização correta das coordenadas.")		      
 				"""
-            self.register_log(points_with_regions, log, check_coords)
+            self.register_log(gdf, log, check_coords)
 
-            points_with_regions.drop(
-                ["Código_Município", "Município", "UF"], axis=1, inplace=True
-            )
+            gdf.drop(["Código_Município", "Município", "UF"], axis=1, inplace=True)
 
-        points_with_regions.rename(
+        gdf.rename(
             columns={
                 "CD_MUN": "Código_Município",
                 "NM_MUN": "Município",
@@ -180,7 +174,7 @@ class Outorgadas(Base):
             inplace=True,
         )
 
-        return points_with_regions
+        return gdf
 
     def validate_coordinates(
         self, df: pd.DataFrame, check_municipio: bool = True
@@ -207,8 +201,9 @@ class Outorgadas(Base):
         self,
         dfs: List,  # List with the individual API sources
     ) -> pd.DataFrame:  # Processed DataFrame
-        # aero = self.validate_coordinates(dfs.pop(), False)
-        return self.validate_coordinates(pd.concat(dfs, ignore_index=True))
-        return pd.concat([aero, anatel], ignore_index=True).sort_values(
+        aero = self.validate_coordinates(dfs.pop(), False)
+        anatel = self.validate_coordinates(pd.concat(dfs, ignore_index=True))
+        df = pd.concat([aero, anatel], ignore_index=True).sort_values(
             ["Frequência", "Latitude", "Longitude"], ignore_index=True
         )
+        return df.loc[:, self.columns]

@@ -82,7 +82,6 @@ COLS_LICENCIAMENTO = [
 
 AGG_LICENCIAMENTO = [
     "Frequência",
-    "Entidade",
     "Fistel",
     "Código_Município",
     "Longitude",
@@ -389,6 +388,9 @@ MONGO_TELECOM = {
         {"NumServico": {"$nin": ["010", "045", "171", "450", "750", "", None]}},
         {"FreqTxMHz": {"$nin": [None, "", 0], "$type": 1.0}},
         {"CodMunicipio": {"$nin": [None, ""]}},
+        {"NumFistel": {"$nin": [None, ""]}},
+        {"CodTipoClasseEstacao": {"$nin": [None, ""]}},
+        {"DesignacaoEmissao": {"$nin": [None, ""]}},
     ]
 }
 
@@ -411,6 +413,10 @@ MONGO_SMP = {
         {"NumServico": "010"},
         {"FreqTxMHz": {"$nin": [None, "", 0], "$type": 1.0}},
         {"CodMunicipio": {"$nin": [None, ""]}},
+        {"NumFistel": {"$nin": [None, ""]}},
+        {"CodTipoClasseEstacao": {"$nin": [None, ""]}},
+        {"DesignacaoEmissao": {"$nin": [None, ""]}},
+        {"Tecnologia": {"$nin": [None, ""]}},
     ]
 }
 
