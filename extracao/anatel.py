@@ -4,6 +4,10 @@
 __all__ = ['Outorgadas']
 
 # %% ../nbs/03a_anatel.ipynb 3
+import os
+import shutil
+import urllib.request
+from zipfile import ZipFile
 from typing import List, Tuple
 from functools import cached_property
 import pandas as pd
@@ -12,6 +16,7 @@ from fastcore.xtras import Path
 from fastcore.parallel import parallel, partialler
 from fastcore.foundation import L
 from pyarrow import ArrowInvalid
+import geopandas as gpd
 
 
 from .datasources.sitarweb import Stel, Radcom, SQLSERVER_PARAMS
@@ -22,7 +27,7 @@ from .datasources.smp import SMP
 from .datasources.base import Base
 from .datasources.aeronautica import Aero
 from .datasources.connectors import SQLServer
-from .constants import COLUNAS, SQL_VALIDA_COORD
+from .constants import COLUNAS, IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
 
 # %% ../nbs/03a_anatel.ipynb 4
 load_dotenv(find_dotenv())
@@ -84,125 +89,118 @@ class Outorgadas(Base):
             Outorgadas._update_instance, sources, n_workers=len(sources), progress=True
         )
 
-    def update_cached_df(
-        self,
-        df: pd.DataFrame,
-    ) -> pd.DataFrame:
-        """Mescla ambos dataframes eliminando os excluídos (existentes somente em df_cache)"""
-
-        if self.df_cache.empty:
-            return df
-
-        # Merge dataframes based on all columns except "Coords_Valida_IBGE"
-        merged = pd.merge(
-            self.df_cache,
-            df,
-            on=list(df.columns),
-            how="outer",
-            indicator=True,
-            copy=False,
-            validate="one_to_one",
-        )
-
-        # Exclude rows only present in df_cache
-        df_cache = merged[merged["_merge"] != "left_only"]
-
-        # inplace=True not working
-        df_cache.loc[:, ["Latitude", "Longitude"]] = df_cache.loc[
-            :, ["Latitude", "Longitude"]
-        ].fillna(-1)
-
-        # Drop the _merge column
-        df_cache = df_cache.drop(columns="_merge")
-
-        # Write the new dataframe to cache
-        self.df_cache = df_cache
-
-        return self.df_cache
-
     @staticmethod
-    def intersect_coordinates_on_poligon(
-        row: pd.Series,  # DataFrame row
-        sql_params: dict,  # Connection parameters to pass to SQLServer
-    ) -> Tuple:  # Tuple com dados do município
-        """Valida os dados de coordenadas e município em `row` no polígono dos municípios em banco corporativo do IBGE"""
+    def verify_shapefile_folder():
+        # Convert the file paths to Path objects
+        shapefile_path = Path(IBGE_POLIGONO)
+        zip_file_path = shapefile_path.parent.with_suffix(".zip")
 
-        mun, cod, lat, long = (
-            row.Município,
-            row.Código_Município,
-            row.Latitude,
-            row.Longitude,
+        # Check if all required files exist
+        required_files = L(".cpg", ".dbf", ".prj", ".shx").map(
+            shapefile_path.with_suffix
         )
-        is_valid = -1
-        conn = SQLServer(sql_params).connect()
-        crsr = conn.cursor()
-        sql = SQL_VALIDA_COORD.format(long, lat, cod)
-        crsr.execute(sql)
-        result = crsr.fetchone()
-        if result is not None:
-            mun = result.NO_MUNICIPIO
-            lat = result.NU_LATITUDE
-            long = result.NU_LONGITUDE
-            is_valid = result.COORD_VALIDA
-        conn.close()
-        return mun, lat, long, is_valid
+        if not all(required_files.map(Path.is_file)):
+            shutil.rmtree(str(shapefile_path.parent), ignore_errors=True)
+            # Download and unzip the zipped folder
+            urllib.request.urlretrieve(MALHA_IBGE, zip_file_path)
+            with ZipFile(zip_file_path, "r") as zip_ref:
+                zip_ref.extractall(shapefile_path.parent.parent)
+            zip_file_path.unlink()
 
-    def validate_coordinates(
+    def fill_nan_coordinates(
         self,
         df: pd.DataFrame,  # DataFrame com os dados da Anatel
     ) -> pd.DataFrame:  # DataFrame com as coordenadas validadas na base do IBGE
         """Valida as coordenadas consultado a Base Corporativa do IBGE, excluindo o que já está no cache na versão anterior"""
 
-        df_cache = self.update_cached_df(df)
-
         municipios = pd.read_csv(
-            Path(__file__).parent / "datasources" / "arquivos" / "municipios.csv",
-            usecols=["codigo_ibge"],
-            dtype="string",
+            IBGE_MUNICIPIOS,
+            usecols=["Código_Município", "Latitude", "Longitude"],
+            dtype="string[pyarrow]",
+            dtype_backend="pyarrow",
         )
 
-        # valida os códigos de municípios
-        valid_cod_mun = df_cache.Código_Município.isin(municipios.codigo_ibge)
+        df = pd.merge(df, municipios, on="Código_Município", how="left", copy=False)
 
-        df_cache.loc[~valid_cod_mun, "Coords_Valida_IBGE"] = -1
+        null_coords = df.Latitude_x.isna() | df.Longitude_x.isna()
 
-        subset = df_cache.Coords_Valida_IBGE.isna()
+        df.loc[null_coords, ["Latitude_x", "Longitude_x"]] = df.loc[
+            null_coords, ["Latitude_y", "Longitude_y"]
+        ]
 
-        if linhas := list(
-            df_cache.loc[
-                subset, ["Município", "Código_Município", "Latitude", "Longitude"]
-            ].itertuples()
-        ):
-            ibge = [
-                "Município_IBGE",
-                "Latitude_IBGE",
-                "Longitude_IBGE",
-                "Coords_Valida_IBGE",
-            ]
+        log = """[("Colunas", ["Latitude", "Longitude"]),
+		           ("Processamento", "Coordenadas Ausentes. Inserido coordenadas do Município")]"""
+        df = self.register_log(df, log, null_coords)
 
-            func = partialler(
-                Outorgadas.intersect_coordinates_on_poligon, sql_params=self.sql_params
+        df.rename(
+            columns={
+                "Latitude_x": "Latitude",
+                "Longitude_x": "Longitude",
+                "Latitude_y": "Latitude_ibge",
+                "Longitude_y": "Longitude_ibge",
+            },
+            inplace=True,
+        )
+
+        return df
+
+    def intersect_coordinates_on_poligon(
+        self, df: pd.DataFrame, check_municipio: bool = True
+    ):
+        regions = gpd.read_file(IBGE_POLIGONO)
+        # Convert pandas dataframe to geopandas df with geometry point given coordinates
+        gdf_points = gpd.GeoDataFrame(
+            df, geometry=gpd.points_from_xy(df.Longitude, df.Latitude)
+        )
+
+        # Set the same coordinate reference system (CRS) as the regions shapefile
+        gdf_points.crs = regions.crs
+
+        # Spatial join points to the regions
+        points_with_regions = gpd.sjoin(
+            gdf_points, regions, how="inner", predicate="within"
+        )
+
+        if check_municipio:
+            # Check correctness of Coordinates
+            check_coords = (
+                points_with_regions.Código_Município != points_with_regions.CD_MUN
             )
 
-            df_cache.loc[subset, ibge] = parallel(
-                func, linhas, threadpool=True, n_workers=self.n_workers, progress=True
+            log = """[("Colunas", ["Código_Município", "Município", "UF"]),
+					("Processamento", "Informações substituídas  pela localização correta das coordenadas.")		      
+				"""
+            self.register_log(points_with_regions, log, check_coords)
+
+            points_with_regions.drop(
+                ["Código_Município", "Município", "UF"], axis=1, inplace=True
             )
 
-        df_cache.loc[df_cache.Coords_Valida_IBGE == -1, "Coords_Valida_IBGE"] = pd.NA
+        points_with_regions.rename(
+            columns={
+                "CD_MUN": "Código_Município",
+                "NM_MUN": "Município",
+                "SIGLA_UF": "UF",
+            },
+            inplace=True,
+        )
 
-        return df_cache
+        return points_with_regions
+
+    def validate_coordinates(
+        self, df: pd.DataFrame, check_municipio: bool = True
+    ) -> pd.DataFrame:
+        self.verify_shapefile_folder()
+        if check_municipio:
+            df = self.fill_nan_coordinates(df)
+        return self.intersect_coordinates_on_poligon(df, check_municipio)
 
     def _format(
         self,
         dfs: List,  # List with the individual API sources
     ) -> pd.DataFrame:  # Processed DataFrame
-        df = pd.concat(dfs, ignore_index=True).sort_values(
+        aero = self.validate_coordinates(dfs.pop(0), False)
+        anatel = self.validate_coordinates(pd.concat(dfs, ignore_index=True))
+        return pd.concat(aero, anatel, ignore_index=True).sort_values(
             ["Frequência", "Latitude", "Longitude"], ignore_index=True
         )
-
-        # inplace not working!
-        df.loc[:, ["Latitude", "Longitude"]] = (
-            df.loc[:, ["Latitude", "Longitude"]].astype("string").fillna("0")
-        )
-
-        return df

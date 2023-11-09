@@ -86,9 +86,11 @@ class Base:
         """Register a log in the dataframe"""
         if row_filter is None:
             row_filter = pd.Series(True, index=df.index)
-        df.loc[row_filter, "Log"] = (
-            df.loc[row_filter, "Log"].astype("string") + "|" + log
-        )
+
+        c1 = row_filter & df.Log == ""
+        c2 = row_filter & df.Log != ""
+        df.loc[c1, "Log"] = log
+        df.loc[c2, "Log"] = df.loc[c2, "Log"].astype("string") + "|" + log
         return df
 
     @property

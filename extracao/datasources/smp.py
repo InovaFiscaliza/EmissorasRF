@@ -16,7 +16,7 @@ from extracao.constants import (
     CHANNELS,
     COLS_LICENCIAMENTO,
     DICT_LICENCIAMENTO,
-    IBGE,
+    IBGE_MUNICIPIOS,
     MONGO_SMP,
     PROJECTION_LICENCIAMENTO,
 )
@@ -221,9 +221,9 @@ class SMP(Mosaico):
 
     def substitute_coordenates(self, df: pd.DataFrame) -> pd.DataFrame:
         ibge = pd.read_csv(
-            IBGE,
+            IBGE_MUNICIPIOS,
             dtype="string",
-            usecols=["codigo_ibge", "nome", "latitude", "longitude"],
+            usecols=["Código_Município", "Município", "Latitude", "Longitude"],
         )
         ibge.columns = ["Código_Município", "Município", "Latitude", "Longitude"]
         coords = pd.merge(
