@@ -118,13 +118,13 @@ class SMP(Mosaico):
         self,
         df: pd.DataFrame,  # DataFrame de Origem
     ) -> pd.DataFrame:  # DataFrame com os canais inválidos excluídos
-        df_sub = df[df.Canalização == "Downlink"].copy().reset_index(drop=True)
-        for flag in ["Uplink", "Inválida"]:
-            discarded = df[df.Canalização == flag].copy()
-            if not discarded.empty:
-                log = f"""[("Colunas", ("Frequência", "Largura_Emissão(kHz)")),  
-                         ("Processamento", "Canalização {flag}")]"""
-                self.append2discarded(self.register_log(discarded, log))
+        df_sub = df[df.Canalização == "Downlink"].reset_index(drop=True)
+        # for flag in ["Uplink", "Inválida"]:
+        #     discarded = df[df.Canalização == flag]
+        #     if not discarded.empty:
+        #         log = f"""[("Colunas", ("Frequência", "Largura_Emissão(kHz)")),
+        #                  ("Processamento", "Canalização {flag}")]"""
+        #         self.append2discarded(self.register_log(discarded, log))
         return df_sub
 
     def validate_channels(

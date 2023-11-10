@@ -35,12 +35,13 @@ class Aero(Base):
 
     @property
     def columns(self):
-        return ["Frequency", "Latitude", "Longitude", "Description", "Fonte"]
+        return ["Frequência", "Latitude", "Longitude", "Entidade", "Fonte"]
 
     @cached_property
     def extraction(self) -> pd.DataFrame:
         func = lambda f: f()
         radares = pd.read_csv(Path(__file__).parent / "arquivos" / "radares.csv")
+        radares["Fonte"] = "RADARES"
         sources = [get_icao, get_aisw, get_aisg, get_redemet]
         dfs = parallel(func, sources, threadpool=True, progress=True)
         dfs.append(radares)
@@ -77,4 +78,5 @@ class Aero(Base):
 
 # %% ../../nbs/03b_aero.ipynb 7
 # | export
+# | export# | export
 # | export

@@ -75,6 +75,7 @@ class Outorgadas(Base):
             Radcom(self.sql_params),
             Aero(),
         ]
+        return [Outorgadas._update_instance(s) for s in sources]
 
         return parallel(
             Outorgadas._update_instance, sources, n_workers=len(sources), progress=True
@@ -159,8 +160,8 @@ class Outorgadas(Base):
             check_coords = gdf.Código_Município != gdf.CD_MUN
 
             log = """[("Colunas", ["Código_Município", "Município", "UF"]),
-					("Processamento", "Informações substituídas  pela localização correta das coordenadas.")		      
-				"""
+				  	 ("Processamento", "Informações substituídas  pela localização correta das coordenadas.")		      
+				  """
             self.register_log(gdf, log, check_coords)
 
             gdf.drop(["Código_Município", "Município", "UF"], axis=1, inplace=True)

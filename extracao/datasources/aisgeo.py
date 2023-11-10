@@ -50,7 +50,7 @@ COLS_DME = (
     "Channel",
 )
 
-UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
+UNIQUE_COLS = ["Frequência", "Latitude", "Longitude"]
 
 # %% ../../nbs/02c_aisgeo.ipynb 6
 def convert_frequency(
@@ -79,17 +79,17 @@ def _process_frequency(
         df_channels = pd.read_csv(VOR_ILS_DME, dtype="string", dtype_backend="pyarrow")
         df = df.dropna(subset=[cols[0]])
         df["Channel"] = df[cols[0]].astype("int").astype("string") + df[cols[1]]
-        df["Frequency"] = -1.0
+        df["Frequência"] = -1.0
 
         for row in df.itertuples(index=True):
             row_match = df_channels.loc[
                 (df_channels.Channel == row.Channel), "DMEground"
             ]
             if not row_match.empty:
-                df.loc[row.Index, "Frequency"] = float(row_match.item())
+                df.loc[row.Index, "Frequência"] = float(row_match.item())
 
     else:
-        df["Frequency"] = (
+        df["Frequência"] = (
             df[[cols[0], cols[1]]]
             .apply(lambda x: convert_frequency(x[0], x[1]), axis=1)
             .astype("float")
@@ -99,14 +99,11 @@ def _process_frequency(
 # %% ../../nbs/02c_aisgeo.ipynb 8
 def _filter_df(df, cols):  # sourcery skip: use-fstring-for-concatenation
     df.fillna("", inplace=True)
-    df["Description"] = (df[cols[4]] + " - " + df[cols[5]] + " " + df[cols[6]]).astype(
+    df["Entidade"] = (df[cols[4]] + " - " + df[cols[5]] + " " + df[cols[6]]).astype(
         "string"
     )
-
     df["Fonte"] = "AISGEO"
-
-    df = df[["Frequency", cols[2], cols[3], "Description", "Fonte"]]
-
+    df = df[["Frequência", cols[2], cols[3], "Entidade", "Fonte"]]
     return df.rename(
         columns={
             cols[2]: "Latitude",

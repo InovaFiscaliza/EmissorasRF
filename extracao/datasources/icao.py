@@ -17,7 +17,7 @@ load_dotenv(find_dotenv(), override=True)
 # %% ../../nbs/02a_icao.ipynb 6
 COLS_NAV = ["Frequency", "Latitude", "Longitude", "Facility", "Location", "NS", "WE"]
 COLS_COM = ["Frequency", "CoordLat", "CoordLong", "DOC", "Location", "NS", "WE"]
-UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
+UNIQUE_COLS = ["Frequência", "Latitude", "Longitude"]
 
 # %% ../../nbs/02a_icao.ipynb 7
 def convert_latitude(
@@ -59,7 +59,7 @@ def _read_df(
     )
     df["Description"] = df.Facility + ", " + df.Location
     df["Fonte"] = "ICAO"
-    return df[["Frequency", "Latitude", "Longitude", "Description", "Fonte"]]
+    return df[["Frequência", "Latitude", "Longitude", "Description", "Fonte"]]
 
 # %% ../../nbs/02a_icao.ipynb 11
 def map_channels(
@@ -68,8 +68,8 @@ def map_channels(
 ) -> pd.DataFrame:
     """Mapeia os canais contidos em `df` e adiciona os registros ILS/DME caso houver"""
     chs = pd.read_csv(VOR_ILS_DME, dtype="string[pyarrow]", dtype_backend="pyarrow")
-    for row in df[df.Description.str.contains("ILS|DME")].itertuples():
-        if not (ch := chs[(chs.VOR_ILSloc == row.Frequency)]).empty:
+    for row in df[df.Entidade.str.contains("ILS|DME")].itertuples():
+        if not (ch := chs[(chs.VOR_ILSloc == row.Frequência)]).empty:
             for i, c in enumerate(ch.values[0][2:]):
                 if pd.notna(c):
                     if i == 0:
@@ -80,13 +80,13 @@ def map_channels(
                         freq_type = "Ground-based DME"
                     else:
                         raise ValueError("No additional frequency to map on channel")
-                    description = row.Description + f"({freq_type})"
+                    entidade = row.Entidade + f"({freq_type})"
                     df.loc[len(df)] = [
                         c,
                         row.Latitude,
                         row.Longitude,
-                        description,
-                        "CANALIZACAO-VOR",
+                        entidade,
+                        f"{origem} | CANALIZACAO-VOR",
                     ]
     return df
 

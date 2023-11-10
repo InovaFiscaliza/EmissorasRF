@@ -96,29 +96,4 @@ class Telecom(Mosaico):
         return df_sub.loc[:, self.columns]
 
 # %% ../../nbs/01f_telecom.ipynb 8
-if __name__ == "__main__":
-    import time
-
-    start = time.perf_counter()
-
-    data = Telecom()
-
-    data.update()
-
-    print("DATA")
-
-    display(data.df)
-
-    print(150 * "=")
-
-    print("DISCARDED!")
-
-    display(data.discarded[["Frequência", "Entidade", "Log"]])
-
-    print(150 * "=")
-
-    print(data.df.Multiplicidade.sum())
-
-    data.save()
-
-    print(f"Elapsed time: {time.perf_counter() - start} seconds")
+# | export

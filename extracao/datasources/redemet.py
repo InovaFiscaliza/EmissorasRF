@@ -16,7 +16,7 @@ load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/02d_redemet.ipynb 5
 URL = "https://api-redemet.decea.mil.br/produtos/radar/maxcappi?api_key={}&{}"
-UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
+UNIQUE_COLS = ["Frequência", "Latitude", "Longitude"]
 
 # %% ../../nbs/02d_redemet.ipynb 6
 def get_redemet() -> (
@@ -39,9 +39,9 @@ def get_redemet() -> (
     df = pd.json_normalize(
         data_json["data"]["radar"][0],
     )
-    df["Frequency"] = "2800"
-    df["Description"] = df.nome.astype("string")
-    df = df[["Frequency", "lat_center", "lon_center", "Description"]].astype(
+    df["Frequência"] = "2800"
+    df["Entidade"] = df.nome.astype("string")
+    df = df[["Frequência", "lat_center", "lon_center", "Entidade"]].astype(
         "string", copy=False
     )
     df["Fonte"] = "REDEMET"

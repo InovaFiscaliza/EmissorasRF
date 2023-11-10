@@ -137,9 +137,12 @@ def get_km_distance(row):
 def merge_on_frequency(
     df_left: pd.DataFrame,  # DataFrame da esquerda a ser mesclado
     df_right: pd.DataFrame,  # DataFrame da direira a ser mesclado
-    on: str = "Frequency",  # Coluna usada como chave de mesclagem
-    coords: Tuple[str] = ("Latitude", "Longitude"),
-    description: str = "Description",
+    on: str = "Frequência",  # Coluna usada como chave de mesclagem
+    coords: Tuple[str] = (
+        "Latitude",
+        "Longitude",
+    ),  # Coordenadas usadas para avaliar a distância
+    cols2merge: str = ("Entidade", "Fonte"),  # Colunas a serem mescladas
     suffixes: Tuple[str] = ("_x", "_y"),  # Sufixo para as colunas que foram criadas
 ) -> pd.DataFrame:  # DataFrame resultante da mesclagem
     """Mescla os dataframes baseados na frequência
@@ -289,11 +292,10 @@ def merge_on_frequency(
         .empty
     ), "Verifique os passos de mesclagem, validação falhou!"
 
-    df_final_merge[f"{description}{x}"] = (
-        df_final_merge[f"{description}{x}"]
-        + " | "
-        + df_final_merge[f"{description}{y}"]
-    )
+    for col in cols2merge:
+        df_final_merge[f"{col}{x}"] = (
+            df_final_merge[f"{col}{x}"] + " | " + df_final_merge[f"{col}{y}"]
+        )
 
     df_final_merge = df_final_merge[left_cols]
     df_final_merge.columns = only_left.columns

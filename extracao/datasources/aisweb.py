@@ -24,8 +24,8 @@ load_dotenv(find_dotenv(), override=True)
 SIGLA_AERO = ["MIL", "PRIV/PUB", "PUB", "PUB/MIL", "PUB/REST"]
 URL = "http://aisweb.decea.gov.br/api/?apiKey={}&apiPass={}&area=rotaer&rowend=10000"
 TYPE = ["COM", "NAV"]
-COLUMNS = ["Frequency", "Latitude", "Longitude", "Description", "Fonte"]
-UNIQUE_COLS = ["Frequency", "Latitude", "Longitude"]
+COLUMNS = ["Frequência", "Latitude", "Longitude", "Entidade", "Fonte"]
+UNIQUE_COLS = ["Frequência", "Latitude", "Longitude"]
 
 # %% ../../nbs/02b_aisweb.ipynb 6
 def convert_latitude(
@@ -103,7 +103,7 @@ class AisWeb:
     def _parse_type(self, df):
         df = df[df["@type"].isin(TYPE)].reset_index(drop=True)
         if "type" in df.columns:
-            df["Description"] = [
+            df["Entidade"] = [
                 ", ".join(cols) for cols in zip(df["@type"], df["type"])
             ]  # Only way to prevent bizarre errors
             df = df.drop(["@type", "type"], axis=1)
@@ -113,14 +113,14 @@ class AisWeb:
         if "freqs.freq" in df:
             df = df.explode("freqs.freq")
             idx = df["freqs.freq"].notnull()
-            df.loc[idx, "Frequency"] = df.loc[idx, "freqs.freq"].apply(
+            df.loc[idx, "Frequência"] = df.loc[idx, "freqs.freq"].apply(
                 lambda x: x.get("#text", pd.NA)
             )
             df = df.drop("freqs.freq", axis=1)
 
         if (column := "freqs.freq.#text") in df:
             idx = df[column].notnull()
-            df.loc[idx, "Frequency"] = df.loc[idx, column]
+            df.loc[idx, "Frequência"] = df.loc[idx, column]
             df = df.drop("freqs.freq.#text", axis=1)
 
         return df.reset_index(drop=True)
@@ -128,15 +128,15 @@ class AisWeb:
     def _check_ils_dme(self, df):
         if (columns := {"freq", "lat", "lng", "thr", "ident"}).issubset(df.columns):
             idx = df.freq.notna()
-            df.loc[idx, "Frequency"] = df.loc[idx, "freq"]
+            df.loc[idx, "Frequência"] = df.loc[idx, "freq"]
             df.loc[idx, "Latitude"] = df.loc[idx, "lat"].apply(
                 lambda x: convert_latitude(x)
             )
             df.loc[idx, "Longitude"] = df.loc[idx, "lng"].apply(
                 lambda x: convert_longitude(x)
             )
-            df.loc[idx, "Description"] = (
-                df.loc[idx, "Description"]
+            df.loc[idx, "Entidade"] = (
+                df.loc[idx, "Entidade"]
                 + " "
                 + df.loc[idx, "thr"]
                 + " "
@@ -150,14 +150,13 @@ class AisWeb:
         df.loc[df["Latitude"] == "", "Latitude"] = airport_data.lat
         df.loc[df["Longitude"] == "", "Longitude"] = airport_data.lng
         if not df.empty:
-            df["Description"] = (
+            df["Entidade"] = (
                 str(airport_data["AeroCode"])
                 + "-"
-                + df["Description"]
+                + df["Entidade"]
                 + ", "
                 + str(airport_data["name"])
             )
-            df["Fonte"] = "AISWEB"
         return df
 
     def _process_data(
@@ -176,10 +175,12 @@ class AisWeb:
         df = self._check_ils_dme(df)
         df = self._process_coords(df, airport_data)
         df = df[COLUMNS]
-        df["Frequency"] = df.Frequency.apply(lambda x: "".join(re.findall("\d|\.", x)))
-        df = df[~df["Frequency"].isin({"", "0"})].reset_index(drop=True)
-        df["Frequency"] = df.Frequency.str.extract(r"(^\d+\.?\d*)")
-        df["Frequency"] = df.Frequency.astype("float")
+        df["Frequência"] = df.Frequência.apply(
+            lambda x: "".join(re.findall("\d|\.", x))
+        )
+        df = df[~df["Frequência"].isin({"", "0"})].reset_index(drop=True)
+        df["Frequência"] = df.Frequência.str.extract(r"(^\d+\.?\d*)")
+        df["Frequência"] = df.Frequência.astype("float")
         return df
 
     def request_stations(
@@ -208,7 +209,10 @@ class AisWeb:
             progress=True,
         )
         df = pd.concat(records).astype("string")
-        return map_channels(df, "AISW").drop_duplicates(UNIQUE_COLS, ignore_index=True)
+        df["Fonte"] = "AISWEB"
+        return map_channels(df, "AISWEB").drop_duplicates(
+            UNIQUE_COLS, ignore_index=True
+        )
 
 # %% ../../nbs/02b_aisweb.ipynb 8
 def get_aisw() -> pd.DataFrame:  # DataFrame com todos os dados do GEOAISWEB
