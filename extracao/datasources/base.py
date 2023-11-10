@@ -28,7 +28,7 @@ class Base:
         """Lê o dataframe formado por self.folder / self.stem.parquet.gzip"""
         file = Path(f"{self.folder}/{stem}.parquet.gzip")
         try:
-            df = pd.read_parquet(file)
+            df = pd.read_parquet(file, dtype_backend="pyarrow")
         except (ArrowInvalid, FileNotFoundError) as e:
             raise ValueError(f"Error when reading {file}") from e
         return df
@@ -37,7 +37,9 @@ class Base:
         self, df: pd.DataFrame, folder: Union[str, Path], stem: str
     ) -> pd.DataFrame:
         """Format, Save and return a dataframe"""
-        df = df.astype("string").drop_duplicates(keep="first", ignore_index=True)
+        df = df.astype("string[pyarrow]").drop_duplicates(
+            keep="first", ignore_index=True
+        )
         try:
             file = Path(f"{folder}/{stem}.parquet.gzip")
             df.to_parquet(file, compression="gzip", index=False)
@@ -45,12 +47,11 @@ class Base:
             raise e(f"Não foi possível salvar o arquivo parquet {file}") from e
         return df
 
-    @cached_property
     def df(self) -> pd.DataFrame:
         try:
             df = self._read(self.stem)
         except (ArrowInvalid, FileNotFoundError):
-            df = self._format(self.extraction)
+            df = self._format(self.extraction())
         return df
 
     @staticmethod
@@ -87,10 +88,11 @@ class Base:
         if row_filter is None:
             row_filter = pd.Series(True, index=df.index)
 
-        c1 = row_filter & df.Log == ""
-        c2 = row_filter & df.Log != ""
-        df.loc[c1, "Log"] = log
-        df.loc[c2, "Log"] = df.loc[c2, "Log"].astype("string") + "|" + log
+        df["Log"] = df["Log"].astype("string")
+
+        df.loc[row_filter, "Log"] = df.loc[row_filter, "Log"].apply(
+            lambda x: log if not x else x + "|" + log
+        )
         return df
 
     @property
@@ -120,7 +122,7 @@ class Base:
         raise NotImplementedError("Subclasses devem implementar o método _format")
 
     def update(self):
-        self.df = self._format(self.extraction)
+        self.df = self._format(self.extraction())
 
     def save(self, folder: Union[str, Path] = None):
         if folder is None:

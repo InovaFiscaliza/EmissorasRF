@@ -91,7 +91,7 @@ def _process_frequency(
     else:
         df["Frequência"] = (
             df[[cols[0], cols[1]]]
-            .apply(lambda x: convert_frequency(x[0], x[1]), axis=1)
+            .apply(lambda x: convert_frequency(x.iloc[0], x.iloc[1]), axis=1)
             .astype("float")
         )
     return df

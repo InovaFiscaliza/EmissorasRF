@@ -2,27 +2,23 @@ from extracao.datasources.smp import SMP
 from pprint import pprint
 
 
-if __name__ == "__main__":
-    import time
+if __name__ == '__main__':
+	import time
 
-    start = time.perf_counter()
+	start = time.perf_counter()
 
-    data = SMP(limit=50000)
+	data = SMP(limit=100000)
 
-    data.update()
+	data.update()
 
-    print("DATA")
+	print(data.df)
 
-    pprint(data.df.loc[data.df.Frequência.notna()].drop('Log', axis=1))
+	print(150 * '=')
 
-    print(150 * "=")
+	# print("DISCARDED!")
 
-    print("Descartadas!")
+	# print(data.discarded[["Frequência", "Entidade", "Log"]])
 
-    print(data.discarded)
+	print(150 * '=')
 
-    # display(data.Coords_Valida_IBGE.value_counts())
-
-    data.save()
-
-    print(f"Elapsed time: {time.perf_counter() - start} seconds")
+	print(f'Elapsed time: {time.perf_counter() - start} seconds')

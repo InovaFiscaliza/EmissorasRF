@@ -131,19 +131,14 @@ def _format_matlab(
 
 # %% ../nbs/00b_format.ipynb 10
 def get_km_distance(row):
-    return geodesic((row[0], row[1]), (row[2], row[3])).km
+    return geodesic((row.iloc[0], row.iloc[1]), (row.iloc[2], row.iloc[3])).km
 
 
 def merge_on_frequency(
     df_left: pd.DataFrame,  # DataFrame da esquerda a ser mesclado
     df_right: pd.DataFrame,  # DataFrame da direira a ser mesclado
     on: str = "Frequência",  # Coluna usada como chave de mesclagem
-    coords: Tuple[str] = (
-        "Latitude",
-        "Longitude",
-    ),  # Coordenadas usadas para avaliar a distância
     cols2merge: str = ("Entidade", "Fonte"),  # Colunas a serem mescladas
-    suffixes: Tuple[str] = ("_x", "_y"),  # Sufixo para as colunas que foram criadas
 ) -> pd.DataFrame:  # DataFrame resultante da mesclagem
     """Mescla os dataframes baseados na frequência
     É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
@@ -155,13 +150,12 @@ def merge_on_frequency(
         df_right,
         on=on,
         how="outer",
-        suffixes=suffixes,
         indicator=True,
         copy=False,
     )
 
-    x, y = suffixes
-    lat, long = coords
+    x, y = "_x", "_y"
+    lat, long = "Latitude", "Longitude"
 
     left = df._merge == "left_only"
     right = df._merge == "right_only"

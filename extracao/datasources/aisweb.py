@@ -204,8 +204,8 @@ class AisWeb:
             self.request_stations,
             self.airports.AeroCode,
             threadpool=True,
-            n_workers=8,
-            pause=0.1,
+            n_workers=20,
+            # pause=0.1,
             progress=True,
         )
         df = pd.concat(records).astype("string")

@@ -46,7 +46,10 @@ class Mosaico(Base, GetAttr):
         client = self.connect()
         database = client[self.database]
         collection = database[collection]
-        df = pd.DataFrame(list(collection.aggregate(pipeline)), dtype="string[pyarrow]")
+        dtype = "string[pyarrow]" if self.stem == "srd" else "category"
+        df = pd.DataFrame(
+            [c for c in collection.aggregate(pipeline)], copy=False, dtype=dtype
+        )
         # Substitui strings vazias e somente com espaços por nulo
         return df.replace(r"^\s*$", pd.NA, regex=True)
 

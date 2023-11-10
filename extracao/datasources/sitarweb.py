@@ -50,7 +50,6 @@ class Sitarweb(Base, GetAttr):
     def query(self):
         raise NotImplementedError("Subclasses devem implementar a propriedade 'query'")
 
-    @cached_property
     def extraction(self):
         return pd.read_sql_query(self.query, self.connect(), dtype="string")
 

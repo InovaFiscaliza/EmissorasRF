@@ -58,7 +58,6 @@ class SRD(Mosaico):
     def cols_mapping(self):
         return DICT_SRD
 
-    @cached_property
     def extraction(self) -> pd.DataFrame:
         pipeline = [
             # match the documents that satisfy your query
@@ -67,11 +66,11 @@ class SRD(Mosaico):
             {"$project": self.projection},
         ]
         df = self._extract(self.collection, pipeline)
-        df.loc[df["estacao"] == "[]", "estacao"] = "{}"
-        cols = ["srd_planobasico", "estacao", "habilitacao", "Status"]
-        for col in cols:
-            df = df.join(pd.json_normalize(df[col].apply(eval)))
-        df.drop(columns=cols, inplace=True)
+        # df.loc[df["estacao"] == "[]", "estacao"] = "{}"
+        # cols = ["srd_planobasico", "estacao", "habilitacao", "Status"]
+        # for col in cols:
+        #     df = df.join(pd.json_normalize(df[col].apply(eval)))
+        # df.drop(columns=cols, inplace=True)
         df["Log"] = ""
         return df
 
@@ -87,9 +86,7 @@ class SRD(Mosaico):
         # log = """[("Registro", "Status"),
         #         ("Processamento", "Registro com Status não considerado para fins de monitoração")]"""
         # discarded = self.register_log(discarded, log)
-        df = df[
-            df.Status.str.contains("-C1$|-C2$|-C3$|-C4$|-C7|-C98$", na=False)
-        ].reset_index(drop=True)
+        df = df[status].reset_index(drop=True)
         df["Frequência"] = (
             df.Frequência.astype("string").str.replace(",", ".").astype("float")
         )

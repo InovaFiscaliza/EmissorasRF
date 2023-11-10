@@ -60,7 +60,6 @@ class SMP(Mosaico):
     def cols_mapping(self):
         return DICT_LICENCIAMENTO
 
-    @cached_property
     def extraction(self) -> pd.DataFrame:
         pipeline = [{"$match": self.query}, {"$project": self.projection}]
         if self.limit > 0:
@@ -81,9 +80,9 @@ class SMP(Mosaico):
         df["Largura_Emissão(kHz)"] = pd.to_numeric(
             df["Largura_Emissão(kHz)"], errors="coerce"
         )
-        df["Largura_Emissão(kHz)"] = df["Largura_Emissão(kHz)"].fillna(0)
-        df["Classe_Emissão"] = df["Classe_Emissão"].fillna("NI")
-        df["Tecnologia"] = df["Tecnologia"].fillna("NI")
+        # df['Largura_Emissão(kHz)'] = df['Largura_Emissão(kHz)'].fillna(0)
+        # df['Classe_Emissão'] = df['Classe_Emissão'].fillna('NI')
+        # df['Tecnologia'] = df['Tecnologia'].fillna('NI')
         duplicated = df.duplicated(subset=AGG_SMP, keep="first")
         df_sub = df[~duplicated].copy().reset_index(drop=True)
         # discarded = df[duplicated].copy().reset_index(drop=True)
@@ -97,7 +96,7 @@ class SMP(Mosaico):
         #     self.append2discarded(self.register_log(discarded_with_na, log))
         df_sub.dropna(subset=AGG_SMP, inplace=True)
         df_sub["Multiplicidade"] = (
-            df.groupby(AGG_SMP, dropna=True, sort=False).size().values
+            df.groupby(AGG_SMP, dropna=True, sort=False, observed=True).size().values
         )
         df_sub["Status"] = "L"
         df_sub["Fonte"] = "MOSAICO"
@@ -211,9 +210,7 @@ class SMP(Mosaico):
             & (df["Largura_Emissão(kHz)"].notna())
             & (~np.isclose(df["Largura_Emissão(kHz)"], 0))
         )
-        df.loc[:, ["Frequência", "Offset"]] = df.loc[
-            :, ["Frequência", "Offset"]
-        ].astype("float")
+        df[["Frequência", "Offset"]] = df[["Frequência", "Offset"]].astype("float")
         df.loc[valid, "Frequência_Recepção"] = (
             df.loc[valid, "Frequência"] - df.loc[valid, "Offset"]
         )
@@ -232,9 +229,10 @@ class SMP(Mosaico):
             on="Código_Município",
             how="left",
         )
+        df[["Latitude", "Longitude"]] = df[["Latitude", "Longitude"]].astype("float")
         df.loc[df.Multiplicidade > 1, ["Latitude", "Longitude"]] = coords[
             ["Latitude", "Longitude"]
-        ].values
+        ].values.astype("float")
         log = """[("Colunas", ("Latitude", "Longitude")), 
         ("Processamento", "Substituição por Coordenadas do Município (Agrupamento)")]"""
         return self.register_log(df, log, df.Multiplicidade > 1)

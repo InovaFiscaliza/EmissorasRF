@@ -230,17 +230,17 @@ PROJECTION_SRD = {
     "frequency": 1.0,
     "licensee": 1.0,
     "NumFistel": 1.0,
-    "estacao.NumEstacao": 1.0,
+    "NumEstacao": "$estacao.NumEstacao",
     # flatten the nested fields with dot notation
-    "srd_planobasico.NomeMunicipio": "$srd_planobasico.NomeMunicipio",
-    "srd_planobasico.CodMunicipio": "$srd_planobasico.CodMunicipio",
-    "srd_planobasico.SiglaUF": "$srd_planobasico.SiglaUF",
-    "estacao.MedLatitudeDecimal": "$estacao.MedLatitudeDecimal",
-    "estacao.MedLongitudeDecimal": "$estacao.MedLongitudeDecimal",
+    "NomeMunicipio": "$srd_planobasico.NomeMunicipio",
+    "CodMunicipio": "$srd_planobasico.CodMunicipio",
+    "SiglaUF": "$srd_planobasico.SiglaUF",
+    "MedLatitudeDecimal": "$estacao.MedLatitudeDecimal",
+    "MedLongitudeDecimal": "$estacao.MedLongitudeDecimal",
     "stnClass": 1.0,
     "NumServico": 1.0,
-    "habilitacao.DataValFreq": 1.0,
-    "Status.state": "$Status.state",
+    "DataValFreq": "$habilitacao.DataValFreq",
+    "state": "$Status.state",
     # "PotenciaTransmissorWatts": 1.0,
     # "CodTipoAntena": 1.0,
     # "Polarizacao": 1.0,
@@ -397,11 +397,10 @@ MONGO_TELECOM = {
 
 MONGO_SRD = {
     "$and": [
-        {
-            "frequency": {"$nin": [None, "", 0], "$type": 1.0},
-            "srd_planobasico.CodMunicipio": {"$nin": [None, ""]},
-            "NumFistel": {"$nin": [None, ""]},
-        }
+        {"frequency": {"$nin": [None, "", 0], "$type": 1.0}},
+        {"srd_planobasico.CodMunicipio": {"$nin": [None, ""]}},
+        {"NumFistel": {"$nin": [None, ""]}},
+        # {"habilitacao.DataValFreq": {"$nin": [None, ""]}},
     ]
 }
 

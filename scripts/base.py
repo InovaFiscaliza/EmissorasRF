@@ -2,7 +2,7 @@ import os
 import warnings
 from dotenv import find_dotenv, load_dotenv
 
-from extracao.anatel import Outorgadas
+from extracao.estacoes import Estacoes
 from pprint import pprint
 
 load_dotenv(find_dotenv(), override=True)
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = Outorgadas(sql_params=SQLSERVER_PARAMS)
+	data = Estacoes(sql_params=SQLSERVER_PARAMS, limit=1000000)
 
 	data.update()
 
@@ -48,6 +48,6 @@ if __name__ == '__main__':
 
 	print(150 * '=')
 
-	data.save()
+	# data.save()
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')

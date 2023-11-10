@@ -1,11 +1,11 @@
-from extracao.anatel import Outorgadas
+from extracao.estacoes import Estacoes
 import pandas as pd
 from fastcore.xtras import Path
 import time
 
 start = time.perf_counter()
 
-anatel = Outorgadas()
+anatel = Estacoes()
 
 df = pd.read_parquet(
 	Path(__file__).parent.parent

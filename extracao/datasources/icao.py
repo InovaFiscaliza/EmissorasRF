@@ -59,7 +59,9 @@ def _read_df(
     )
     df["Description"] = df.Facility + ", " + df.Location
     df["Fonte"] = "ICAO"
-    return df[["Frequência", "Latitude", "Longitude", "Description", "Fonte"]]
+    df = df[["Frequency", "Latitude", "Longitude", "Description", "Fonte"]]
+    df.columns = ["Frequência", "Latitude", "Longitude", "Entidade", "Fonte"]
+    return df
 
 # %% ../../nbs/02a_icao.ipynb 11
 def map_channels(
@@ -86,7 +88,7 @@ def map_channels(
                         row.Latitude,
                         row.Longitude,
                         entidade,
-                        f"{origem} | CANALIZACAO-VOR",
+                        f"{origem}-CANALIZACAO-VOR",
                     ]
     return df
 

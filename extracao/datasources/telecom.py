@@ -59,7 +59,6 @@ class Telecom(Mosaico):
     def cols_mapping(self):
         return DICT_LICENCIAMENTO
 
-    @cached_property
     def extraction(self) -> pd.DataFrame:
         pipeline = [{"$match": self.query}, {"$project": self.projection}]
         if self.limit > 0:
@@ -86,7 +85,9 @@ class Telecom(Mosaico):
         # .count() drop the NaN from the subset, not keeping them
         df_sub.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
         df_sub["Multiplicidade"] = (
-            df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False).size().values
+            df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False, observed=True)
+            .size()
+            .values
         )
         log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
         df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)
@@ -96,4 +97,6 @@ class Telecom(Mosaico):
         return df_sub.loc[:, self.columns]
 
 # %% ../../nbs/01f_telecom.ipynb 8
+# | export
+# | export# | export
 # | export
