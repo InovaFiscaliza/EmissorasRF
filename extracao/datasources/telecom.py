@@ -84,7 +84,7 @@ class Telecom(Mosaico):
         # del discarded
         # gc.collect()
         # .count() drop the NaN from the subset, not keeping them
-        df.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
+        df_sub.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
         df_sub["Multiplicidade"] = (
             df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False).size().values
         )

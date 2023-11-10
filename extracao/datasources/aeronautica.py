@@ -77,3 +77,4 @@ class Aero(Base):
 
 # %% ../../nbs/03b_aero.ipynb 7
 # | export
+# | export

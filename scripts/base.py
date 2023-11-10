@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = Outorgadas(sql_params=SQLSERVER_PARAMS, limit=2000000)
+	data = Outorgadas(sql_params=SQLSERVER_PARAMS)
 
 	data.update()
 
@@ -42,9 +42,9 @@ if __name__ == '__main__':
 
 	pprint(data.df.info())
 
-	print(150 * '=')
+	# print(150 * '=')
 
-	pprint(data.df.Log.value_counts())
+	# pprint(data.df.Log.value_counts())
 
 	print(150 * '=')
 
