@@ -13,7 +13,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from extracao.constants import (
     AGG_LICENCIAMENTO,
-    COLS_LICENCIAMENTO,
+    COLUNAS,
     DICT_LICENCIAMENTO,
     MONGO_TELECOM,
     PROJECTION_LICENCIAMENTO,
@@ -53,7 +53,7 @@ class Telecom(Mosaico):
 
     @property
     def columns(self):
-        return COLS_LICENCIAMENTO
+        return COLUNAS
 
     @property
     def cols_mapping(self):
@@ -92,11 +92,12 @@ class Telecom(Mosaico):
         log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
         df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)
         df_sub["Status"] = "L"
-        df_sub["Fonte"] = "MOSAICO"
-
+        df_sub["Fonte"] = "MOSAICO-LICENCIAMENTO"
         return df_sub.loc[:, self.columns]
 
 # %% ../../nbs/01f_telecom.ipynb 8
 # | export
+# | export# | export
+# | export# | export
 # | export# | export
 # | export

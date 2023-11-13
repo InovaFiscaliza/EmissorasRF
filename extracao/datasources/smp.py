@@ -14,7 +14,7 @@ from dotenv import find_dotenv, load_dotenv
 from extracao.constants import (
     AGG_SMP,
     CHANNELS,
-    COLS_LICENCIAMENTO,
+    COLUNAS,
     DICT_LICENCIAMENTO,
     IBGE_MUNICIPIOS,
     MONGO_SMP,
@@ -54,7 +54,7 @@ class SMP(Mosaico):
 
     @property
     def columns(self):
-        return COLS_LICENCIAMENTO
+        return COLUNAS
 
     @property
     def cols_mapping(self):
@@ -98,8 +98,6 @@ class SMP(Mosaico):
         df_sub["Multiplicidade"] = (
             df.groupby(AGG_SMP, dropna=True, sort=False, observed=True).size().values
         )
-        df_sub["Status"] = "L"
-        df_sub["Fonte"] = "MOSAICO"
         log = f'[("Colunas", {AGG_SMP}), ("Processamento", "Agrupamento")]'
         return self.register_log(df_sub, log, df_sub["Multiplicidade"] > 1)
 
@@ -246,7 +244,7 @@ class SMP(Mosaico):
         df["Status"] = "L"
         df["Num_Serviço"] = "010"
         down = df.drop("Frequência_Recepção", axis=1)
-        down["Fonte"] = "MOSAICO"
+        down["Fonte"] = "MOSAICO-LICENCIAMENTO"
         down["Classe"] = "FB"
         up = df.drop("Frequência", axis=1)
         up = up.rename(columns={"Frequência_Recepção": "Frequência"})

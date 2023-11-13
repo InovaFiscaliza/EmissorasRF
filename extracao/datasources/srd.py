@@ -13,7 +13,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from extracao.constants import (
     BW_MAP,
-    COLUNAS,
+    COLS_SRD,
     DICT_SRD,
     MONGO_SRD,
     PROJECTION_SRD,
@@ -31,8 +31,9 @@ MONGO_URI = os.environ.get("MONGO_URI")
 class SRD(Mosaico):
     """Classe para encapsular a lógica de extração de Radiodifusão"""
 
-    def __init__(self, mongo_uri: str = MONGO_URI) -> None:
+    def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
         super().__init__(mongo_uri)
+        self.limit = limit
 
     @property
     def stem(self):
@@ -52,19 +53,16 @@ class SRD(Mosaico):
 
     @property
     def columns(self):
-        return COLUNAS
+        return COLS_SRD
 
     @property
     def cols_mapping(self):
         return DICT_SRD
 
     def extraction(self) -> pd.DataFrame:
-        pipeline = [
-            # match the documents that satisfy your query
-            {"$match": self.query},
-            # project the fields that you want to keep
-            {"$project": self.projection},
-        ]
+        pipeline = [{"$match": self.query}, {"$project": self.projection}]
+        if self.limit > 0:
+            pipeline.append({"$limit": self.limit})
         df = self._extract(self.collection, pipeline)
         # df.loc[df["estacao"] == "[]", "estacao"] = "{}"
         # cols = ["srd_planobasico", "estacao", "habilitacao", "Status"]
@@ -100,13 +98,22 @@ class SRD(Mosaico):
         ].apply(lambda x: float(Decimal(x) / Decimal(1000)))
         df["Frequência"] = df["Frequência"].astype("float")
         df["Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
-        df["Fonte"] = "MOSAICO"
+        df["Fonte"] = "MOSAICO-SRD"
         df["Num_Serviço"] = df["Num_Serviço"].fillna("")
         df["Designação_Emissão"] = (
             df.Num_Serviço.astype("string").fillna("").map(BW_MAP)
         )
         df = self.split_designacao(df)
         df["Multiplicidade"] = 1
+        df["Padrão_Antena(dBd)"] = df["Padrão_Antena(dBd)"].str.replace("None", "0")
+        df["Potência_Transmissor(W)"] = pd.to_numeric(
+            df["Potência_Transmissor(W)"], errors="coerce"
+        ).astype(float)
+        df["Potência_Transmissor(W)"] = (
+            df["Potência_Transmissor(W)"]
+            .apply(lambda x: float(Decimal(1000) * Decimal(x)))
+            .astype(float)
+        )
         # self.append2discarded([self.discarded, discarded, discarded_with_na])
         return df.loc[:, self.columns]
 

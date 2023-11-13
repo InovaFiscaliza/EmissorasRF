@@ -4,9 +4,7 @@
 __all__ = ['Estacoes']
 
 # %% ../nbs/04_estacoes.ipynb 3
-import shutil
 import urllib.request
-from functools import cached_property
 from typing import List
 from zipfile import ZipFile
 
@@ -17,7 +15,7 @@ from fastcore.foundation import L
 from fastcore.parallel import parallel
 from fastcore.xtras import Path
 
-from .constants import COLUNAS, IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
+from .constants import COLS_SRD, IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
 from .datasources.aeronautica import Aero
 from .datasources.base import Base
 from .datasources.mosaico import MONGO_URI
@@ -25,6 +23,7 @@ from .datasources.sitarweb import SQLSERVER_PARAMS, Radcom, Stel
 from .datasources.smp import SMP
 from .datasources.srd import SRD
 from .datasources.telecom import Telecom
+from .format import merge_on_frequency
 
 # %% ../nbs/04_estacoes.ipynb 4
 load_dotenv(find_dotenv())
@@ -38,51 +37,52 @@ class Estacoes(Base):
         sql_params: dict = SQLSERVER_PARAMS,
         mongo_uri: str = MONGO_URI,
         limit: int = 0,
+        parallel: bool = True,
     ):
         self.sql_params = sql_params
         self.mongo_uri = mongo_uri
         self.limit = limit
+        self.parallel = parallel
+        self.init_data_sources()
 
     @property
     def columns(self):
-        return COLUNAS
+        return COLS_SRD
 
-    @cached_property
-    def df_cache(self) -> pd.DataFrame:
-        try:
-            df = self._read(self.stem)
-        except ValueError:
-            df = pd.DataFrame(columns=self.columns)
-        return df
+    def build_from_sources(self) -> pd.DataFrame:
+        return self._format([s.df() for s in self.sources.values()])
 
     @property
     def stem(self):
         return "anatel"
 
     @staticmethod
-    def _update_instance(class_instance):
+    def _update_source(class_instance):
         class_instance.update()
         class_instance.save()
-        return class_instance.df
+        return class_instance
+
+    def init_data_sources(self):
+        self.sources = {
+            "telecom": Telecom(self.mongo_uri, self.limit),
+            "smp": SMP(self.mongo_uri, self.limit),
+            "srd": SRD(self.mongo_uri),
+            "stel": Stel(self.sql_params),
+            "radcom": Radcom(self.sql_params),
+            "aero": Aero(),
+        }
 
     def extraction(self) -> L:
-        sources = [
-            Telecom(self.mongo_uri, self.limit),
-            SMP(self.mongo_uri, self.limit),
-            SRD(self.mongo_uri),
-            Stel(self.sql_params),
-            Radcom(self.sql_params),
-            Aero(),
-        ]
-        # result = L()
-        # for s in sources:
-        # 	result.append(Estacoes._update_instance(s))
-
-        # return result
-
-        return parallel(
-            Estacoes._update_instance, sources, n_workers=len(sources), progress=True
-        )
+        if self.parallel:
+            sources = parallel(
+                Estacoes._update_source,
+                self.sources.values(),
+                n_workers=len(self.sources),
+                progress=True,
+            )
+        else:
+            sources = L(self._update_source(s) for s in self.sources.values())
+        return sources.attrgot("df")
 
     @staticmethod
     def verify_shapefile_folder():
@@ -207,9 +207,10 @@ class Estacoes(Base):
         self,
         dfs: List,  # List with the individual API sources
     ) -> pd.DataFrame:  # Processed DataFrame
-        aero = self.validate_coordinates(dfs.pop(), False)
-        anatel = self.validate_coordinates(pd.concat(dfs, ignore_index=True))
-        df = pd.concat([aero, anatel], ignore_index=True).sort_values(
-            ["Frequência", "Latitude", "Longitude"], ignore_index=True
+        aero = dfs.pop()
+        anatel = pd.concat(dfs, ignore_index=True)
+        df = self.validate_coordinates(merge_on_frequency(anatel, aero))
+        df.sort_values(
+            ["Frequência", "Latitude", "Longitude"], ignore_index=True, inplace=True
         )
         return df.loc[:, self.columns]

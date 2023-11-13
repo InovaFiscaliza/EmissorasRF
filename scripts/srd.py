@@ -11,18 +11,8 @@ if __name__ == '__main__':
 
 	print('DATA')
 
-	print(data.df)
+	print(data.df.iloc[:, -10:])
 
 	print(150 * '=')
-
-	# print("DISCARDED!")
-
-	# print(data.discarded[["Frequência", "Entidade", "Log"]])
-
-	# print(150 * "=")
-
-	# print(data.df.Multiplicidade.sum())
-
-	# data.save()
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')

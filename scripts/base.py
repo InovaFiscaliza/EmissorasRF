@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = Estacoes(sql_params=SQLSERVER_PARAMS, limit=1000000)
+	data = Estacoes(sql_params=SQLSERVER_PARAMS, limit=100000)
 
 	data.update()
 
@@ -35,6 +35,8 @@ if __name__ == '__main__':
 	pprint(data.df)
 
 	pprint(150 * '=')
+
+	pprint(data.df.Fonte.value_counts())
 
 	# print('DISCARDED!')
 
@@ -48,6 +50,6 @@ if __name__ == '__main__':
 
 	print(150 * '=')
 
-	# data.save()
+	data.save()
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')
