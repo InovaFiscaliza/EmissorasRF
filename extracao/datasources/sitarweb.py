@@ -51,7 +51,7 @@ class Sitarweb(Base, GetAttr):
         raise NotImplementedError("Subclasses devem implementar a propriedade 'query'")
 
     def extraction(self):
-        return pd.read_sql_query(self.query, self.connect(), dtype="string")
+        return pd.read_sql_query(self.query, self.connect(), dtype="category")
 
 # %% ../../nbs/01c_sitarweb.ipynb 7
 class Radcom(Sitarweb):
@@ -80,7 +80,7 @@ class Radcom(Sitarweb):
         df["Fonte"] = "SRD"
         df["Multiplicidade"] = "1"
         a = df.Situação.isna()
-        df.loc[a, "Classe"] = df.loc[a, "Fase"]
+        df.loc[a, "Classe"] = df.loc[a, "Fase"].astype("string")
         df.loc[~a, "Classe"] = (
             df.loc[~a, "Fase"].astype("string")
             + "-"
@@ -120,6 +120,7 @@ class Stel(Sitarweb):
         df["Status"] = "L"
         df["Entidade"] = df.Entidade.str.strip()
         df["Fonte"] = "STEL"
+        df["Largura_Emissão"] = df["Largura_Emissão"].astype("string")
         df.loc[:, ["Largura_Emissão(kHz)", "_"]] = (
             df.Largura_Emissão.fillna("").apply(self.parse_bw).tolist()
         )

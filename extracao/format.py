@@ -143,8 +143,8 @@ def merge_on_frequency(
     """Mescla os dataframes baseados na frequência
     É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
     """
-    df_left = df_left.astype("string").drop_duplicates(ignore_index=True)
-    df_right = df_right.astype("string").drop_duplicates(ignore_index=True)
+    # df_left = df_left.astype("string").drop_duplicates(ignore_index=True)
+    # df_right = df_right.astype("string").drop_duplicates(ignore_index=True)
     df: pd.DataFrame = pd.merge(
         df_left,
         df_right,
@@ -178,6 +178,7 @@ def merge_on_frequency(
     intersection_left = len(df_left) - len(only_left)
     intersection_right = len(df_right) - len(only_right)
 
+    # Disjuntos
     if not intersection_left or not intersection_right:
         return pd.concat([df_left, df_right], ignore_index=True)
 
@@ -193,7 +194,6 @@ def merge_on_frequency(
 
     df_both_left = df_both.groupby(filter_left_cols, as_index=False).first()
     df_both_right = df_both.groupby(filter_right_cols, as_index=False).first()
-
     assert (
         len(df_both_left) == intersection_left
     ), f"O Agrupamento por colunas únicas não tem o comprimento esperado: {len(df_both_left)}!= {intersection_left}"
