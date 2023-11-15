@@ -93,7 +93,7 @@ class Radcom(Sitarweb):
         )
         discarded = df[df.Frequência.isna()].copy()
         if not discarded.empty:
-            log = f"""[("Colunas", "Frequência"),  
+            log = """[("Colunas", "Frequência"),  
             ("Processamento", "Valor Nulo")]"""
             self.append2discarded(self.register_log(discarded, log))
         df.dropna(subset=["Frequência"], inplace=True)
@@ -137,33 +137,3 @@ class Stel(Sitarweb):
         df["Multiplicidade"] = 1
         df["Log"] = ""
         return df.loc[:, self.columns]
-
-# %% ../../nbs/01c_sitarweb.ipynb 9
-if __name__ == "__main__":
-    import time
-
-    start = time.perf_counter()
-
-    data = Stel()
-
-    data.update()
-
-    print("STEL")
-
-    display(data.df)
-
-    data.save()
-
-    print(150 * "=")
-
-    data = Radcom()
-
-    data.update()
-
-    print("STEL")
-
-    display(data.df)
-
-    data.save()
-
-    print(f"Elapsed time: {time.perf_counter() - start} seconds")

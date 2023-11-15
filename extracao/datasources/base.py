@@ -17,7 +17,7 @@ from pyarrow import ArrowInvalid, ArrowTypeError
 from ..constants import BW, RE_BW
 
 # %% ../../nbs/01b_base.ipynb 4
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01b_base.ipynb 6
 @dataclass
@@ -71,9 +71,7 @@ class Base:
 
     @cached_property
     def discarded(self) -> pd.DataFrame:
-        df = pd.DataFrame(columns=self.columns)
-        # df["Log"] = ""
-        return df
+        return pd.DataFrame(columns=self.columns)
 
     def append2discarded(self, dfs: Union[pd.DataFrame, List]) -> None:
         """Receives one of more dataframes and append to the discarded dataframe"""
@@ -91,7 +89,7 @@ class Base:
         df["Log"] = df["Log"].astype("string").fillna("")
 
         df.loc[row_filter, "Log"] = df.loc[row_filter, "Log"].apply(
-            lambda x: log if not x else x + "|" + log
+            lambda x: f"{x}|{log}" if x else log
         )
         df["Log"] = df.Log.str.replace(r"[\n\t]", "", regex=True)
         return df

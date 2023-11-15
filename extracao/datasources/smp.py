@@ -5,7 +5,6 @@ __all__ = ['MONGO_URI', 'SMP']
 
 # %% ../../nbs/01g_smp.ipynb 4
 import os
-from functools import cached_property
 
 import pandas as pd
 import numpy as np
@@ -266,31 +265,3 @@ class SMP(Mosaico):
         df = self.substitute_coordenates(df)
         df = self.input_fixed_columns(df)
         return df.loc[:, self.columns]
-
-# %% ../../nbs/01g_smp.ipynb 9
-if __name__ == "__main__":
-    import time
-
-    start = time.perf_counter()
-
-    data = SMP()
-
-    data.update()
-
-    print("DATA")
-
-    display(data.df)
-
-    print(150 * "=")
-
-    print("DISCARDED!")
-
-    display(data.discarded[["Frequência", "Entidade", "Log"]])
-
-    print(150 * "=")
-
-    print(data.df.Multiplicidade.sum())
-
-    data.save()
-
-    print(f"Elapsed time: {time.perf_counter() - start} seconds")

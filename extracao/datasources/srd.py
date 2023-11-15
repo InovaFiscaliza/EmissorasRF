@@ -22,10 +22,10 @@ from extracao.constants import (
 from .mosaico import Mosaico
 
 # %% ../../nbs/01e_srd.ipynb 4
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01e_srd.ipynb 6
-MONGO_URI = os.environ.get("MONGO_URI", "")
+MONGO_URI = os.environ.get("MONGO_URI")
 
 # %% ../../nbs/01e_srd.ipynb 7
 class SRD(Mosaico):
@@ -123,6 +123,3 @@ class SRD(Mosaico):
         )
         # self.append2discarded([self.discarded, discarded, discarded_with_na])
         return df.loc[:, self.columns]
-
-# %% ../../nbs/01e_srd.ipynb 8
-# |export

@@ -26,7 +26,7 @@ from .datasources.telecom import Telecom
 from .format import merge_on_frequency
 
 # %% ../nbs/04_estacoes.ipynb 4
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ../nbs/04_estacoes.ipynb 6
 class Estacoes(Base):
@@ -230,6 +230,3 @@ class Estacoes(Base):
             ["Frequência", "Latitude", "Longitude"], ignore_index=True, inplace=True
         )
         return df.loc[:, self.columns]
-
-
-# %%

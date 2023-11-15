@@ -4,8 +4,8 @@
 __all__ = ['TIMEOUT', 'RELATORIO', 'ESTACAO', 'MALHA_IBGE', 'FILES', 'PATH_NAV', 'PATH_COM', 'VOR_ILS_DME', 'CHANNELS',
            'IBGE_MUNICIPIOS', 'IBGE_POLIGONO', 'COLUNAS', 'COLS_SRD', 'AGG_LICENCIAMENTO', 'AGG_SMP', 'APP_ANALISE_PT',
            'APP_ANALISE_EN', 'ESTADOS', 'SIGLAS', 'BW', 'BW_MAP', 'DICT_SRD', 'PROJECTION_SRD', 'DICT_LICENCIAMENTO',
-           'PROJECTION_LICENCIAMENTO', 'SQL_RADCOM', 'SQL_STEL', 'SQL_VALIDA_COORD', 'MONGO_TELECOM', 'MONGO_SRD',
-           'MONGO_SMP', 'REGEX_ESTADOS', 'RE_BW', 'MIN_LAT', 'MAX_LAT', 'MIN_LONG', 'MAX_LONG']
+           'PROJECTION_LICENCIAMENTO', 'MONGO_TELECOM', 'MONGO_SRD', 'MONGO_SMP', 'SQL_RADCOM', 'SQL_STEL',
+           'SQL_VALIDA_COORD', 'REGEX_ESTADOS', 'RE_BW', 'MIN_LAT', 'MAX_LAT', 'MIN_LONG', 'MAX_LONG']
 
 # %% ../nbs/00_constants.ipynb 2
 import re
@@ -299,7 +299,47 @@ DICT_LICENCIAMENTO = {
 
 PROJECTION_LICENCIAMENTO = {k: 1.0 for k in DICT_LICENCIAMENTO}
 
-# %% ../nbs/00_constants.ipynb 10
+# %% ../nbs/00_constants.ipynb 9
+MONGO_TELECOM = {
+    "$and": [
+        {"DataExclusao": None},
+        {"DataValidade": {"$nin": ["", None]}},
+        {"Status.state": "LIC-LIC-01"},
+        {"NumServico": {"$nin": ["010", "045", "171", "450", "750", "", None]}},
+        {"FreqTxMHz": {"$nin": [None, "", 0], "$type": 1.0}},
+        {"CodMunicipio": {"$nin": [None, ""]}},
+        {"NumFistel": {"$nin": [None, ""]}},
+        {"CodTipoClasseEstacao": {"$nin": [None, ""]}},
+        {"DesignacaoEmissao": {"$nin": [None, ""]}},
+    ]
+}
+
+
+MONGO_SRD = {
+    "$and": [
+        {"frequency": {"$nin": [None, "", 0], "$type": 1.0}},
+        {"srd_planobasico.CodMunicipio": {"$nin": [None, ""]}},
+        {"NumFistel": {"$nin": [None, ""]}},
+        # {'habilitacao.DataValFreq': {'$nin': [None, '']}},
+    ]
+}
+
+MONGO_SMP = {
+    "$and": [
+        {"DataExclusao": None},
+        {"DataValidade": {"$nin": ["", None]}},
+        {"Status.state": "LIC-LIC-01"},
+        {"NumServico": "010"},
+        {"FreqTxMHz": {"$nin": [None, "", 0], "$type": 1.0}},
+        {"CodMunicipio": {"$nin": [None, ""]}},
+        {"NumFistel": {"$nin": [None, ""]}},
+        {"CodTipoClasseEstacao": {"$nin": [None, ""]}},
+        {"DesignacaoEmissao": {"$nin": [None, ""]}},
+        {"Tecnologia": {"$nin": [None, ""]}},
+    ]
+}
+
+# %% ../nbs/00_constants.ipynb 11
 SQL_RADCOM = """
 select 
   distinct F.MedFrequenciaInicial as 'Frequência', 
@@ -333,7 +373,7 @@ order by
 
 """
 
-# %% ../nbs/00_constants.ipynb 11
+# %% ../nbs/00_constants.ipynb 12
 SQL_STEL = """
 select 
   distinct f.MedTransmissaoInicial as 'Frequência', 
@@ -374,7 +414,7 @@ where
   and c.DataValidadeRadiofrequencia is not null 
 """
 
-# %% ../nbs/00_constants.ipynb 12
+# %% ../nbs/00_constants.ipynb 13
 SQL_VALIDA_COORD = """
     SELECT 
         mun.NO_MUNICIPIO 
@@ -392,51 +432,11 @@ SQL_VALIDA_COORD = """
         MUN.CO_MUNICIPIO = {}
 """
 
-# %% ../nbs/00_constants.ipynb 13
-MONGO_TELECOM = {
-    "$and": [
-        {"DataExclusao": None},
-        {"DataValidade": {"$nin": ["", None]}},
-        {"Status.state": "LIC-LIC-01"},
-        {"NumServico": {"$nin": ["010", "045", "171", "450", "750", "", None]}},
-        {"FreqTxMHz": {"$nin": [None, "", 0], "$type": 1.0}},
-        {"CodMunicipio": {"$nin": [None, ""]}},
-        {"NumFistel": {"$nin": [None, ""]}},
-        {"CodTipoClasseEstacao": {"$nin": [None, ""]}},
-        {"DesignacaoEmissao": {"$nin": [None, ""]}},
-    ]
-}
-
-
-MONGO_SRD = {
-    "$and": [
-        {"frequency": {"$nin": [None, "", 0], "$type": 1.0}},
-        {"srd_planobasico.CodMunicipio": {"$nin": [None, ""]}},
-        {"NumFistel": {"$nin": [None, ""]}},
-        # {'habilitacao.DataValFreq': {'$nin': [None, '']}},
-    ]
-}
-
-MONGO_SMP = {
-    "$and": [
-        {"DataExclusao": None},
-        {"DataValidade": {"$nin": ["", None]}},
-        {"Status.state": "LIC-LIC-01"},
-        {"NumServico": "010"},
-        {"FreqTxMHz": {"$nin": [None, "", 0], "$type": 1.0}},
-        {"CodMunicipio": {"$nin": [None, ""]}},
-        {"NumFistel": {"$nin": [None, ""]}},
-        {"CodTipoClasseEstacao": {"$nin": [None, ""]}},
-        {"DesignacaoEmissao": {"$nin": [None, ""]}},
-        {"Tecnologia": {"$nin": [None, ""]}},
-    ]
-}
-
-# %% ../nbs/00_constants.ipynb 15
+# %% ../nbs/00_constants.ipynb 14
 REGEX_ESTADOS = f'({"|".join(ESTADOS)})'
 RE_BW = re.compile(r"^(\d{1,3})([HKMG])(\d{0,2})(\w{0,3})")
 
-# %% ../nbs/00_constants.ipynb 17
+# %% ../nbs/00_constants.ipynb 16
 MIN_LAT = -33.7509907  # Arroio Chuy RS
 MAX_LAT = 5.2718317  # Monte Caburaí RR
 MIN_LONG = -73.80658592032779
