@@ -5,8 +5,8 @@ __all__ = ['SQLSERVER_PARAMS', 'Sitarweb', 'Radcom', 'Stel']
 
 # %% ../../nbs/01c_sitarweb.ipynb 3
 import os
+import sys
 from decimal import Decimal, getcontext
-from functools import cached_property
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
@@ -17,6 +17,7 @@ from extracao.constants import (
     SQL_RADCOM,
     SQL_STEL,
 )
+
 from .base import Base
 from .connectors import SQLServer
 
@@ -26,16 +27,24 @@ load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01c_sitarweb.ipynb 6
 SQLSERVER_PARAMS = dict(
-    driver="{ODBC Driver 17 for SQL Server}",
-    server="ANATELBDRO05",
-    database="SITARWEB",
+    driver=os.environ.get("SQL_DRIVER"),
+    server=os.environ.get("SQL_SERVER"),
+    database=os.environ.get("SQL_DATABASE"),
     trusted_conn=True,
     mult_results=True,
     encrypt=False,
-    username=os.environ.get("USERNAME"),
-    password=os.environ.get("PASSWORD"),
-    timeout=1000,
+    timeout=int(os.environ.get("SQL_TIMEOUT")),
 )
+
+if sys.platform in ("linux", "darwin", "cygwin"):
+    SQLSERVER_PARAMS.update(
+        {
+            "trusted_conn": False,
+            "mult_results": False,
+            "username": os.environ.get("USERNAME"),
+            "password": os.environ.get("PASSWORD"),
+        }
+    )
 
 
 class Sitarweb(Base, GetAttr):

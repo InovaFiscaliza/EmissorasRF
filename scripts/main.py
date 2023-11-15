@@ -57,7 +57,7 @@ def get_db(
 		path = Path(path)
 		path.mkdir(parents=True, exist_ok=True)
 		print(f'Salvando dados em {path}')
-		shutil.copytree(str(data.folder), str(path))
+		shutil.copytree(str(data.folder), str(path), dirs_exist_ok=True)
 	print('Sucesso :zap:')
 	return data
 

@@ -143,8 +143,8 @@ def merge_on_frequency(
     """Mescla os dataframes baseados na frequência
     É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
     """
-    # df_left = df_left.astype("string").drop_duplicates(ignore_index=True)
-    # df_right = df_right.astype("string").drop_duplicates(ignore_index=True)
+    df_left = df_left.astype("string[pyarrow]").drop_duplicates(ignore_index=True)
+    df_right = df_right.astype("string[pyarrow]").drop_duplicates(ignore_index=True)
     df: pd.DataFrame = pd.merge(
         df_left,
         df_right,
@@ -161,6 +161,10 @@ def merge_on_frequency(
     right = df._merge == "right_only"
     both = df._merge == "both"
     df = df.drop(columns=["_merge"])
+
+    # Disjuntos
+    if df[both].empty:
+        return pd.concat([df_left, df_right], ignore_index=True)
 
     left_cols: List[str] = [c for c in df.columns if y not in c]
     right_cols: List[str] = [c for c in df.columns if x not in c]
@@ -179,8 +183,8 @@ def merge_on_frequency(
     intersection_right = len(df_right) - len(only_right)
 
     # Disjuntos
-    if not intersection_left or not intersection_right:
-        return pd.concat([df_left, df_right], ignore_index=True)
+    # if not intersection_left or not intersection_right:
+    # 	return pd.concat([df_left, df_right], ignore_index=True)
 
     both_columns = [f"{lat}{x}", f"{long}{x}", f"{lat}{y}", f"{long}{y}"]
     df.loc[both, "Distance"] = df.loc[both, both_columns].apply(get_km_distance, axis=1)
@@ -192,8 +196,16 @@ def merge_on_frequency(
         listify(on) + df_both.columns[len(df_left.columns) : -1].to_list()
     )  # the -1 is to eliminate the distance
 
-    df_both_left = df_both.groupby(filter_left_cols, as_index=False).first()
-    df_both_right = df_both.groupby(filter_right_cols, as_index=False).first()
+    # df_both_left = df_both.groupby(filter_left_cols, as_index=False).first()
+    # df_both_right = df_both.groupby(filter_right_cols, as_index=False).first()
+
+    df_both_left = df_both.drop_duplicates(
+        filter_left_cols, keep="first", ignore_index=True
+    )
+    df_both_right = df_both.drop_duplicates(
+        filter_right_cols, keep="first", ignore_index=True
+    )
+
     assert (
         len(df_both_left) == intersection_left
     ), f"O Agrupamento por colunas únicas não tem o comprimento esperado: {len(df_both_left)}!= {intersection_left}"

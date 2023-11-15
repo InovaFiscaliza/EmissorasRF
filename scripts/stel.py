@@ -35,6 +35,8 @@ if sys.platform in ('linux', 'darwin', 'cygwin'):
 		}
 	)
 
+print(SQLSERVER_PARAMS)
+
 
 from extracao.datasources.sitarweb import Stel
 
@@ -44,7 +46,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = Stel()
+	data = Stel(SQLSERVER_PARAMS)
 
 	print(data.extraction())
 

@@ -54,7 +54,7 @@ class Estacoes(Base):
 
     @property
     def stem(self):
-        return "anatel"
+        return "estacoes"
 
     @staticmethod
     def _update_source(class_instance):
@@ -66,7 +66,7 @@ class Estacoes(Base):
         self.sources = {
             "telecom": Telecom(self.mongo_uri, self.limit),
             "smp": SMP(self.mongo_uri, self.limit),
-            "srd": SRD(self.mongo_uri),
+            "srd": SRD(self.mongo_uri, self.limit),
             "stel": Stel(self.sql_params),
             "radcom": Radcom(self.sql_params),
             "aero": Aero(),
@@ -118,7 +118,13 @@ class Estacoes(Base):
             dtype_backend="pyarrow",
         )
 
-        df = pd.merge(df, municipios, on="Código_Município", how="left", copy=False)
+        df = pd.merge(
+            df.astype("string[pyarrow]"),
+            municipios,
+            on="Código_Município",
+            how="left",
+            copy=False,
+        )
 
         null_coords = df.Latitude_x.isna() | df.Longitude_x.isna()
 
