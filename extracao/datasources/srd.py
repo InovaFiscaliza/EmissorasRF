@@ -25,7 +25,7 @@ from .mosaico import Mosaico
 load_dotenv(find_dotenv())
 
 # %% ../../nbs/01e_srd.ipynb 6
-MONGO_URI = os.environ.get("MONGO_URI")
+MONGO_URI = os.environ.get("MONGO_URI", "")
 
 # %% ../../nbs/01e_srd.ipynb 7
 class SRD(Mosaico):
@@ -114,33 +114,15 @@ class SRD(Mosaico):
             .apply(lambda x: float(Decimal(1000) * Decimal(x)))
             .astype(float)
         )
+        df.loc[:, ["Id", "Status"]] = df.loc[:, ["Id", "Status"]].astype("string")
+        df["Relatório_Canal"] = (
+            "http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id="
+            + df["Id"]
+            + "&state="
+            + df["Status"]
+        )
         # self.append2discarded([self.discarded, discarded, discarded_with_na])
         return df.loc[:, self.columns]
 
 # %% ../../nbs/01e_srd.ipynb 8
-if __name__ == "__main__":
-    import time
-
-    start = time.perf_counter()
-
-    data = SRD()
-
-    data.update()
-
-    print("DATA")
-
-    display(data.df)
-
-    print(150 * "=")
-
-    print("DISCARDED!")
-
-    display(data.discarded[["Frequência", "Entidade", "Log"]])
-
-    print(150 * "=")
-
-    print(data.df.Multiplicidade.sum())
-
-    data.save()
-
-    print(f"Elapsed time: {time.perf_counter() - start} seconds")
+# |export

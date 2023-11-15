@@ -40,7 +40,7 @@ class Aero(Base):
     def extraction(self) -> pd.DataFrame:
         func = lambda f: f()
         radares = pd.read_csv(Path(__file__).parent / "arquivos" / "radares.csv")
-        radares["Fonte"] = "RADARES"
+        radares["Fonte"] = "RADAR"
         sources = [get_icao, get_aisw, get_aisg, get_redemet]
         dfs = parallel(func, sources, threadpool=True, progress=True)
         dfs.append(radares)

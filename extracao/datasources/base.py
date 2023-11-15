@@ -88,11 +88,12 @@ class Base:
         if row_filter is None:
             row_filter = pd.Series(True, index=df.index)
 
-        df["Log"] = df["Log"].astype("string")
+        df["Log"] = df["Log"].astype("string").fillna("")
 
         df.loc[row_filter, "Log"] = df.loc[row_filter, "Log"].apply(
             lambda x: log if not x else x + "|" + log
         )
+        df["Log"] = df.Log.str.replace(r"[\n\t]", "", regex=True)
         return df
 
     @property

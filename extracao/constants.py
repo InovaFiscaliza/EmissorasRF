@@ -56,6 +56,8 @@ COLS_SRD = COLUNAS + [
     "Atenuação_Linha(db/100m)",
     "Perdas_Acessórias_Linha(db)",
     "Padrão_Antena(dBd)",
+    "Comprimento_Linha(m)",
+    "Relatório_Canal",
 ]
 
 # COLS_LICENCIAMENTO = [
@@ -210,6 +212,7 @@ BW_MAP = {
 }
 
 DICT_SRD = {
+    "_id": "Id",
     "frequency": "Frequência",
     "licensee": "Entidade",
     "NumFistel": "Fistel",
@@ -232,10 +235,12 @@ DICT_SRD = {
     "MedOrientNV": "Azimute_Antena",
     "MedHCI": "Altura_Antena(m)",
     "MedAtenLinhaTransmissaodB100m": "Atenuação_Linha(db/100m)",
+    "MedComprimento": "Comprimento_Linha(m)",
     "PerdasAcessorias_db": "Perdas_Acessórias_Linha(db)",
 }
 
 PROJECTION_SRD = {
+    "_id": 1.0,
     "frequency": 1.0,
     "licensee": 1.0,
     "NumFistel": 1.0,
@@ -259,6 +264,7 @@ PROJECTION_SRD = {
     "IndPolariz": "$antena.principal.IndPolariz",
     "MedHCI": "$antena.principal.MedHCI",
     "MedAtenLinhaTransmissaodB100m": "$linhatransmissao.principal.MedAtenLinhaTransmissaodB100m",
+    "MedComprimento": "$linhatransmissao.principal.MedComprimento",
     "PerdasAcessorias_db": "$linhatransmissao.principal.PerdasAcessorias_db",
 }
 
@@ -428,7 +434,7 @@ MONGO_SMP = {
 
 # %% ../nbs/00_constants.ipynb 15
 REGEX_ESTADOS = f'({"|".join(ESTADOS)})'
-RE_BW = re.compile("^(\d{1,3})([HKMG])(\d{0,2})(\w{0,3})")
+RE_BW = re.compile(r"^(\d{1,3})([HKMG])(\d{0,2})(\w{0,3})")
 
 # %% ../nbs/00_constants.ipynb 17
 MIN_LAT = -33.7509907  # Arroio Chuy RS

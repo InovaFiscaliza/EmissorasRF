@@ -88,7 +88,7 @@ def map_channels(
                         row.Latitude,
                         row.Longitude,
                         entidade,
-                        f"{origem}-CANALIZACAO-VOR",
+                        f"{origem}-CANALIZACAO-VOR/ILS/DME",
                     ]
     return df
 

@@ -203,14 +203,33 @@ class Estacoes(Base):
             df = self.fill_nan_coordinates(df)
         return self.intersect_coordinates_on_poligon(df, check_municipio)
 
+    @staticmethod
+    def _simplify_sources(df):
+        df["Fonte"] = df["Fonte"].str.replace(
+            "ICAO-CANALIZACAO-VOR/ILS/DME | AISWEB-CANALIZACAO-VOR/ILS/DME",
+            "CANALIZACAO-VOR/ILS/DME",
+        )
+        df["Fonte"] = df["Fonte"].str.replace(
+            r"(ICAO-)?(AISWEB-)?CANALIZACAO-VOR/ILS/DME",
+            "CANALIZACAO-VOR/ILS/DME",
+            regex=True,
+        )
+
+        return df
+
     def _format(
         self,
         dfs: List,  # List with the individual API sources
     ) -> pd.DataFrame:  # Processed DataFrame
         aero = dfs.pop()
         anatel = pd.concat(dfs, ignore_index=True)
-        df = self.validate_coordinates(merge_on_frequency(anatel, aero))
+        df = merge_on_frequency(anatel, aero)
+        df = self.validate_coordinates(df)
+        df = self._simplify_sources(df)
         df.sort_values(
             ["Frequência", "Latitude", "Longitude"], ignore_index=True, inplace=True
         )
         return df.loc[:, self.columns]
+
+
+# %%
