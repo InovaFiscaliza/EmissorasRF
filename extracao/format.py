@@ -40,9 +40,9 @@ def _filter_matlab(
     df: pd.DataFrame,  # Arquivo de Dados Base de Entrada
 ) -> pd.DataFrame:  # Arquivo de Dados formatado para leitura no Matlab
     """Recebe a base de dados da Anatel e formata as colunas para leitura de acordo com os requisitos do Matlab"""
-    df["#Estação"] = df["Número_Estação"]
+    df["#Estação"] = df["Estação"]
     df.loc[df.Multiplicidade != "1", "#Estação"] = (
-        df.loc[df.Multiplicidade != "1", "Número_Estação"]
+        df.loc[df.Multiplicidade != "1", "Estação"]
         + "+"
         + df.loc[df.Multiplicidade != "1", "Multiplicidade"]
     )

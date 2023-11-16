@@ -93,16 +93,14 @@ class SRD(Mosaico):
         #         ("Processamento", "Registro com valor nulo presente")]"""
         # discarded_with_na = self.register_log(discarded_with_na, log)
         df.dropna(subset="Frequência", ignore_index=True, inplace=True)  # type: ignore
-        df.loc[df["Num_Serviço"] == "205", "Frequência"] = df.loc[
-            df["Num_Serviço"] == "205", "Frequência"
+        df.loc[df["Serviço"] == "205", "Frequência"] = df.loc[
+            df["Serviço"] == "205", "Frequência"
         ].apply(lambda x: float(Decimal(x) / Decimal(1000)))
         df["Frequência"] = df["Frequência"].astype("float")
         df["Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
         df["Fonte"] = "MOSAICO-SRD"
-        df["Num_Serviço"] = df["Num_Serviço"].fillna("")
-        df["Designação_Emissão"] = (
-            df.Num_Serviço.astype("string").fillna("").map(BW_MAP)
-        )
+        df["Serviço"] = df["Serviço"].fillna("")
+        df["Designação_Emissão"] = df.Serviço.astype("string").fillna("").map(BW_MAP)
         df = self.split_designacao(df)
         df["Multiplicidade"] = 1
         df["Padrão_Antena(dBd)"] = df["Padrão_Antena(dBd)"].str.replace("None", "0")

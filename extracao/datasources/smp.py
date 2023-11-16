@@ -74,8 +74,8 @@ class SMP(Mosaico):
         f"""Exclui os registros duplicados
         O subconjunto de colunas consideradas é {AGG_SMP}
         """
-        df["Número_Estação"] = df["Número_Estação"].astype("int")
-        df = df.sort_values("Número_Estação", ignore_index=True)
+        df["Estação"] = df["Estação"].astype("int")
+        df = df.sort_values("Estação", ignore_index=True)
         df["Largura_Emissão(kHz)"] = pd.to_numeric(
             df["Largura_Emissão(kHz)"], errors="coerce"
         )
@@ -241,7 +241,7 @@ class SMP(Mosaico):
         pd.DataFrame
     ):  # DataFrame com os canais de downlink e uplink contenados e formatados
         df["Status"] = "L"
-        df["Num_Serviço"] = "010"
+        df["Serviço"] = "010"
         down = df.drop("Frequência_Recepção", axis=1)
         down["Fonte"] = "MOSAICO-LICENCIAMENTO"
         down["Classe"] = "FB"

@@ -80,7 +80,7 @@ df.sample(5).iloc[:, :6]
       <th>Frequência</th>
       <th>Entidade</th>
       <th>Fistel</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Código_Município</th>
     </tr>
@@ -170,7 +170,7 @@ cada uma
 - `Entidade`: Nome da Pessoa (Física \| Jurídica) detentora da Outorga
 - `Fistel`: Código itentificador da Outorga de Serviço, um Fistel pode
   conter uma ou mais estações
-- `Número_Estação`: Código Identificador da Estação - Código não
+- `Estação`: Código Identificador da Estação - Código não
   necessáriamente único, por vezes uma única estação possui diversos
   transmissores com características distintas
 - `Município`: Município de Outorga daquela estação
@@ -201,7 +201,7 @@ significado de cada uma
 - Onde ambas estão presentes a `Classe` é igual a `<Fase>-<Situação>`:
   - `3-P`
   - `P-A`
-- `Num_Serviço`: Número identificador do serviço, no caso de `RADCOM` o
+- `Serviço`: Número identificador do serviço, no caso de `RADCOM` o
   valor é único: `231`
 - `Classe_Emissão`: Dado ausente na base de `RADCOM` , inserido valores
   únicos nulos para normalizar com as demais bases
@@ -242,7 +242,7 @@ print(f'Número de coordenadas ausentes: {df[df.Latitude.isna() | df.Longitude.i
 df[['Latitude', 'Longitude']] = df[['Latitude', 'Longitude']].astype('float')
 bad = df[~(df.Latitude.between(MIN_LAT, MAX_LAT) & df.Longitude.between(MIN_LONG, MAX_LONG))]
 print("Exemplo de coordenadas incorretas, fora dos limites do Brasil: ")
-bad.loc[:, ['Frequência', 'Entidade', 'Número_Estação', 'Município', 'Latitude', 'Longitude']]
+bad.loc[:, ['Frequência', 'Entidade', 'Estação', 'Município', 'Latitude', 'Longitude']]
 ```
 
 </details>
@@ -269,7 +269,7 @@ bad.loc[:, ['Frequência', 'Entidade', 'Número_Estação', 'Município', 'Latit
       <th></th>
       <th>Frequência</th>
       <th>Entidade</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Latitude</th>
       <th>Longitude</th>
@@ -511,7 +511,7 @@ df.sample(5).iloc[:, :6]
       <th>Frequência</th>
       <th>Entidade</th>
       <th>Fistel</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Código_Município</th>
     </tr>
@@ -618,7 +618,7 @@ base de `RADCOM`
 
 - `Classe`: String que identifica o tipo de estação , e.g
   `Fixa Aeronáutica`, `Fixa Base`, `Móvel`, `Transmissora` etc…
-- `Num_Serviço`: Código que identifica o Serviço Outorgado na Anatel,
+- `Serviço`: Código que identifica o Serviço Outorgado na Anatel,
   aqui existem diversos serviços: `604, 035, 507, 019`
 - `Validade_RF`: Data de Validade da Radiofrequência
 
@@ -673,7 +673,7 @@ print(f'Número de coordenadas ausentes: {df[df.Latitude.isna() | df.Longitude.i
 df[['Latitude', 'Longitude']] = df[['Latitude', 'Longitude']].astype('float')
 bad = df[~(df.Latitude.between(MIN_LAT, MAX_LAT) & df.Longitude.between(MIN_LONG, MAX_LONG))]
 print("Exemplo de coordenadas incorretas, fora dos limites do Brasil: ")
-bad.loc[:, ['Frequência', 'Entidade', 'Número_Estação', 'Município', 'Latitude', 'Longitude']]
+bad.loc[:, ['Frequência', 'Entidade', 'Estação', 'Município', 'Latitude', 'Longitude']]
 ```
 
 </details>
@@ -700,7 +700,7 @@ bad.loc[:, ['Frequência', 'Entidade', 'Número_Estação', 'Município', 'Latit
       <th></th>
       <th>Frequência</th>
       <th>Entidade</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Latitude</th>
       <th>Longitude</th>
@@ -933,7 +933,7 @@ df.sample(5).iloc[:, :6]
       <th>Frequência</th>
       <th>Entidade</th>
       <th>Fistel</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Código_Município</th>
     </tr>
@@ -1068,7 +1068,7 @@ print(f'A base do MOSAICO de Radiodifusão possui atualmente {len(df)} registros
 df[['Latitude', 'Longitude']] = df[['Latitude', 'Longitude']].astype('float')
 bad = df[~(df.Latitude.between(MIN_LAT, MAX_LAT) & df.Longitude.between(MIN_LONG, MAX_LONG))]
 print("Exemplo de coordenadas incorretas ou ausentes: ")
-bad.loc[:, ['Frequência', 'Entidade', 'Número_Estação', 'Município', 'Latitude', 'Longitude']]
+bad.loc[:, ['Frequência', 'Entidade', 'Estação', 'Município', 'Latitude', 'Longitude']]
 ```
 
 </details>
@@ -1095,7 +1095,7 @@ bad.loc[:, ['Frequência', 'Entidade', 'Número_Estação', 'Município', 'Latit
       <th></th>
       <th>Frequência</th>
       <th>Entidade</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Latitude</th>
       <th>Longitude</th>
@@ -1239,7 +1239,7 @@ df.sample(5).iloc[:, :6]
       <th>Frequência</th>
       <th>Entidade</th>
       <th>Fistel</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Código_Município</th>
     </tr>
@@ -1353,7 +1353,7 @@ seguir
 - `Multiplicidade`: Contador do número de estações similares:
 
   - Existem registros com todas as características anteriores idênticas,
-    exceto o `Número_Estação` por exemplo.
+    exceto o `Estação` por exemplo.
   - Estações possuem detalhes técnicos que não são considerados
     relevantes, pelo menos no escopo atual, para a Análise Espectral e
     Identificação de Emissões - como por exemplo:
@@ -1829,7 +1829,7 @@ df.sample(5).iloc[:, :6]
       <th>Frequência</th>
       <th>Entidade</th>
       <th>Fistel</th>
-      <th>Número_Estação</th>
+      <th>Estação</th>
       <th>Município</th>
       <th>Código_Município</th>
     </tr>
@@ -1932,7 +1932,7 @@ formatado da seguinte forma:
 - Arquivo base com os dados da Anatel com as seguintes colunas:
   - `Frequência`
   - `Número_Serviço`
-  - `Número_Estação`
+  - `Estação`
   - `Classe_Emissão`
   - `Largura_Emissão(kHz)`
 - Para simplificação de como os dados são apresentados, é criada a
@@ -1947,7 +1947,7 @@ formatado da seguinte forma:
 
   - `Fistel`
 
-  - `#Estação` - `Número_Estação`+ `Multiplicidade`
+  - `#Estação` - `Estação`+ `Multiplicidade`
 
   - `Município_IBGE`
 

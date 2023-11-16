@@ -72,7 +72,7 @@ class Radcom(Sitarweb):
     ) -> pd.DataFrame:  # DataFrame formatado
         """Formata, limpa e padroniza os dados provenientes da query no banco"""
         df["Entidade"] = df["Entidade"].str.strip()
-        df["Num_Serviço"] = "231"
+        df["Serviço"] = "231"
         df["Classe_Emissão"] = pd.NA
         df["Largura_Emissão(kHz)"] = "256"
         df["Validade_RF"] = pd.NA
