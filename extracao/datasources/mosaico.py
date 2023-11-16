@@ -47,14 +47,12 @@ class Mosaico(Base, GetAttr):
         database = client[self.database]
         collection = database[collection]
         dtype = "string[pyarrow]" if self.stem == "srd" else "category"
-        df = pd.DataFrame(
-            [c for c in collection.aggregate(pipeline)], copy=False, dtype=dtype
-        )
+        df = pd.DataFrame(list(collection.aggregate(pipeline)), copy=False, dtype=dtype)
         # Substitui strings vazias e somente com espaços por nulo
         return df.replace(r"^\s*$", pd.NA, regex=True)
 
-    @staticmethod
     def split_designacao(
+        self,
         df: pd.DataFrame,  # DataFrame com coluna original DesignacaoEmissao
     ) -> (
         pd.DataFrame
@@ -69,7 +67,11 @@ class Mosaico(Base, GetAttr):
             .str.upper()
             .str.split(" ")
         )
-        df = df.explode("Designação_Emissão")
+        df = df.explode("Designação_Emissão").reset_index(drop=True)
+        exploded_rows = df["Designação_Emissão"].apply(lambda x: isinstance(x, list))
+        log = """[("Colunas", "Designação_Emissão"]),
+		          ("Processamento", "Registro expandido nos componentes individuais e extraídas Largura e Classe")]"""
+        df = self.register_log(df, log, exploded_rows)
         df = df[df["Designação_Emissão"] != "/"]  # Removes empty rows
         # Apply the parse_bw function
         parsed_data = zip(*df["Designação_Emissão"].apply(Base.parse_bw))
