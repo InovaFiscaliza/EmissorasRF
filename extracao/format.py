@@ -138,7 +138,7 @@ def merge_on_frequency(
     df_left: pd.DataFrame,  # DataFrame da esquerda a ser mesclado
     df_right: pd.DataFrame,  # DataFrame da direira a ser mesclado
     on: str = "Frequência",  # Coluna usada como chave de mesclagem
-    cols2merge: str = ("Entidade", "Fonte"),  # Colunas a serem mescladas
+    cols2merge: Tuple = ("Entidade", "Fonte"),  # Colunas a serem mescladas
 ) -> pd.DataFrame:  # DataFrame resultante da mesclagem
     """Mescla os dataframes baseados na frequência
     É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
@@ -154,11 +154,11 @@ def merge_on_frequency(
         copy=False,
     )
 
-    x, y = "_x", "_y"
+    left_suffix, right_suffix = "_x", "_y"
     lat, long = "Latitude", "Longitude"
 
-    left = df._merge == "left_only"
-    right = df._merge == "right_only"
+    left_only = df._merge == "left_only"
+    right_only = df._merge == "right_only"
     both = df._merge == "both"
     df = df.drop(columns=["_merge"])
 
@@ -166,27 +166,32 @@ def merge_on_frequency(
     if df[both].empty:
         return pd.concat([df_left, df_right], ignore_index=True)
 
-    left_cols: List[str] = [c for c in df.columns if y not in c]
-    right_cols: List[str] = [c for c in df.columns if x not in c]
+    left_cols = [c for c in df.columns if right_suffix not in c]
+    right_cols = [c for c in df.columns if left_suffix not in c]
 
-    only_left = df.loc[left, left_cols].drop_duplicates(
-        subset=left_cols, ignore_index=True
+    only_left = (
+        df.loc[left_only, left_cols]
+        .copy()
+        .drop_duplicates(subset=left_cols, ignore_index=True)
     )
-    only_left.columns = [c.replace(x, "") for c in left_cols]
+    only_left.columns = [c.replace(left_suffix, "") for c in left_cols]
 
-    only_right = df.loc[right, right_cols].drop_duplicates(
-        subset=right_cols, ignore_index=True
+    only_right = (
+        df.loc[right_only, right_cols]
+        .copy()
+        .drop_duplicates(subset=right_cols, ignore_index=True)
     )
-    only_right.columns = [c.replace(y, "") for c in right_cols]
+    only_right.columns = [c.replace(right_suffix, "") for c in right_cols]
 
     intersection_left = len(df_left) - len(only_left)
     intersection_right = len(df_right) - len(only_right)
 
-    # Disjuntos
-    # if not intersection_left or not intersection_right:
-    # 	return pd.concat([df_left, df_right], ignore_index=True)
-
-    both_columns = [f"{lat}{x}", f"{long}{x}", f"{lat}{y}", f"{long}{y}"]
+    both_columns = [
+        f"{lat}{left_suffix}",
+        f"{long}{left_suffix}",
+        f"{lat}{right_suffix}",
+        f"{long}{right_suffix}",
+    ]
     df.loc[both, "Distance"] = df.loc[both, both_columns].apply(get_km_distance, axis=1)
 
     df_both = df[both].sort_values("Distance", ignore_index=True)
@@ -196,24 +201,24 @@ def merge_on_frequency(
         listify(on) + df_both.columns[len(df_left.columns) : -1].to_list()
     )  # the -1 is to eliminate the distance
 
-    # df_both_left = df_both.groupby(filter_left_cols, as_index=False).first()
-    # df_both_right = df_both.groupby(filter_right_cols, as_index=False).first()
-
-    df_both_left = df_both.drop_duplicates(
+    # keep only the closer merged rows in the outer join
+    df_both_left = df_both.copy().drop_duplicates(
         filter_left_cols, keep="first", ignore_index=True
     )
-    df_both_right = df_both.drop_duplicates(
+    df_both_right = df_both.copy().drop_duplicates(
         filter_right_cols, keep="first", ignore_index=True
     )
 
+    # Sanity Checks
     assert (
         len(df_both_left) == intersection_left
-    ), f"O Agrupamento por colunas únicas não tem o comprimento esperado: {len(df_both_left)}!= {intersection_left}"
+    ), f"Grouping by unique columns has unexpected length: {len(df_both_left)}!= {intersection_left}"
 
     assert (
         len(df_both_right) == intersection_right
-    ), f"Error: {len(df_both_right)}!= {intersection_right}"
+    ), f"Grouping by unique columns has unexpected length: {len(df_both_right)}!= {intersection_right}"
 
+    # Separate according the MAX_DIST
     df_both_far_left = df_both_left[df_both_left.Distance > MAX_DIST]
     df_both_far_right = df_both_right[df_both_right.Distance > MAX_DIST]
 
@@ -222,6 +227,7 @@ def merge_on_frequency(
 
     merge_cols = df_both.columns.to_list()
     merge_cols.remove("Distance")
+    # Since it's an outer join, keep only the columns that are in both
     df_close_merge = (
         pd.merge(df_both_left, df_both_right, how="inner", on=merge_cols, copy=False)
         .drop("Distance_y", axis=1)
@@ -233,7 +239,7 @@ def merge_on_frequency(
 
     assert pd.merge(
         df_both_left, df_both_right, how="inner", on=merge_cols
-    ).empty, "Verifique os passos de mesclagem, df_both_left e df_both_right deveria ser disjuntos"
+    ).empty, "Check merging steps, df_both_left and df_both_right should be disjoint"
 
     df_final_merge = pd.concat(
         [df_close_merge, df_both_left, df_both_right], ignore_index=True
@@ -241,11 +247,11 @@ def merge_on_frequency(
 
     assert len(df_both_far_left) + len(df_close_merge) + len(df_both_left) == (
         len(df_left) - len(only_left)
-    ), "Verifique os passos de mesclagem, validação falhou!"
+    ), "Check merging steps, validation failed!"
 
     assert len(df_both_far_right) + len(df_close_merge) + len(df_both_right) == (
         len(df_right) - len(only_right)
-    ), "Verifique os passos de mesclagem, validação falhou!"
+    ), "Check merging steps, validation failed!"
 
     original_cols = df_both.columns.to_list()
     df_both = (
@@ -268,7 +274,7 @@ def merge_on_frequency(
 
     assert (
         df_both.Distance > MAX_DIST
-    ).all(), "Verifique os passos de mesclagem, validação falhou!"
+    ).all(), "Check merging steps, validation failed!"
 
     assert (
         pd.merge(
@@ -282,7 +288,7 @@ def merge_on_frequency(
         .loc[lambda x: x["_merge"] == "left_only"]
         .iloc[:, range(len(original_cols))]
         .empty
-    ), "Verifique os passos de mesclagem, validação falhou!"
+    ), "Check merging steps, validation failed!"
 
     assert (
         pd.merge(
@@ -296,11 +302,13 @@ def merge_on_frequency(
         .loc[lambda x: x["_merge"] == "left_only"]
         .iloc[:, range(len(original_cols))]
         .empty
-    ), "Verifique os passos de mesclagem, validação falhou!"
+    ), "Check merging steps, validation failed!"
 
     for col in cols2merge:
-        df_final_merge[f"{col}{x}"] = (
-            df_final_merge[f"{col}{x}"] + " | " + df_final_merge[f"{col}{y}"]
+        df_final_merge[f"{col}{left_suffix}"] = (
+            df_final_merge[f"{col}{left_suffix}"]
+            + " | "
+            + df_final_merge[f"{col}{right_suffix}"]
         )
 
     df_final_merge = df_final_merge[left_cols]

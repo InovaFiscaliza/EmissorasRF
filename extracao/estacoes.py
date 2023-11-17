@@ -67,8 +67,8 @@ class Estacoes(Base):
             "telecom": Telecom(self.mongo_uri, self.limit),
             "smp": SMP(self.mongo_uri, self.limit),
             "srd": SRD(self.mongo_uri, self.limit),
-            "stel": Stel(self.sql_params),
-            "radcom": Radcom(self.sql_params),
+            # 'stel': Stel(self.sql_params),
+            # 'radcom': Radcom(self.sql_params),
             "aero": Aero(),
         }
 
@@ -175,7 +175,11 @@ class Estacoes(Base):
 				  """
             self.register_log(gdf, log, check_coords)
 
-            gdf.drop(["Código_Município", "Município", "UF"], axis=1, inplace=True)
+            gdf.drop(
+                ["Código_Município", "Município", "UF", "geometry", "AREA_KM2"],
+                axis=1,
+                inplace=True,
+            )
 
         gdf.rename(
             columns={
@@ -227,31 +231,45 @@ class Estacoes(Base):
     def _cast2float(column: pd.Series) -> pd.Series:
         return pd.to_numeric(
             column, downcast="float", errors="coerce", dtype_backend="pyarrow"
-        )
+        ).fillna(-1.0)
 
     @staticmethod
     def _cast2int(column: pd.Series) -> pd.Series:
         return pd.to_numeric(
             column, downcast="integer", errors="coerce", dtype_backend="pyarrow"
-        )
+        ).fillna(-1)
 
     @staticmethod
     def _cast2str(column: pd.Series) -> pd.Series:
-        return column.astype("string", copy=False)
+        column.replace("", "-1", inplace=True)
+        return column.astype("string", copy=False).fillna("-1")
 
     @staticmethod
     def _cast2cat(column: pd.Series) -> pd.Series:
-        return column.astype("category", copy=False)
+        column.replace("", "-1", inplace=True)
+        return column.fillna("-1").astype("category", copy=False)
 
     @staticmethod
     def _remove_invalid_frequencies(df):
-        valid_range = df["Frequência"] <= LIMIT_FREQ
+        df.sort_values(
+            ["Frequência", "Latitude", "Longitude"], ignore_index=True, inplace=True
+        )
+        return df[df["Frequência"] <= LIMIT_FREQ]
         # TODO: save to discarded and log
         # log = f"""[("Colunas", "Frequência"),
         # 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
         # 		  """
         # self.register_log(df, log, check_coords)
-        return df.loc[valid_range]
+
+    @staticmethod
+    def _format_types(df):
+        cols = ["Frequência", "Latitude", "Longitude"]
+        for col in cols:
+            df[col] = Estacoes._cast2float(df[col])
+        for col in df.columns:
+            if col not in cols:
+                df[col] = Estacoes._cast2cat(df[col])
+        return df
 
     def _format(
         self,
@@ -261,11 +279,8 @@ class Estacoes(Base):
         anatel = pd.concat(dfs, ignore_index=True)
         df = merge_on_frequency(anatel, aero)
         df = self.validate_coordinates(df)
-        df = self._simplify_sources(df)
-        for col in ["Frequência", "Latitude", "Longitude"]:
-            df[col] = self._cast2float(df[col])
-        df.sort_values(
-            ["Frequência", "Latitude", "Longitude"], ignore_index=True, inplace=True
-        )
-        df = self._remove_invalid_frequencies(df)
+        df = Estacoes._simplify_sources(df)
+        df = Estacoes._format_types(df)
+        df = Estacoes._remove_invalid_frequencies(df)
+        df = Estacoes._format_types(df)
         return df.loc[:, self.columns]

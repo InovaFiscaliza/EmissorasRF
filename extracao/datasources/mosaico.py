@@ -67,11 +67,12 @@ class Mosaico(Base, GetAttr):
             .str.upper()
             .str.split(" ")
         )
-        df = df.explode("Designação_Emissão").reset_index(drop=True)
         exploded_rows = df["Designação_Emissão"].apply(lambda x: isinstance(x, list))
         log = """[("Colunas", "Designação_Emissão"]),
 		          ("Processamento", "Registro expandido nos componentes individuais e extraídas Largura e Classe")]"""
         df = self.register_log(df, log, exploded_rows)
+        df = df.explode("Designação_Emissão").reset_index(drop=True)
+
         df = df[df["Designação_Emissão"] != "/"]  # Removes empty rows
         # Apply the parse_bw function
         parsed_data = zip(*df["Designação_Emissão"].apply(Base.parse_bw))
