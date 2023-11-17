@@ -37,12 +37,9 @@ class Base:
         self, df: pd.DataFrame, folder: Union[str, Path], stem: str
     ) -> pd.DataFrame:
         """Format, Save and return a dataframe"""
-        df = df.astype("string[pyarrow]").drop_duplicates(
-            keep="first", ignore_index=True
-        )
         try:
             file = Path(f"{folder}/{stem}.parquet.gzip")
-            df.to_parquet(file, compression="gzip", index=False)
+            df.to_parquet(file, compression="gzip", index=False, engine="pyarrow")
         except (ArrowInvalid, ArrowTypeError) as e:
             raise e(f"Não foi possível salvar o arquivo parquet {file}") from e
         return df

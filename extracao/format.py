@@ -143,8 +143,12 @@ def merge_on_frequency(
     """Mescla os dataframes baseados na frequência
     É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
     """
-    df_left = df_left.astype("string[pyarrow]").drop_duplicates(ignore_index=True)
-    df_right = df_right.astype("string[pyarrow]").drop_duplicates(ignore_index=True)
+    df_left["Frequência"] = df_left["Frequência"].astype(
+        "string[pyarrow]"
+    )  # .drop_duplicates(ignore_index=True)
+    df_right["Frequência"] = df_right["Frequência"].astype(
+        "string[pyarrow]"
+    )  # .drop_duplicates(ignore_index=True)
     df: pd.DataFrame = pd.merge(
         df_left,
         df_right,
@@ -320,11 +324,10 @@ def merge_on_frequency(
     df_both_far_right = df_both_far_right[right_cols]
     df_both_far_right.columns = only_right.columns
 
-    merged_df = pd.concat(
+    return pd.concat(
         [only_left, df_both_far_left, df_final_merge, only_right, df_both_far_right],
         ignore_index=True,
     )
-    return merged_df.astype("string").drop_duplicates(ignore_index=True)
 
 
 def _left_filter(df, df_close_merge, merge_cols):

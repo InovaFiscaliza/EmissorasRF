@@ -95,7 +95,7 @@ class AisWeb:
             self.type_aero,
             n_workers=1,
             pause=0.1,
-            progress=True,
+            progress=False,
             threadpool=True,
         )
         return pd.concat(airports)
@@ -205,8 +205,7 @@ class AisWeb:
             self.airports.AeroCode,
             threadpool=True,
             n_workers=20,
-            # pause=0.1,
-            progress=True,
+            progress=False,
         )
         df = pd.concat(records).astype("string")
         df["Fonte"] = "AISWEB"

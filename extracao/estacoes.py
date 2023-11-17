@@ -15,7 +15,16 @@ from fastcore.foundation import L
 from fastcore.parallel import parallel
 from fastcore.xtras import Path
 
-from .constants import COLS_SRD, IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
+from extracao.constants import (
+    COLS_SRD,
+    IBGE_MUNICIPIOS,
+    IBGE_POLIGONO,
+    MALHA_IBGE,
+    FLOAT_COLUMNS,
+    INT_COLUMNS,
+    STR_COLUMNS,
+    CAT_COLUMNS,
+)
 from .datasources.aeronautica import Aero
 from .datasources.base import Base
 from .datasources.mosaico import MONGO_URI
@@ -118,8 +127,10 @@ class Estacoes(Base):
             dtype_backend="pyarrow",
         )
 
+        df["Código_Município"] = df["Código_Município"].astype("string[pyarrow]")
+
         df = pd.merge(
-            df.astype("string[pyarrow]"),
+            df,
             municipios,
             on="Código_Município",
             how="left",
@@ -176,7 +187,14 @@ class Estacoes(Base):
             self.register_log(gdf, log, check_coords)
 
             gdf.drop(
-                ["Código_Município", "Município", "UF", "geometry", "AREA_KM2"],
+                [
+                    "Código_Município",
+                    "Município",
+                    "UF",
+                    "geometry",
+                    "AREA_KM2",
+                    "index_right",
+                ],
                 axis=1,
                 inplace=True,
             )
@@ -230,14 +248,20 @@ class Estacoes(Base):
     @staticmethod
     def _cast2float(column: pd.Series) -> pd.Series:
         return pd.to_numeric(
-            column, downcast="float", errors="coerce", dtype_backend="pyarrow"
-        ).fillna(-1.0)
+            column.fillna("-1"),
+            downcast="float",
+            errors="coerce",
+            dtype_backend="pyarrow",
+        )
 
     @staticmethod
     def _cast2int(column: pd.Series) -> pd.Series:
         return pd.to_numeric(
-            column, downcast="integer", errors="coerce", dtype_backend="pyarrow"
-        ).fillna(-1)
+            column.fillna("0"),
+            downcast="unsigned",
+            errors="coerce",
+            dtype_backend="pyarrow",
+        )
 
     @staticmethod
     def _cast2str(column: pd.Series) -> pd.Series:
@@ -263,12 +287,15 @@ class Estacoes(Base):
 
     @staticmethod
     def _format_types(df):
-        cols = ["Frequência", "Latitude", "Longitude"]
-        for col in cols:
+        df["Frequência"] = df["Frequência"].astype("double[pyarrow]")
+        for col in FLOAT_COLUMNS:
             df[col] = Estacoes._cast2float(df[col])
-        for col in df.columns:
-            if col not in cols:
-                df[col] = Estacoes._cast2cat(df[col])
+        for col in INT_COLUMNS:
+            df[col] = Estacoes._cast2int(df[col])
+        for col in CAT_COLUMNS:
+            df[col] = Estacoes._cast2cat(df[col])
+        for col in STR_COLUMNS:
+            df[col] = Estacoes._cast2str(df[col])
         return df
 
     def _format(
@@ -282,5 +309,4 @@ class Estacoes(Base):
         df = Estacoes._simplify_sources(df)
         df = Estacoes._format_types(df)
         df = Estacoes._remove_invalid_frequencies(df)
-        df = Estacoes._format_types(df)
         return df.loc[:, self.columns]
