@@ -203,13 +203,13 @@ class Radcom(Sitarweb):
     ) -> pd.DataFrame:  # DataFrame formatado
         """Formata, limpa e padroniza os dados provenientes da query no banco"""
         df["Entidade"] = df["Entidade"].str.strip()
-        df["Num_Serviço"] = "231"
-        df["Classe_Emissão"] = pd.NA
-        df["Largura_Emissão(kHz)"] = "256"
-        df["Validade_RF"] = pd.NA
+        df["Serviço"] = 231
+        df["Classe_Emissão"] = "-1"
+        df["Largura_Emissão(kHz)"] = 256
+        df["Validade_RF"] = "-1"
         df["Status"] = "RADCOM"
         df["Fonte"] = "SRD"
-        df["Multiplicidade"] = "1"
+        df["Multiplicidade"] = 1
         a = df.Situação.isna()
         df.loc[a, "Classe"] = df.loc[a, "Fase"].astype("string")
         df.loc[~a, "Classe"] = (

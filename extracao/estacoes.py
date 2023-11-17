@@ -5,7 +5,7 @@ __all__ = ['Estacoes']
 
 # %% ../nbs/04_estacoes.ipynb 3
 import urllib.request
-from typing import List
+from typing import List, Union
 from zipfile import ZipFile
 
 import geopandas as gpd
@@ -14,6 +14,8 @@ from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import L
 from fastcore.parallel import parallel
 from fastcore.xtras import Path
+from pyarrow import ArrowInvalid, ArrowTypeError
+
 
 from extracao.constants import (
     COLS_SRD,
@@ -76,8 +78,8 @@ class Estacoes(Base):
             "telecom": Telecom(self.mongo_uri, self.limit),
             "smp": SMP(self.mongo_uri, self.limit),
             "srd": SRD(self.mongo_uri, self.limit),
-            # 'stel': Stel(self.sql_params),
-            # 'radcom': Radcom(self.sql_params),
+            "stel": Stel(self.sql_params),
+            "radcom": Radcom(self.sql_params),
             "aero": Aero(),
         }
 
@@ -284,6 +286,17 @@ class Estacoes(Base):
         # 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
         # 		  """
         # self.register_log(df, log, check_coords)
+
+    def _save(
+        self, df: pd.DataFrame, folder: Union[str, Path], stem: str
+    ) -> pd.DataFrame:
+        """Format, Save and return a dataframe"""
+        try:
+            file = Path(f"{folder}/{stem}.parquet.gzip")
+            df.to_parquet(file, compression="gzip", index=False, engine="pyarrow")
+        except (ArrowInvalid, ArrowTypeError) as e:
+            raise e(f"Não foi possível salvar o arquivo parquet {file}") from e
+        return df
 
     @staticmethod
     def _format_types(df):
