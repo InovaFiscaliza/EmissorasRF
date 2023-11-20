@@ -2,10 +2,11 @@
 
 # %% auto 0
 __all__ = ['TIMEOUT', 'RELATORIO', 'ESTACAO', 'MALHA_IBGE', 'FILES', 'PATH_NAV', 'PATH_COM', 'VOR_ILS_DME', 'CHANNELS',
-           'IBGE_MUNICIPIOS', 'IBGE_POLIGONO', 'COLUNAS', 'COLS_SRD', 'DTYPES', 'AGG_LICENCIAMENTO', 'AGG_SMP',
-           'APP_ANALISE_PT', 'APP_ANALISE_EN', 'ESTADOS', 'SIGLAS', 'BW', 'BW_MAP', 'DICT_SRD', 'PROJECTION_SRD',
-           'DICT_LICENCIAMENTO', 'PROJECTION_LICENCIAMENTO', 'MONGO_TELECOM', 'MONGO_SRD', 'MONGO_SMP', 'SQL_RADCOM',
-           'SQL_STEL', 'SQL_VALIDA_COORD', 'REGEX_ESTADOS', 'RE_BW', 'MIN_LAT', 'MAX_LAT', 'MIN_LONG', 'MAX_LONG']
+           'IBGE_MUNICIPIOS', 'IBGE_POLIGONO', 'COLUNAS', 'COLS_SRD', 'FLOAT_COLUMNS', 'INT_COLUMNS', 'STR_COLUMNS',
+           'CAT_COLUMNS', 'AGG_LICENCIAMENTO', 'AGG_SMP', 'APP_ANALISE_PT', 'APP_ANALISE_EN', 'ESTADOS', 'SIGLAS', 'BW',
+           'BW_MAP', 'DICT_SRD', 'PROJECTION_SRD', 'DICT_LICENCIAMENTO', 'PROJECTION_LICENCIAMENTO', 'MONGO_TELECOM',
+           'MONGO_SRD', 'MONGO_SMP', 'SQL_RADCOM', 'SQL_STEL', 'SQL_VALIDA_COORD', 'REGEX_ESTADOS', 'RE_BW', 'MIN_LAT',
+           'MAX_LAT', 'MIN_LONG', 'MAX_LONG']
 
 # %% ../nbs/00_constants.ipynb 2
 import re
@@ -60,37 +61,68 @@ COLS_SRD = COLUNAS + [
     "Relatório_Canal",
 ]
 
-DTYPES = {
-    "Frequência"
-    "Entidade"
-    "Fistel"
-    "Serviço"
-    "Estação"
-    "Latitude"
-    "Longitude"
-    "Código_Município"
-    "Município"
-    "UF"
-    "Classe"
-    "Classe_Emissão"
-    "Largura_Emissão(kHz)"
-    "Validade_RF"
-    "Status"
-    "Fonte"
-    "Multiplicidade"
-    "Log"
-    "Cota_Base_Torre(m)"
-    "Potência_Transmissor(W)"
-    "Ganho_Antena(dBd)"
-    "Ângulo_Elevação_Antena"
-    "Azimute_Antena"
-    "Altura_Antena(m)"
-    "Atenuação_Linha(db/100m)"
-    "Perdas_Acessórias_Linha(db)"
-    "Padrão_Antena(dBd)"
-    "Comprimento_Linha(m)"
-    "Relatório_Canal"
-}
+FLOAT_COLUMNS = [
+    "Latitude",
+    "Longitude",
+    "Largura_Emissão(kHz)",
+    "Cota_Base_Torre(m)",
+    "Potência_Transmissor(W)",
+    "Ganho_Antena(dBd)",
+    "Ângulo_Elevação_Antena",
+    "Azimute_Antena",
+    "Altura_Antena(m)",
+    "Atenuação_Linha(db/100m)",
+    "Perdas_Acessórias_Linha(db)",
+    "Comprimento_Linha(m)",
+]
+
+INT_COLUMNS = ["Fistel", "Serviço", "Código_Município", "Multiplicidade"]
+
+
+STR_COLUMNS = ["Entidade", "Estação", "Log", "Padrão_Antena(dBd)", "Relatório_Canal"]
+
+CAT_COLUMNS = [
+    # 'Código_Município',
+    "Município",
+    "UF",
+    "Classe",
+    "Classe_Emissão",
+    "Validade_RF",
+    "Status",
+    "Fonte",
+]
+
+# DTYPES = {
+# 	'Frequência'
+# 	'Entidade'
+# 	'Fistel'
+# 	'Serviço'
+# 	'Estação'
+# 	'Latitude'
+# 	'Longitude'
+# 	'Código_Município'
+# 	'Município'
+# 	'UF'
+# 	'Classe'
+# 	'Classe_Emissão'
+# 	'Largura_Emissão(kHz)'
+# 	'Validade_RF'
+# 	'Status'
+# 	'Fonte'
+# 	'Multiplicidade'
+# 	'Log'
+# 	'Cota_Base_Torre(m)'
+# 	'Potência_Transmissor(W)'
+# 	'Ganho_Antena(dBd)'
+# 	'Ângulo_Elevação_Antena'
+# 	'Azimute_Antena'
+# 	'Altura_Antena(m)'
+# 	'Atenuação_Linha(db/100m)'
+# 	'Perdas_Acessórias_Linha(db)'
+# 	'Padrão_Antena(dBd)'
+# 	'Comprimento_Linha(m)'
+# 	'Relatório_Canal'
+# }
 
 # COLS_LICENCIAMENTO = [
 # 	'Frequência',

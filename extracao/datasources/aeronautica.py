@@ -42,7 +42,7 @@ class Aero(Base):
         radares = pd.read_csv(Path(__file__).parent / "arquivos" / "radares.csv")
         radares["Fonte"] = "RADAR"
         sources = [get_icao, get_aisw, get_aisg, get_redemet]
-        dfs = parallel(func, sources, threadpool=True, progress=True)
+        dfs = parallel(func, sources, threadpool=True, progress=False)
         dfs.append(radares)
         return dfs
 
@@ -71,4 +71,5 @@ class Aero(Base):
             )
             icao.loc[np.isclose(icao.Longitude, -472.033447), "Longitude"] = -47.2033447
             icao.loc[np.isclose(icao.Longitude, 69.934998), "Longitude"] = -69.934998
+            icao["Multiplicidade"] = 1
             return icao
