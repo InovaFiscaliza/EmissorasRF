@@ -90,15 +90,7 @@ class AisWeb:
         self,
     ) -> pd.DataFrame:  # DataFrame com os dados de aeroportos
         """Retorna a lista de aeroportos"""
-        airports = parallel(
-            self.request_aero,
-            self.type_aero,
-            n_workers=1,
-            pause=0.1,
-            progress=False,
-            threadpool=True,
-        )
-        return pd.concat(airports)
+        return pd.concat([self.request_aero(a) for a in self.type_aero])
 
     def _parse_type(self, df):
         df = df[df["@type"].isin(TYPE)].reset_index(drop=True)
@@ -205,6 +197,7 @@ class AisWeb:
             self.airports.AeroCode,
             threadpool=True,
             n_workers=20,
+            pause=0.1,
             progress=False,
         )
         df = pd.concat(records).astype("string")

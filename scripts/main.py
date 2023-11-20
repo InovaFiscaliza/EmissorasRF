@@ -66,12 +66,6 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = typer.run(get_db)
-
-	print(data.info())
-
-	print(data.sample(5))
-
-	print(data.Fonte.value_counts())
+	typer.run(get_db)
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')
