@@ -145,7 +145,7 @@ def merge_on_frequency(
     """
     df_left = df_left.astype("string[pyarrow]").drop_duplicates(ignore_index=True)
     df_right = df_right.astype("string[pyarrow]").drop_duplicates(ignore_index=True)
-    df: pd.DataFrame = pd.merge(
+    df = pd.merge(
         df_left,
         df_right,
         on=on,
@@ -166,22 +166,14 @@ def merge_on_frequency(
     if df[both].empty:
         return pd.concat([df_left, df_right], ignore_index=True)
 
-    left_cols = [c for c in df.columns if right_suffix not in c]
-    right_cols = [c for c in df.columns if left_suffix not in c]
+    only_left = df[left_only].copy()
+    only_left = only_left.iloc[:, : len(df_left.columns)]
+    only_left.columns = df_left.columns
 
-    only_left = (
-        df.loc[left_only, left_cols]
-        .copy()
-        .drop_duplicates(subset=left_cols, ignore_index=True)
-    )
-    only_left.columns = [c.replace(left_suffix, "") for c in left_cols]
-
-    only_right = (
-        df.loc[right_only, right_cols]
-        .copy()
-        .drop_duplicates(subset=right_cols, ignore_index=True)
-    )
-    only_right.columns = [c.replace(right_suffix, "") for c in right_cols]
+    only_right = df[right_only].copy()
+    only_right_cols = listify(on) + df.columns[len(df_left.columns) :].to_list()
+    only_right = only_right.loc[:, only_right_cols]
+    only_right.columns = df_right.columns
 
     intersection_left = len(df_left) - len(only_left)
     intersection_right = len(df_right) - len(only_right)
