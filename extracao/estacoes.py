@@ -131,15 +131,15 @@ class Estacoes(Base):
 			dtype_backend='pyarrow',
 		)
 
-		df['Código_Município'] = df['Código_Município'].astype('string[pyarrow]')
+        df["Código_Município"] = df["Código_Município"].astype("string[pyarrow]")
 
-		df = pd.merge(
-			df,
-			municipios,
-			on='Código_Município',
-			how='left',
-			copy=False,
-		)
+        df = pd.merge(
+            df,
+            municipios,
+            on="Código_Município",
+            how="left",
+            copy=False,
+        )
 
 		null_coords = df.Latitude_x.isna() | df.Longitude_x.isna()
 
@@ -265,12 +265,29 @@ class Estacoes(Base):
 	def _cast2str(column: pd.Series) -> pd.Series:
 		column.replace('', '-1', inplace=True)
 		return column.astype('string', copy=False).fillna('-1')
+	@staticmethod
+	def _cast2str(column: pd.Series) -> pd.Series:
+		column.replace('', '-1', inplace=True)
+		return column.astype('string', copy=False).fillna('-1')
 
 	@staticmethod
 	def _cast2cat(column: pd.Series) -> pd.Series:
 		column.replace('', '-1', inplace=True)
 		return column.fillna('-1').astype('category', copy=False)
+	@staticmethod
+	def _cast2cat(column: pd.Series) -> pd.Series:
+		column.replace('', '-1', inplace=True)
+		return column.fillna('-1').astype('category', copy=False)
 
+	@staticmethod
+	def _remove_invalid_frequencies(df):
+		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
+		return df[df['Frequência'] <= LIMIT_FREQ]
+		# TODO: save to discarded and log
+		# log = f"""[("Colunas", "Frequência"),
+		# 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
+		# 		  """
+		# self.register_log(df, log, check_coords)
 	@staticmethod
 	def _remove_invalid_frequencies(df):
 		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
@@ -303,6 +320,18 @@ class Estacoes(Base):
 			df[col] = Estacoes._cast2str(df[col])
 		return df
 
+	def _format(
+		self,
+		dfs: List,  # List with the individual API sources
+	) -> pd.DataFrame:  # Processed DataFrame
+		aero = dfs.pop()
+		anatel = pd.concat(dfs, ignore_index=True)
+		df = merge_on_frequency(anatel, aero)
+		df = self.validate_coordinates(df)
+		df = Estacoes._simplify_sources(df)
+		df = Estacoes._format_types(df)
+		df = Estacoes._remove_invalid_frequencies(df)
+		return df.loc[:, self.columns]
 	def _format(
 		self,
 		dfs: List,  # List with the individual API sources
