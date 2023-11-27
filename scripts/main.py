@@ -44,6 +44,9 @@ def get_db(
 	parallel: bool = True,  # Caso verdadeiro efetua as requisições de forma paralela em cada fonte de dados
 ) -> 'pd.DataFrame':  # Retorna o DataFrame com as bases da Anatel e da Aeronáutica
 	"""Função para encapsular a instância e atualização dos dados"""
+	import time
+
+	start = time.perf_counter()
 	data = Estacoes(SQLSERVER_PARAMS, MONGO_URI, limit, parallel)
 	data.update()
 	data.save()
@@ -58,20 +61,10 @@ def get_db(
 		path.mkdir(parents=True, exist_ok=True)
 		print(f'Salvando dados em {path}')
 		shutil.copytree(str(data.folder), str(path), dirs_exist_ok=True)
+
+	print(f'Elapsed time: {time.perf_counter() - start} seconds')
 	return data
 
 
 if __name__ == '__main__':
-	import time
-
-	start = time.perf_counter()
-
-	data = typer.run(get_db)
-
-	print(data.info())
-
-	print(data.sample(5))
-
-	print(data.Fonte.value_counts())
-
-	print(f'Elapsed time: {time.perf_counter() - start} seconds')
+	typer.run(get_db)
