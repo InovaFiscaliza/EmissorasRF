@@ -76,7 +76,7 @@ class Estacoes(Base):
 		except Exception as e:
 			print(f'Erro ao atualizar a classe {class_instance.__class__.__name__}')
 			print(e)
-		return class_instance.df()
+		return class_instance.df
 
 	def init_data_sources(self):
 		self.sources = {
