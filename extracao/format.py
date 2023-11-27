@@ -169,12 +169,13 @@ def merge_on_frequency(
 		return pd.concat([df_left, df_right], ignore_index=True)
 
 	only_left = df[left_only].copy()
+	left_cols = only_left.columns[: len(df_left.columns)].to_list()
 	only_left = only_left.iloc[:, : len(df_left.columns)]
 	only_left.columns = df_left.columns
 
 	only_right = df[right_only].copy()
-	only_right_cols = listify(on) + df.columns[len(df_left.columns) :].to_list()
-	only_right = only_right.loc[:, only_right_cols]
+	right_cols = listify(on) + df.columns[len(df_left.columns) :].to_list()
+	only_right = only_right.loc[:, right_cols]
 	only_right.columns = df_right.columns
 
 	intersection_left = len(df_left) - len(only_left)
