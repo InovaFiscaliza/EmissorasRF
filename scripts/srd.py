@@ -9,6 +9,8 @@ if __name__ == '__main__':
 
 	data.update()
 
+	data.save()
+
 	print('DATA')
 
 	print(data.df.iloc[:, -10:])

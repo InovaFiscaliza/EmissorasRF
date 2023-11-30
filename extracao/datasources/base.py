@@ -38,9 +38,7 @@ class Base:
 		"""Format, Save and return a dataframe"""
 		try:
 			file = Path(f'{folder}/{stem}.parquet.gzip')
-			df.astype('string[pyarrow]').to_parquet(
-				file, compression='gzip', index=False, engine='pyarrow'
-			)
+			df.to_parquet(file, compression='gzip', index=False, engine='pyarrow')
 		except (ArrowInvalid, ArrowTypeError) as e:
 			raise e(f'Não foi possível salvar o arquivo parquet {file}') from e
 		return df
@@ -123,3 +121,31 @@ class Base:
 			folder = self.folder
 		self._save(self.df, folder, self.stem)
 		self._save(self.discarded, folder, f'{self.stem}_discarded')
+
+	@staticmethod
+	def _cast2float(column: pd.Series) -> pd.Series:
+		return pd.to_numeric(
+			column,
+			downcast='float',
+			errors='coerce',
+			dtype_backend='numpy_nullable',
+		).fillna(-1.0)
+
+	@staticmethod
+	def _cast2int(column: pd.Series) -> pd.Series:
+		return pd.to_numeric(
+			column,
+			downcast='integer',
+			errors='coerce',
+			dtype_backend='numpy_nullable',
+		).fillna(-1)
+
+	@staticmethod
+	def _cast2str(column: pd.Series) -> pd.Series:
+		column.replace('', '-1', inplace=True)
+		return column.astype('string', copy=False).fillna('-1')
+
+	@staticmethod
+	def _cast2cat(column: pd.Series) -> pd.Series:
+		column.replace('', '-1', inplace=True)
+		return column.fillna('-1').astype('category', copy=False)

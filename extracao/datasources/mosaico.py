@@ -11,6 +11,12 @@ from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import GetAttr
 from tqdm.auto import tqdm
 
+from extracao.constants import (
+	FLOAT_COLUMNS,
+	INT_COLUMNS,
+	CAT_COLUMNS,
+	STR_COLUMNS,
+)
 from .connectors import MongoDB
 from .base import Base
 
@@ -18,63 +24,66 @@ from .base import Base
 load_dotenv(find_dotenv())
 
 # %% ../../nbs/01d_mosaico.ipynb 6
-MONGO_URI: str = os.environ.get("MONGO_URI")
+MONGO_URI: str = os.environ.get('MONGO_URI')
+
 
 # %% ../../nbs/01d_mosaico.ipynb 7
 class Mosaico(Base, GetAttr):
-    def __init__(self, mongo_uri: str = MONGO_URI):
-        self.database = "sms"
-        self.default = MongoDB(mongo_uri)
+	def __init__(self, mongo_uri: str = MONGO_URI):
+		self.database = 'sms'
+		self.default = MongoDB(mongo_uri)
 
-    @property
-    def collection(self):
-        raise NotImplementedError(
-            "Subclasses devem implementar a propriedade 'collection'"
-        )
+	@property
+	def collection(self):
+		raise NotImplementedError("Subclasses devem implementar a propriedade 'collection'")
 
-    @property
-    def query(self):
-        raise NotImplementedError("Subclasses devem implementar a propriedade 'query'")
+	@property
+	def query(self):
+		raise NotImplementedError("Subclasses devem implementar a propriedade 'query'")
 
-    @property
-    def projection(self):
-        raise NotImplementedError(
-            "Subclasses devem implementar a propriedade 'projection'"
-        )
+	@property
+	def projection(self):
+		raise NotImplementedError("Subclasses devem implementar a propriedade 'projection'")
 
-    def _extract(self, collection: str, pipeline: list):
-        client = self.connect()
-        database = client[self.database]
-        collection = database[collection]
-        dtype = "string[pyarrow]" if self.stem == "srd" else "category"
-        df = pd.DataFrame(list(collection.aggregate(pipeline)), copy=False, dtype=dtype)
-        # Substitui strings vazias e somente com espaços por nulo
-        return df.replace(r"^\s*$", pd.NA, regex=True)
+	def _extract(self, collection: str, pipeline: list):
+		client = self.connect()
+		database = client[self.database]
+		collection = database[collection]
+		df = pd.DataFrame(list(collection.aggregate(pipeline)), copy=False, dtype='string')
+		# Substitui strings vazias e somente com espaços por nulo
+		return df.replace(r'^\s*$', pd.NA, regex=True)
 
-    def split_designacao(
-        self,
-        df: pd.DataFrame,  # DataFrame com coluna original DesignacaoEmissao
-    ) -> (
-        pd.DataFrame
-    ):  # DataFrame com novas colunas Largura_Emissão(kHz) e Classe_Emissão
-        """Parse a bandwidth string
-        It returns the numerical component and a character class
-        """
-        df["Designação_Emissão"] = (
-            df["Designação_Emissão"]
-            .str.replace(",", " ")
-            .str.strip()
-            .str.upper()
-            .str.split(" ")
-        )
-        exploded_rows = df["Designação_Emissão"].apply(lambda x: isinstance(x, list))
-        log = """[("Colunas", "Designação_Emissão"]),
+	def split_designacao(
+		self,
+		df: pd.DataFrame,  # DataFrame com coluna original DesignacaoEmissao
+	) -> pd.DataFrame:  # DataFrame com novas colunas Largura_Emissão(kHz) e Classe_Emissão
+		"""Parse a bandwidth string
+		It returns the numerical component and a character class
+		"""
+		df['Designação_Emissão'] = (
+			df['Designação_Emissão'].str.replace(',', ' ').str.strip().str.upper().str.split(' ')
+		)
+		exploded_rows = df['Designação_Emissão'].apply(lambda x: isinstance(x, list))
+		log = """[("Colunas", "Designação_Emissão"]),
 		          ("Processamento", "Registro expandido nos componentes individuais e extraídas Largura e Classe")]"""
-        df = self.register_log(df, log, exploded_rows)
-        df = df.explode("Designação_Emissão").reset_index(drop=True)
+		df = self.register_log(df, log, exploded_rows)
+		df = df.explode('Designação_Emissão').reset_index(drop=True)
 
-        df = df[df["Designação_Emissão"] != "/"]  # Removes empty rows
-        # Apply the parse_bw function
-        parsed_data = zip(*df["Designação_Emissão"].apply(Base.parse_bw))
-        df["Largura_Emissão(kHz)"], df["Classe_Emissão"] = parsed_data
-        return df.drop("Designação_Emissão", axis=1)
+		df = df[df['Designação_Emissão'] != '/']  # Removes empty rows
+		# Apply the parse_bw function
+		parsed_data = zip(*df['Designação_Emissão'].apply(Base.parse_bw))
+		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
+		return df.drop('Designação_Emissão', axis=1)
+
+	@staticmethod
+	def _format_types(df):
+		df['Frequência'] = df['Frequência'].astype('float')
+		for col in FLOAT_COLUMNS:
+			df[col] = Base._cast2float(df[col])
+		for col in INT_COLUMNS:
+			df[col] = Base._cast2int(df[col])
+		for col in CAT_COLUMNS:
+			df[col] = Base._cast2cat(df[col])
+		for col in STR_COLUMNS:
+			df[col] = Base._cast2str(df[col])
+		return df

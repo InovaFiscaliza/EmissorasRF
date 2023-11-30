@@ -12,11 +12,11 @@ import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 
 from extracao.constants import (
-    BW_MAP,
-    COLS_SRD,
-    DICT_SRD,
-    MONGO_SRD,
-    PROJECTION_SRD,
+	BW_MAP,
+	COLS_SRD,
+	DICT_SRD,
+	MONGO_SRD,
+	PROJECTION_SRD,
 )
 
 from .mosaico import Mosaico
@@ -25,99 +25,93 @@ from .mosaico import Mosaico
 load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01e_srd.ipynb 6
-MONGO_URI = os.environ.get("MONGO_URI")
+MONGO_URI = os.environ.get('MONGO_URI')
+
 
 # %% ../../nbs/01e_srd.ipynb 7
 class SRD(Mosaico):
-    """Classe para encapsular a lógica de extração de Radiodifusão"""
+	"""Classe para encapsular a lógica de extração de Radiodifusão"""
 
-    def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
-        super().__init__(mongo_uri)
-        self.limit = limit
+	def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
+		super().__init__(mongo_uri)
+		self.limit = limit
 
-    @property
-    def stem(self):
-        return "srd"
+	@property
+	def stem(self):
+		return 'srd'
 
-    @property
-    def collection(self):
-        return "srd"
+	@property
+	def collection(self):
+		return 'srd'
 
-    @property
-    def query(self):
-        return MONGO_SRD
+	@property
+	def query(self):
+		return MONGO_SRD
 
-    @property
-    def projection(self):
-        return PROJECTION_SRD
+	@property
+	def projection(self):
+		return PROJECTION_SRD
 
-    @property
-    def columns(self):
-        return COLS_SRD
+	@property
+	def columns(self):
+		return COLS_SRD
 
-    @property
-    def cols_mapping(self):
-        return DICT_SRD
+	@property
+	def cols_mapping(self):
+		return DICT_SRD
 
-    def extraction(self) -> pd.DataFrame:
-        pipeline = [{"$match": self.query}, {"$project": self.projection}]
-        if self.limit > 0:
-            pipeline.append({"$limit": self.limit})
-        df = self._extract(self.collection, pipeline)
-        # df.loc[df["estacao"] == "[]", "estacao"] = "{}"
-        # cols = ["srd_planobasico", "estacao", "habilitacao", "Status"]
-        # for col in cols:
-        #     df = df.join(pd.json_normalize(df[col].apply(eval)))
-        # df.drop(columns=cols, inplace=True)
-        df["Log"] = ""
-        return df
+	def extraction(self) -> pd.DataFrame:
+		pipeline = [{'$match': self.query}, {'$project': self.projection}]
+		if self.limit > 0:
+			pipeline.append({'$limit': self.limit})
+		df = self._extract(self.collection, pipeline)
+		df['Log'] = ''
+		return df
 
-    def _format(
-        self,
-        df: pd.DataFrame,  # DataFrame com o resultantes do banco de dados
-    ) -> pd.DataFrame:  # DataFrame formatado
-        """Formata, limpa e padroniza os dados provenientes da query no banco"""
+	def _format(
+		self,
+		df: pd.DataFrame,  # DataFrame com o resultantes do banco de dados
+	) -> pd.DataFrame:  # DataFrame formatado
+		"""Formata, limpa e padroniza os dados provenientes da query no banco"""
 
-        df = df.rename(columns=self.cols_mapping)
-        status = df.Status.str.contains("-C1$|-C2$|-C3$|-C4$|-C7|-C98$", na=False)
-        # discarded = df[~status].copy()
-        # log = """[("Registro", "Status"),
-        #         ("Processamento", "Registro com Status não considerado para fins de monitoração")]"""
-        # discarded = self.register_log(discarded, log)
-        df = df[status].reset_index(drop=True)
-        df["Frequência"] = (
-            df.Frequência.astype("string").str.replace(",", ".").astype("float")
-        )
-        # discarded_with_na = df[df.Frequência.isna()].copy()
-        # log = """[("Registro", "Frequência"),
-        #         ("Processamento", "Registro com valor nulo presente")]"""
-        # discarded_with_na = self.register_log(discarded_with_na, log)
-        df.dropna(subset="Frequência", ignore_index=True, inplace=True)  # type: ignore
-        df.loc[df["Serviço"] == "205", "Frequência"] = df.loc[
-            df["Serviço"] == "205", "Frequência"
-        ].apply(lambda x: float(Decimal(x) / Decimal(1000)))
-        df["Frequência"] = df["Frequência"].astype("float")
-        df["Validade_RF"] = df.Validade_RF.astype("string").str.slice(0, 10)
-        df["Fonte"] = "MOSAICO-SRD"
-        df["Serviço"] = df["Serviço"].fillna("")
-        df["Designação_Emissão"] = df.Serviço.astype("string").fillna("").map(BW_MAP)
-        df = self.split_designacao(df)
-        df["Multiplicidade"] = 1
-        df["Padrão_Antena(dBd)"] = df["Padrão_Antena(dBd)"].str.replace("None", "0")
-        df["Potência_Transmissor(W)"] = pd.to_numeric(
-            df["Potência_Transmissor(W)"], errors="coerce"
-        ).astype(float)
-        df["Potência_Transmissor(W)"] = (
-            df["Potência_Transmissor(W)"]
-            .apply(lambda x: float(Decimal(1000) * Decimal(x)))
-            .astype(float)
-        )
-        df.loc[:, ["Id", "Status"]] = df.loc[:, ["Id", "Status"]].astype("string")
-        df["Relatório_Canal"] = (
-            "http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id="
-            + df["Id"]
-            + "&state="
-            + df["Status"]
-        )
-        # self.append2discarded([self.discarded, discarded, discarded_with_na])
-        return df.loc[:, self.columns]
+		df = df.rename(columns=self.cols_mapping)
+		status = df.Status.str.contains('-C1$|-C2$|-C3$|-C4$|-C7|-C98$', na=False)
+		# discarded = df[~status].copy()
+		# log = """[("Registro", "Status"),
+		#         ("Processamento", "Registro com Status não considerado para fins de monitoração")]"""
+		# discarded = self.register_log(discarded, log)
+		df = df[status].reset_index(drop=True)
+		df.dropna(subset='Frequência', ignore_index=True, inplace=True)  # type: ignore
+		df['Frequência'] = df.Frequência.astype('string').str.replace(',', '.').astype('float')
+		# discarded_with_na = df[df.Frequência.isna()].copy()
+		# log = """[("Registro", "Frequência"),
+		#         ("Processamento", "Registro com valor nulo presente")]"""
+		# discarded_with_na = self.register_log(discarded_with_na, log)
+		df.loc[df['Serviço'] == '205', 'Frequência'] = df.loc[
+			df['Serviço'] == '205', 'Frequência'
+		].apply(lambda x: float(Decimal(x) / Decimal(1000)))
+		df['Validade_RF'] = df.Validade_RF.astype('string').str.slice(0, 10)
+		df['Fonte'] = 'MOSAICO-SRD'
+		df['Serviço'] = df['Serviço'].fillna('')
+		df['Designação_Emissão'] = df.Serviço.astype('string').fillna('').map(BW_MAP)
+		df = self.split_designacao(df)
+		df['Multiplicidade'] = 1
+		df['Padrão_Antena(dBd)'] = df['Padrão_Antena(dBd)'].str.replace('None', '0')
+		df['Potência_Transmissor(W)'] = pd.to_numeric(
+			df['Potência_Transmissor(W)'], errors='coerce'
+		).astype('float')
+		df['Potência_Transmissor(W)'] = (
+			df['Potência_Transmissor(W)']
+			.apply(lambda x: float(Decimal(1000) * Decimal(x)))
+			.astype('float')
+		).fillna(-1.0)
+		df.loc[:, ['Id', 'Status']] = df.loc[:, ['Id', 'Status']].astype('string')
+		df['Relatório_Canal'] = (
+			'http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id='
+			+ df['Id']
+			+ '&state='
+			+ df['Status']
+		)
+		df = Mosaico._format_types(df)
+		# self.append2discarded([self.discarded, discarded, discarded_with_na])
+		return df.loc[:, self.columns]

@@ -42,19 +42,20 @@ def get_db(
 	path: str = os.environ.get('DESTINATION'),  # Pasta onde salvar os arquivos",
 	limit: int = 0,  # Número máximo de registros a serem extraídos da cada base MongoDB, 0: sem limite
 	parallel: bool = True,  # Caso verdadeiro efetua as requisições de forma paralela em cada fonte de dados
+	read_cache: bool = False,  # Caso verdadeiro lê os dados já existentes, do contrário efetua a atualização dos dados
 ) -> 'pd.DataFrame':  # Retorna o DataFrame com as bases da Anatel e da Aeronáutica
 	"""Função para encapsular a instância e atualização dos dados"""
 	import time
 
 	start = time.perf_counter()
-	data = Estacoes(SQLSERVER_PARAMS, MONGO_URI, limit, parallel)
+	data = Estacoes(SQLSERVER_PARAMS, MONGO_URI, limit, parallel, read_cache)
 	data.update()
 	data.save()
 	mod_times = {'ANATEL': datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
 	mod_times['AERONAUTICA'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 	versiondb = json.loads((data.folder / 'VersionFile.json').read_text())
 	mod_times['ReleaseDate'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-	versiondb['anateldb'].update(mod_times)
+	versiondb['rfdatahub'].update(mod_times)
 	json.dump(versiondb, (data.folder / 'VersionFile.json').open('w'))
 	if path is not None:
 		path = Path(path)

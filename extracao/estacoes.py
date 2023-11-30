@@ -4,6 +4,7 @@
 __all__ = ['Estacoes']
 
 # %% ../nbs/04_estacoes.ipynb 3
+import copy
 import urllib.request
 from typing import List, Union
 from zipfile import ZipFile
@@ -50,11 +51,13 @@ class Estacoes(Base):
 		mongo_uri: str = MONGO_URI,
 		limit: int = 0,
 		parallel: bool = True,
+		read_cache: bool = False,
 	):
 		self.sql_params = sql_params
 		self.mongo_uri = mongo_uri
 		self.limit = limit
 		self.parallel = parallel
+		self.read_cache = read_cache
 		self.init_data_sources()
 
 	@property
@@ -75,29 +78,32 @@ class Estacoes(Base):
 			class_instance.save()
 		except Exception as e:
 			print(f'Erro ao atualizar a classe {class_instance.__class__.__name__}: {e}')
-		return class_instance.df
+		return class_instance
 
 	def init_data_sources(self):
-		self.sources = {
-			'telecom': Telecom(self.mongo_uri, self.limit),
-			'smp': SMP(self.mongo_uri, self.limit),
-			'srd': SRD(self.mongo_uri, self.limit),
-			'stel': Stel(self.sql_params),
-			'radcom': Radcom(self.sql_params),
-			'aero': Aero(),
-		}
+		self.sources = L(
+			[
+				Telecom(self.mongo_uri, self.limit),
+				SMP(self.mongo_uri, self.limit),
+				SRD(self.mongo_uri, self.limit),
+				Stel(self.sql_params),
+				Radcom(self.sql_params),
+				Aero(),
+			]
+		)
 
 	def extraction(self) -> L:
-		if self.parallel:
-			sources = parallel(
-				Estacoes._update_source,
-				self.sources.values(),
-				n_workers=len(self.sources),
-				progress=True,
-			)
-		else:
-			sources = L(self._update_source(s) for s in self.sources.values())
-		return sources
+		if not self.read_cache:
+			if self.parallel:
+				self.sources = parallel(
+					Estacoes._update_source,
+					self.sources,
+					n_workers=len(self.sources),
+					progress=True,
+				)
+			else:
+				self.sources = self.sources.map(Estacoes._update_source)
+		return self.sources.attrgot('df')
 
 	@staticmethod
 	def verify_shapefile_folder():
@@ -127,19 +133,19 @@ class Estacoes(Base):
 		municipios = pd.read_csv(
 			IBGE_MUNICIPIOS,
 			usecols=['Código_Município', 'Latitude', 'Longitude'],
-			dtype='string[pyarrow]',
-			dtype_backend='pyarrow',
+			dtype='string',
+			dtype_backend='numpy_nullable',
 		)
 
-        df["Código_Município"] = df["Código_Município"].astype("string[pyarrow]")
+		df['Código_Município'] = df['Código_Município'].astype('string')
 
-        df = pd.merge(
-            df,
-            municipios,
-            on="Código_Município",
-            how="left",
-            copy=False,
-        )
+		df = pd.merge(
+			df,
+			municipios,
+			on='Código_Município',
+			how='left',
+			copy=False,
+		)
 
 		null_coords = df.Latitude_x.isna() | df.Longitude_x.isna()
 
@@ -148,7 +154,7 @@ class Estacoes(Base):
 		]
 
 		log = """[("Colunas", ["Latitude", "Longitude"]),
-		           ("Processamento", "Coordenadas Ausentes. Inserido coordenadas do Município")]"""
+				   ("Processamento", "Coordenadas Ausentes. Inserido coordenadas do Município")]"""
 		df = self.register_log(df, log, null_coords)
 
 		df.rename(
@@ -176,6 +182,8 @@ class Estacoes(Base):
 
 		# Spatial join points to the regions
 		gdf = gpd.sjoin(gdf_points, regions, how='inner', predicate='within')
+
+		gdf['CD_MUN'] = gdf.CD_MUN.astype('string')
 
 		if check_municipio:
 			# Check correctness of Coordinates
@@ -215,14 +223,14 @@ class Estacoes(Base):
 		Validates the coordinates in the given DataFrame.
 
 		Args:
-		        df: The DataFrame containing the coordinates to be validated.
-		        check_municipio: A boolean indicating whether to check the municipality information (default: True).
+		                df: The DataFrame containing the coordinates to be validated.
+		                check_municipio: A boolean indicating whether to check the municipality information (default: True).
 
 		Returns:
-		        pd.DataFrame: The DataFrame with validated coordinates.
+		                pd.DataFrame: The DataFrame with validated coordinates.
 
 		Raises:
-		        None
+		                None
 		"""
 		self.verify_shapefile_folder()
 		if check_municipio:
@@ -244,42 +252,6 @@ class Estacoes(Base):
 		return df
 
 	@staticmethod
-	def _cast2float(column: pd.Series) -> pd.Series:
-		return pd.to_numeric(
-			column.fillna('-1'),
-			downcast='float',
-			errors='coerce',
-			dtype_backend='pyarrow',
-		)
-
-	@staticmethod
-	def _cast2int(column: pd.Series) -> pd.Series:
-		return pd.to_numeric(
-			column.fillna('0'),
-			downcast='unsigned',
-			errors='coerce',
-			dtype_backend='pyarrow',
-		)
-
-	@staticmethod
-	def _cast2str(column: pd.Series) -> pd.Series:
-		column.replace('', '-1', inplace=True)
-		return column.astype('string', copy=False).fillna('-1')
-	@staticmethod
-	def _cast2str(column: pd.Series) -> pd.Series:
-		column.replace('', '-1', inplace=True)
-		return column.astype('string', copy=False).fillna('-1')
-
-	@staticmethod
-	def _cast2cat(column: pd.Series) -> pd.Series:
-		column.replace('', '-1', inplace=True)
-		return column.fillna('-1').astype('category', copy=False)
-	@staticmethod
-	def _cast2cat(column: pd.Series) -> pd.Series:
-		column.replace('', '-1', inplace=True)
-		return column.fillna('-1').astype('category', copy=False)
-
-	@staticmethod
 	def _remove_invalid_frequencies(df):
 		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
 		return df[df['Frequência'] <= LIMIT_FREQ]
@@ -288,37 +260,6 @@ class Estacoes(Base):
 		# 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
 		# 		  """
 		# self.register_log(df, log, check_coords)
-	@staticmethod
-	def _remove_invalid_frequencies(df):
-		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
-		return df[df['Frequência'] <= LIMIT_FREQ]
-		# TODO: save to discarded and log
-		# log = f"""[("Colunas", "Frequência"),
-		# 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
-		# 		  """
-		# self.register_log(df, log, check_coords)
-
-	def _save(self, df: pd.DataFrame, folder: Union[str, Path], stem: str) -> pd.DataFrame:
-		"""Format, Save and return a dataframe"""
-		try:
-			file = Path(f'{folder}/{stem}.parquet.gzip')
-			df.to_parquet(file, compression='gzip', index=False, engine='pyarrow')
-		except (ArrowInvalid, ArrowTypeError) as e:
-			raise e(f'Não foi possível salvar o arquivo parquet {file}') from e
-		return df
-
-	@staticmethod
-	def _format_types(df):
-		df['Frequência'] = df['Frequência'].astype('double[pyarrow]')
-		for col in FLOAT_COLUMNS:
-			df[col] = Estacoes._cast2float(df[col])
-		for col in INT_COLUMNS:
-			df[col] = Estacoes._cast2int(df[col])
-		for col in CAT_COLUMNS:
-			df[col] = Estacoes._cast2cat(df[col])
-		for col in STR_COLUMNS:
-			df[col] = Estacoes._cast2str(df[col])
-		return df
 
 	def _format(
 		self,
@@ -329,18 +270,6 @@ class Estacoes(Base):
 		df = merge_on_frequency(anatel, aero)
 		df = self.validate_coordinates(df)
 		df = Estacoes._simplify_sources(df)
-		df = Estacoes._format_types(df)
-		df = Estacoes._remove_invalid_frequencies(df)
-		return df.loc[:, self.columns]
-	def _format(
-		self,
-		dfs: List,  # List with the individual API sources
-	) -> pd.DataFrame:  # Processed DataFrame
-		aero = dfs.pop()
-		anatel = pd.concat(dfs, ignore_index=True)
-		df = merge_on_frequency(anatel, aero)
-		df = self.validate_coordinates(df)
-		df = Estacoes._simplify_sources(df)
-		df = Estacoes._format_types(df)
+		df = SRD._format_types(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		return df.loc[:, self.columns]

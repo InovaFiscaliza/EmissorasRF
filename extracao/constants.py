@@ -115,13 +115,13 @@ FLOAT_COLUMNS = [
 	'Comprimento_Linha(m)',
 ]
 
-INT_COLUMNS = ['Fistel', 'Serviço', 'Código_Município', 'Multiplicidade']
+INT_COLUMNS = ['Fistel', 'Serviço', 'Multiplicidade']
 
 
 STR_COLUMNS = ['Entidade', 'Estação', 'Log', 'Padrão_Antena(dBd)', 'Relatório_Canal']
 
 CAT_COLUMNS = [
-	# 'Código_Município',
+	'Código_Município',
 	'Município',
 	'UF',
 	'Classe',
