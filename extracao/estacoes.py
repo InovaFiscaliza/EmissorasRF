@@ -253,6 +253,7 @@ class Estacoes(Base):
 
 	@staticmethod
 	def _remove_invalid_frequencies(df):
+		df['Frequência'] = df['Frequência'].astype('float')
 		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
 		return df[df['Frequência'] <= LIMIT_FREQ]
 		# TODO: save to discarded and log
@@ -270,6 +271,7 @@ class Estacoes(Base):
 		df = merge_on_frequency(anatel, aero)
 		df = self.validate_coordinates(df)
 		df = Estacoes._simplify_sources(df)
-		df = SRD._format_types(df)
 		df = Estacoes._remove_invalid_frequencies(df)
+		df = SRD._format_types(df)
+		df = df.astype('string', copy=False).replace('-1.0', '-1').astype('category', copy=False)
 		return df.loc[:, self.columns]
