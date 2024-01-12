@@ -11,12 +11,6 @@ from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import GetAttr
 from tqdm.auto import tqdm
 
-from extracao.constants import (
-	FLOAT_COLUMNS,
-	INT_COLUMNS,
-	CAT_COLUMNS,
-	STR_COLUMNS,
-)
 from .connectors import MongoDB
 from .base import Base
 
@@ -74,16 +68,3 @@ class Mosaico(Base, GetAttr):
 		parsed_data = zip(*df['Designação_Emissão'].apply(Base.parse_bw))
 		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
 		return df.drop('Designação_Emissão', axis=1)
-
-	@staticmethod
-	def _format_types(df):
-		df['Frequência'] = df['Frequência'].astype('float')
-		for col in FLOAT_COLUMNS:
-			df[col] = Base._cast2float(df[col])
-		for col in INT_COLUMNS:
-			df[col] = Base._cast2int(df[col])
-		for col in CAT_COLUMNS:
-			df[col] = Base._cast2cat(df[col])
-		for col in STR_COLUMNS:
-			df[col] = Base._cast2str(df[col])
-		return df

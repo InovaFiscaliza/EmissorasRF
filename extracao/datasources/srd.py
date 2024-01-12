@@ -112,6 +112,5 @@ class SRD(Mosaico):
 			+ '&state='
 			+ df['Status']
 		)
-		df = Mosaico._format_types(df)
 		# self.append2discarded([self.discarded, discarded, discarded_with_na])
 		return df.loc[:, self.columns]

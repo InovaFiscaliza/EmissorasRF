@@ -14,7 +14,16 @@ from fastcore.xtras import Path
 from geopy.distance import geodesic
 from pyarrow import ArrowInvalid
 
-from .constants import APP_ANALISE_EN, APP_ANALISE_PT, BW, RE_BW
+from .constants import (
+	FLOAT_COLUMNS,
+	INT_COLUMNS,
+	CAT_COLUMNS,
+	STR_COLUMNS,
+	APP_ANALISE_EN,
+	APP_ANALISE_PT,
+	BW,
+	RE_BW,
+)
 
 MAX_DIST = 10  # Km
 LIMIT_FREQ = 84812.50
@@ -499,3 +508,44 @@ def _left_filter(df, df_close_merge, merge_cols):
 	df = pd.merge(df, df_close_merge, how='left', on=merge_cols, indicator=True, copy=False)
 	df = df.loc[df['_merge'] == 'left_only']
 	return df.drop(['_merge', 'Distance_y'], axis=1).rename(columns={'Distance_x': 'Distance'})
+
+
+def cast2float(column: pd.Series) -> pd.Series:
+	return pd.to_numeric(
+		column,
+		downcast='float',
+		errors='coerce',
+		dtype_backend='numpy_nullable',
+	).fillna(-1.0)
+
+
+def cast2int(column: pd.Series) -> pd.Series:
+	return pd.to_numeric(
+		column,
+		downcast='integer',
+		errors='coerce',
+		dtype_backend='numpy_nullable',
+	).fillna(-1)
+
+
+def cast2str(column: pd.Series) -> pd.Series:
+	column.replace('', '-1', inplace=True)
+	return column.astype('string', copy=False).fillna('-1')
+
+
+def cast2cat(column: pd.Series) -> pd.Series:
+	column.replace('', '-1', inplace=True)
+	return column.fillna('-1').astype('category', copy=False)
+
+
+def format_types(df):
+	df['Frequência'] = df['Frequência'].astype('float')
+	for col in FLOAT_COLUMNS:
+		df[col] = Base._cast2float(df[col])
+	for col in INT_COLUMNS:
+		df[col] = Base._cast2int(df[col])
+	for col in CAT_COLUMNS:
+		df[col] = Base._cast2cat(df[col])
+	for col in STR_COLUMNS:
+		df[col] = Base._cast2str(df[col])
+	return df
