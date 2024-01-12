@@ -5,7 +5,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 
-	data = Telecom(limit=10000)
+	data = Telecom()
 
 	print(data.extraction())
 
