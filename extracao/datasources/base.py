@@ -47,8 +47,8 @@ class Base:
 	def df(self) -> pd.DataFrame:
 		try:
 			df = self._read(self.stem)
-		except (ArrowInvalid, FileNotFoundError):
-			df = self._format(self.extraction())
+		except (ArrowInvalid, FileNotFoundError) as e:
+			raise ValueError(f'Não foi possível ler o arquivo parquet {self.stem}') from e
 		return df
 
 	@staticmethod
