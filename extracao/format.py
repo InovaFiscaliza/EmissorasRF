@@ -339,9 +339,9 @@ def merge_on_frequency(
 	É assumido que as colunas de ambos uma é subconjunto ou idêntica à outra, caso contrário os filtros não irão funcionar como esperado
 	"""
 	df_left['Frequência'] = df_left['Frequência'].astype('string')
-	df_left.drop_duplicates(ignore_index=True, inplace=True)
+	df_left = df_left.drop_duplicates(ignore_index=True)
 	df_right['Frequência'] = df_right['Frequência'].astype('string')
-	df_right.drop_duplicates(ignore_index=True, inplace=True)
+	df_right = df_right.drop_duplicates(ignore_index=True)
 	df: pd.DataFrame = pd.merge(
 		df_left,
 		df_right,
@@ -541,11 +541,11 @@ def cast2cat(column: pd.Series) -> pd.Series:
 def format_types(df):
 	df['Frequência'] = df['Frequência'].astype('float')
 	for col in FLOAT_COLUMNS:
-		df[col] = Base._cast2float(df[col])
+		df[col] = cast2float(df[col])
 	for col in INT_COLUMNS:
-		df[col] = Base._cast2int(df[col])
+		df[col] = cast2int(df[col])
 	for col in CAT_COLUMNS:
-		df[col] = Base._cast2cat(df[col])
+		df[col] = cast2cat(df[col])
 	for col in STR_COLUMNS:
-		df[col] = Base._cast2str(df[col])
+		df[col] = cast2str(df[col])
 	return df
