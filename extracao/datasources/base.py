@@ -38,7 +38,7 @@ class Base:
 		"""Format, Save and return a dataframe"""
 		try:
 			file = Path(f'{folder}/{stem}.parquet.gzip')
-			df.to_parquet(file, compression='gzip', index=False, engine='pyarrow')
+			df.to_parquet(file, compression='gzip', index=False, engine='numpy_nullable')
 		except (ArrowInvalid, ArrowTypeError) as e:
 			raise e(f'Não foi possível salvar o arquivo parquet {file}') from e
 		return df
