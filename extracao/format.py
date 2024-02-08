@@ -5,24 +5,22 @@ __all__ = ['MAX_DIST', 'LIMIT_FREQ', 'parse_bw', 'get_km_distance', 'merge_on_fr
 
 # %% ../nbs/00b_format.ipynb 3
 import re
-from typing import List, Tuple, Union
+from typing import Tuple
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.utils import listify
-from fastcore.xtras import Path
 from geopy.distance import geodesic
-from pyarrow import ArrowInvalid
 
 from .constants import (
-	FLOAT_COLUMNS,
-	INT_COLUMNS,
-	CAT_COLUMNS,
-	STR_COLUMNS,
 	APP_ANALISE_EN,
 	APP_ANALISE_PT,
 	BW,
+	CAT_COLUMNS,
+	FLOAT_COLUMNS,
+	INT_COLUMNS,
 	RE_BW,
+	STR_COLUMNS,
 )
 
 MAX_DIST = 10  # Km
