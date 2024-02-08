@@ -29,7 +29,7 @@ class Base:
 		"""Lê o dataframe formado por self.folder / self.stem.parquet.gzip"""
 		file = Path(f'{self.folder}/{stem}.parquet.gzip')
 		try:
-			df = pd.read_parquet(file, dtype_backend='pyarrow')
+			df = pd.read_parquet(file, dtype_backend='numpy_nullable')
 		except (ArrowInvalid, FileNotFoundError) as e:
 			raise ValueError(f'Error when reading {file}') from e
 		return df
@@ -40,7 +40,7 @@ class Base:
 			file = Path(f'{folder}/{stem}.parquet.gzip')
 			df.to_parquet(file, compression='gzip', index=False, engine='pyarrow')
 		except (ArrowInvalid, ArrowTypeError) as e:
-			raise Exception(f'Não foi possível salvar o arquivo parquet {file}') from e
+			raise Exception(f'Não foi possível salvar o arquivo parquet') from e
 		return df
 
 	@cached_property
@@ -54,7 +54,7 @@ class Base:
 	@staticmethod
 	def parse_bw(
 		bw: str,  # Designação de Emissão (Largura + Classe) codificada como string
-	) -> Tuple[str, str]:  # Largura e Classe de Emissão
+	) -> Tuple[Union[str, pd.NA], Union[str, pd.NA]]:  # Largura e Classe de Emissão
 		"""Parse the bandwidth string"""
 		if match := re.match(RE_BW, bw):
 			multiplier = BW[match[2]]
@@ -116,7 +116,7 @@ class Base:
 	def update(self):
 		self.df = self._format(self.extraction())
 
-	def save(self, folder: Union[str, Path] = None):
+	def save(self, folder: Union[str, Path, None] = None):
 		if folder is None:
 			folder = self.folder
 		self._save(self.df, folder, self.stem)
