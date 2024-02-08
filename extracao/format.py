@@ -364,8 +364,8 @@ def merge_on_frequency(
 		return pd.concat([df_left, df_right], ignore_index=True)
 
 	only_left = df[left_only].copy()
-	left_cols = only_left.columns[: len(df_left.columns)].to_list()
 	only_left = only_left.iloc[:, : len(df_left.columns)]
+	left_cols = only_left.columns.to_list()
 	only_left.columns = df_left.columns
 
 	only_right = df[right_only].copy()
