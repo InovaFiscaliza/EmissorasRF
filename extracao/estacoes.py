@@ -64,9 +64,6 @@ class Estacoes(Base):
 	def columns(self):
 		return COLS_SRD
 
-	def build_from_sources(self) -> pd.DataFrame:
-		return self._format([s.df() for s in self.sources.values()])
-
 	@property
 	def stem(self):
 		return 'estacoes'
@@ -124,7 +121,11 @@ class Estacoes(Base):
 				zip_ref.extractall(parent_folder)
 			zip_file_path.unlink()
 
-	def fill_nan_coordinates(
+	def substitute_coordinates(self, df: pd.DataFrame, rows: pd.Series) -> pd.DataFrame:
+		df.loc[rows, ['Latitude', 'Longitude']] = df.loc[rows, ['Latitude_IBGE', 'Longitude_IBGE']]
+		return df
+
+	def merge_df_with_ibge(
 		self,
 		df: pd.DataFrame,  # DataFrame com os dados da Anatel
 	) -> pd.DataFrame:  # DataFrame com as coordenadas validadas na base do IBGE
@@ -132,7 +133,7 @@ class Estacoes(Base):
 
 		municipios = pd.read_csv(
 			IBGE_MUNICIPIOS,
-			usecols=['Código_Município', 'Latitude', 'Longitude'],
+			usecols=['Código_Município', 'Município', 'UF', 'Latitude', 'Longitude'],
 			dtype='string',
 			dtype_backend='numpy_nullable',
 		)
@@ -147,29 +148,23 @@ class Estacoes(Base):
 			copy=False,
 		)
 
-		null_coords = df.Latitude_x.isna() | df.Longitude_x.isna()
-
-		df.loc[null_coords, ['Latitude_x', 'Longitude_x']] = df.loc[
-			null_coords, ['Latitude_y', 'Longitude_y']
-		]
-
-		log = """[("Colunas", ["Latitude", "Longitude"]),
-				   ("Processamento", "Coordenadas Ausentes. Inserido coordenadas do Município")]"""
-		df = self.register_log(df, log, null_coords)
-
 		df.rename(
 			columns={
 				'Latitude_x': 'Latitude',
 				'Longitude_x': 'Longitude',
-				'Latitude_y': 'Latitude_ibge',
-				'Longitude_y': 'Longitude_ibge',
+				'Município_x': 'Município',
+				'UF_x': 'UF',
+				'Latitude_y': 'Latitude_IBGE',
+				'Longitude_y': 'Longitude_IBGE',
+				'Município_y': 'Município_IBGE',
+				'UF_y': 'UF_IBGE',
 			},
 			inplace=True,
 		)
 
 		return df
 
-	def intersect_coordinates_on_poligon(self, df: pd.DataFrame, check_municipio: bool = True):
+	def intersect_coordinates_on_poligon(self, df: pd.DataFrame):
 		for column in ['Latitude', 'Longitude']:
 			df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
 		regions = gpd.read_file(IBGE_POLIGONO)
@@ -185,46 +180,24 @@ class Estacoes(Base):
 
 		gdf['CD_MUN'] = gdf.CD_MUN.astype('string')
 
-		if check_municipio:
-			# Check correctness of Coordinates
-			check_coords = gdf.Código_Município != gdf.CD_MUN
-
-			log = """[("Colunas", ["Código_Município", "Município", "UF"]),
-				  	 ("Processamento", "Informações substituídas  pela localização correta das coordenadas.")		      
-				  """
-			self.register_log(gdf, log, check_coords)
-
-			gdf.drop(
-				[
-					'Código_Município',
-					'Município',
-					'UF',
-					'geometry',
-					'AREA_KM2',
-					'index_right',
-				],
-				axis=1,
-				inplace=True,
-			)
-
-		gdf.rename(
-			columns={
-				'CD_MUN': 'Código_Município',
-				'NM_MUN': 'Município',
-				'SIGLA_UF': 'UF',
-			},
+		gdf.drop(
+			[
+				'geometry',
+				'AREA_KM2',
+				'index_right',
+			],
+			axis=1,
 			inplace=True,
 		)
 
 		return gdf
 
-	def validate_coordinates(self, df: pd.DataFrame, check_municipio: bool = True) -> pd.DataFrame:
+	def validate_coordinates(self, df: pd.DataFrame) -> pd.DataFrame:
 		"""
 		Validates the coordinates in the given DataFrame.
 
 		Args:
 		                df: The DataFrame containing the coordinates to be validated.
-		                check_municipio: A boolean indicating whether to check the municipality information (default: True).
 
 		Returns:
 		                pd.DataFrame: The DataFrame with validated coordinates.
@@ -233,9 +206,12 @@ class Estacoes(Base):
 		                None
 		"""
 		self.verify_shapefile_folder()
-		if check_municipio:
-			df = self.fill_nan_coordinates(df)
-		return self.intersect_coordinates_on_poligon(df, check_municipio)
+		df = self.merge_df_with_ibge(df)
+		empty_coords = df.Latitude.isna() | df.Longitude.isna()
+		return self.substitute_coordinates(df, empty_coords)
+		df = self.intersect_coordinates_on_poligon(df)
+		diff_mun = df.Código_Município != df.CD_MUN
+		return self.substitute_coordinates(df, diff_mun)
 
 	@staticmethod
 	def _simplify_sources(df):
@@ -269,7 +245,9 @@ class Estacoes(Base):
 		aero = dfs.pop()
 		anatel = pd.concat(dfs, ignore_index=True)
 		df = merge_on_frequency(anatel, aero)
-		df = self.validate_coordinates(df)
+		# df = self.validate_coordinates(df)
+		return df
+
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		df = SRD._format_types(df)

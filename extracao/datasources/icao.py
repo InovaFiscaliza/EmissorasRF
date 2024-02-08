@@ -12,8 +12,7 @@ __all__ = [
 ]
 
 # %% ../../nbs/02a_icao.ipynb 3
-import os
-from pathlib import Path
+
 from typing import Iterable
 
 import pandas as pd
@@ -33,7 +32,7 @@ def convert_latitude(
 	lat: str,  # Latitude
 	hemisphere: str,  # Hemisfério: N | S
 ) -> float:
-	"""Converte a Latitude para formato decimal"""
+	"""Converts the Latitude to decimal format"""
 	multiplier = 1 if hemisphere == 'N' else -1
 	return multiplier * (float(lat[:2]) + float(lat[3:5]) / 60 + float(lat[6:8]) / 3600.0)
 
@@ -42,19 +41,21 @@ def convert_longitude(
 	lon: str,  # Longitude
 	hemisphere: str,  # Hemisfério: W | E
 ) -> float:
-	"""Converte a longitude para formato decimal"""
+	"""Converts the longitude to decimal format"""
 
 	multiplier = 1 if hemisphere == 'E' else -1
 	return multiplier * (float(lon[1:3]) + float(lon[4:6]) / 60 + float(lon[7:9]) / 3600.0)
 
 
 # %% ../../nbs/02a_icao.ipynb 10
+
+
 def _read_df(
-	path: str,  # Caminho do arquivo
-	usecols: Iterable[str],  # Subconjunto de colunas do arquivo
-) -> pd.DataFrame:  # Dataframe formatado
+	path: str,  # Path to file
+	usecols: Iterable[str],  # Subset of file columns
+) -> pd.DataFrame:  # Formatted DataFrame
+	"""Reads the DataFrame at `path`, filters the `usecols` columns and returns it formatted"""
 	# sourcery skip: use-fstring-for-concatenation
-	"""Lê o DataFrame no caminho `path`, filtra as colunas `usecols` e o retorna formatado"""
 	df = pd.read_csv(path, dtype='string')[usecols]
 	df.columns = COLS_NAV
 	df['Latitude'] = df.apply(lambda x: convert_latitude(x['Latitude'], x['NS']), axis=1)

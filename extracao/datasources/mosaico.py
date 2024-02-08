@@ -9,41 +9,42 @@ import os
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import GetAttr
-from tqdm.auto import tqdm
 
 from .connectors import MongoDB
 from .base import Base
 
 # %% ../../nbs/01d_mosaico.ipynb 4
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01d_mosaico.ipynb 6
-MONGO_URI: str = os.environ.get('MONGO_URI')
+MONGO_URI = os.environ.get('MONGO_URI')
 
 
 # %% ../../nbs/01d_mosaico.ipynb 7
 class Mosaico(Base, GetAttr):
+	"""Base Class with the common API from the MOSAICO MongoDB Source"""
+
 	def __init__(self, mongo_uri: str = MONGO_URI):
 		self.database = 'sms'
 		self.default = MongoDB(mongo_uri)
 
 	@property
 	def collection(self):
-		raise NotImplementedError("Subclasses devem implementar a propriedade 'collection'")
+		raise NotImplementedError("Subclasses should implement the property 'collection'")
 
 	@property
 	def query(self):
-		raise NotImplementedError("Subclasses devem implementar a propriedade 'query'")
+		raise NotImplementedError("Subclasses should implement the property 'query'")
 
 	@property
 	def projection(self):
-		raise NotImplementedError("Subclasses devem implementar a propriedade 'projection'")
+		raise NotImplementedError("Subclasses should implement the property 'projection'")
 
 	def _extract(self, collection: str, pipeline: list):
 		client = self.connect()
 		database = client[self.database]
-		collection = database[collection]
-		df = pd.DataFrame(list(collection.aggregate(pipeline)), copy=False, dtype='string')
+		db_collection = database[collection]
+		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False, dtype='string')
 		# Substitui strings vazias e somente com espaços por nulo
 		return df.replace(r'^\s*$', pd.NA, regex=True)
 
