@@ -1,1 +1,36 @@
-{"appAnalise": {"Version": "1.39", "ReleaseDate": "14/11/2023"}, "appColeta": {"Version": "1.11", "ReleaseDate": "01/12/2022"}, "appColetaV2": {"Version": "1.49", "ReleaseDate": "05/10/2023"}, "anateldb": {"ReleaseDate": "02/10/2023 09:20:49", "ANATEL": "02/10/2023 09:19:19", "AERONAUTICA": "02/10/2023 09:19:46"}, "rfdatahub": {"ReleaseDate": "30/11/2023 06:47:45", "ANATEL": "30/11/2023 06:47:45", "AERONAUTICA": "30/11/2023 06:47:45"}, "fiscaliza": {"Version": "0.2.20", "ReleaseDate": "27/02/2023"}, "rfpye": {"Version": "0.2.3", "ReleaseDate": "03/11/2021"}}
+{
+    "appAnalise": {
+        "Version": "1.39",
+        "ReleaseDate": "14/11/2023"
+    },
+    "appAnaliseV2": {
+        "Version": "1.53",
+        "ReleaseDate": "02/02/2024"
+    },
+    "appColeta": {
+        "Version": "1.12",
+        "ReleaseDate": "30/01/2024"
+    },
+    "appColetaV2": {
+        "Version": "1.50",
+        "ReleaseDate": "29/01/2024"
+    },
+    "anateldb": {
+        "ReleaseDate": "02/10/2023 09:20:49",
+        "ANATEL": "02/10/2023 09:19:19",
+        "AERONAUTICA": "02/10/2023 09:19:46"
+    },
+    "rfdatahub": {
+        "ReleaseDate": "30/11/2023 06:47:45",
+        "ANATEL": "30/11/2023 06:47:45",
+        "AERONAUTICA": "30/11/2023 06:47:45"
+    },
+    "fiscaliza": {
+        "Version": "0.2.20",
+        "ReleaseDate": "27/02/2023"
+    },
+    "rfpye": {
+        "Version": "0.2.3",
+        "ReleaseDate": "03/11/2021"
+    }
+}
