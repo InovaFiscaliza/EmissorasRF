@@ -1,18 +1,22 @@
-# Fontes de Dados
+# Arquivo Final
 
-## **Anatel**
+## **Anatel** - `1.123.524`
 
 - **MOSAICO**
   - **SMP**
-    - **Downlink**
-    - **Uplink** - **🧠Gerado pela lib**
+    - **Bruto** : `1.946.611`
+    - **Processado**: `293.613`
+      - **Downlink**: `147.555`
+      - **Uplink**: `146.058` - **🧠Gerado pela lib**
   - **TELECOM**
-    **SRD**
+    - **Bruto** : `7.628.117`
+    - **Processado**: `758.482`
+  - **SRD** - `31.029`
 - **SITARWEB**
-  - **STEL**
-  - **RADCOM**
+  - **STEL** - `35.400`
+  - **RADCOM** - `5.000`
 
-## **Aeronáuticos**
+## **Aeronáuticos** - `2.994`
 
 ### **APIS**
 - **ICAO**
@@ -20,8 +24,7 @@
 - **GEOAISWEB**
 - **REDEMET**
 ### **Pós-Processamento**
-- **RADARES**
-`1030MHz` e `1090MHz`
+- **RADARES** - `1030MHz` e `1090MHz`
 - **CANALIZAÇÃO**
   `VOR_ILSLoc`
   - `ILS glide`
