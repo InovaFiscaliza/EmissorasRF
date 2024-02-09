@@ -43,7 +43,7 @@ load_dotenv(find_dotenv(), override=True)
 
 # %% ../nbs/04_estacoes.ipynb 6
 class Estacoes(Base):
-	"""Classe auxiliar para agregar os dados originários da Anatel"""
+	"""Helper Class to aggregate and process the data from different sources"""
 
 	def __init__(
 		self,
@@ -70,6 +70,7 @@ class Estacoes(Base):
 
 	@staticmethod
 	def _update_source(class_instance):
+		"""Helper functions to update and save the individual data sources"""
 		try:
 			class_instance.update()
 			class_instance.save()
@@ -78,6 +79,7 @@ class Estacoes(Base):
 		return class_instance
 
 	def init_data_sources(self):
+		"""Initializes the individual classes and saves them in a property list"""
 		self.sources = L(
 			[
 				Telecom(self.mongo_uri, self.limit),
@@ -104,6 +106,9 @@ class Estacoes(Base):
 
 	@staticmethod
 	def verify_shapefile_folder():
+		"""It checks the existence and integrity of the all shapefiles from IBGE
+		If any of the checks fails, it downloads, extracts and replaces the local files
+		"""
 		# Convert the file paths to Path objects
 		shapefile_path = Path(IBGE_POLIGONO)
 		parent_folder = shapefile_path.parent
