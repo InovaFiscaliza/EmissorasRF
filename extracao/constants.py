@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = [
 	'TIMEOUT',
-	'RELATORIO',
+	'RELATORIO_SRD',
 	'ESTACAO',
 	'MALHA_IBGE',
 	'FILES',
@@ -51,7 +51,7 @@ from pathlib import Path
 
 # %% ../nbs/00_constants.ipynb 4
 TIMEOUT = 5
-RELATORIO = (
+RELATORIO_SRD = (
 	'http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id={id}&state={state}'
 )
 ESTACAO = 'http://sistemas.anatel.gov.br/se/public/view/b/srd.php?wfid=estacoes&id={}'

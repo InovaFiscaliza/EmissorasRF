@@ -11,13 +11,7 @@ from functools import cached_property
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 
-from extracao.constants import (
-	BW_MAP,
-	COLS_SRD,
-	DICT_SRD,
-	MONGO_SRD,
-	PROJECTION_SRD,
-)
+from extracao.constants import BW_MAP, COLS_SRD, DICT_SRD, MONGO_SRD, PROJECTION_SRD, RELATORIO_SRD
 
 from .mosaico import Mosaico
 
@@ -30,7 +24,7 @@ MONGO_URI = os.environ.get('MONGO_URI')
 
 # %% ../../nbs/01e_srd.ipynb 7
 class SRD(Mosaico):
-	"""Classe para encapsular a lógica de extração de Radiodifusão"""
+	"""Class to encapsulate the Radio Broadcasting Service extraction logic"""
 
 	def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
 		super().__init__(mongo_uri)
@@ -61,6 +55,7 @@ class SRD(Mosaico):
 		return DICT_SRD
 
 	def extraction(self) -> pd.DataFrame:
+		"""Extracts the data from the MongoDB database and returns a DataFrame"""
 		pipeline = [{'$match': self.query}, {'$project': self.projection}]
 		if self.limit > 0:
 			pipeline.append({'$limit': self.limit})
@@ -72,7 +67,7 @@ class SRD(Mosaico):
 		self,
 		df: pd.DataFrame,  # DataFrame com o resultantes do banco de dados
 	) -> pd.DataFrame:  # DataFrame formatado
-		"""Formata, limpa e padroniza os dados provenientes da query no banco"""
+		"""Formats, cleans and standardizes the queried data from the database"""
 
 		df = df.rename(columns=self.cols_mapping)
 		status = df.Status.str.contains('-C1$|-C2$|-C3$|-C4$|-C7|-C98$', na=False)
@@ -106,11 +101,8 @@ class SRD(Mosaico):
 			.astype('float')
 		).fillna(-1.0)
 		df.loc[:, ['Id', 'Status']] = df.loc[:, ['Id', 'Status']].astype('string')
-		df['Relatório_Canal'] = (
-			'http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id='
-			+ df['Id']
-			+ '&state='
-			+ df['Status']
+		df['Relatório_Canal'] = df.apply(
+			lambda row: RELATORIO_SRD.format(row['Id'], row['Status']), axis=1
 		)
 		# self.append2discarded([self.discarded, discarded, discarded_with_na])
 		return df.loc[:, self.columns]

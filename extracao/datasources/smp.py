@@ -73,8 +73,8 @@ class SMP(Mosaico):
 		self,
 		df: pd.DataFrame,  # DataFrame com os dados de Estações
 	) -> pd.DataFrame:  # DataFrame com os dados duplicados excluídos
-		f"""Exclui os registros duplicados
-        O subconjunto de colunas consideradas é {AGG_SMP}
+		f"""Exclude the duplicated rows
+        Columns considered are {'\n'.join(AGG_SMP)}
         """
 		df['Estação'] = df['Estação'].astype('int')
 		df = df.sort_values('Estação', ignore_index=True)
@@ -102,6 +102,7 @@ class SMP(Mosaico):
 
 	@staticmethod
 	def read_channels():
+		"""Reads and formats the SMP channels files"""
 		channels = pd.read_csv(CHANNELS, dtype='string')
 		cols = ['Downlink_Inicial', 'Downlink_Final', 'Uplink_Inicial', 'Uplink_Final']
 		channels[cols] = channels[cols].astype('float')
@@ -114,6 +115,7 @@ class SMP(Mosaico):
 		self,
 		df: pd.DataFrame,  # DataFrame de Origem
 	) -> pd.DataFrame:  # DataFrame com os canais inválidos excluídos
+		"""Helper function to keep only the valid downlink channels"""
 		df_sub = df[df.Canalização == 'Downlink'].reset_index(drop=True)
 		# for flag in ["Uplink", "Inválida"]:
 		#     discarded = df[df.Canalização == flag]
@@ -185,9 +187,9 @@ class SMP(Mosaico):
 
 	def generate_uplink(
 		self,
-		df: pd.DataFrame,  # DataFrame de Origem
-	) -> pd.DataFrame:  # DataFrame com os canais de Uplink adicionados
-		"""Gera os canais de Uplink a partir dos canais de Downlink""" ''
+		df: pd.DataFrame,  # Source dataFrame with downlink frequencies and offset
+	) -> pd.DataFrame:  # DataFrame with the uplink frequencies added
+		"""Generate the respective Uplink channels based on the Downlink frequencies and Offset"""
 		df['Offset'] = pd.to_numeric(df['Offset'], errors='coerce').astype('float')
 		df['Largura_Emissão(kHz)'] = pd.to_numeric(
 			df['Largura_Emissão(kHz)'], errors='coerce'
@@ -202,7 +204,15 @@ class SMP(Mosaico):
 		df.loc[valid, 'Frequência_Recepção'] = df.loc[valid, 'Frequência'] - df.loc[valid, 'Offset']
 		return df
 
-	def substitute_coordenates(self, df: pd.DataFrame) -> pd.DataFrame:
+	def substitute_coordenates(
+		self,
+		df: pd.DataFrame,  # Source dataframe
+	) -> pd.DataFrame:  # Source dataframe with coordinates replace for the city one
+		"""Substitute the coordinates for the central coordinates of the municipality
+		Only does it for the grouped rows (Multiplicity > 1) since for these rows the
+		coordinate values are no longer valid.
+
+		"""
 		ibge = pd.read_csv(
 			IBGE_MUNICIPIOS,
 			dtype='string',
@@ -225,9 +235,9 @@ class SMP(Mosaico):
 
 	def input_fixed_columns(
 		self,
-		df: pd.DataFrame,  # DataFrame de Origem
-	) -> pd.DataFrame:  # DataFrame com os canais de downlink e uplink contenados e formatados
-		"""Add the fixed helper columns to the dataframe"""
+		df: pd.DataFrame,  # Source dataframe
+	) -> pd.DataFrame:  # Cleaned dataframe with some additional columns added
+		"""Formats and adds some helper columns to the dataframe"""
 		df['Status'] = 'L'
 		df['Serviço'] = '010'
 		down = df.drop('Frequência_Recepção', axis=1)
@@ -242,9 +252,9 @@ class SMP(Mosaico):
 
 	def _format(
 		self,
-		df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
-	) -> pd.DataFrame:  # DataFrame com os dados mesclados e limpos
-		"""Clean the merged dataframe with the data from the MOSAICO page"""
+		df: pd.DataFrame,  # Source dataframe
+	) -> pd.DataFrame:  # Final processed dataframe
+		"""Formats, cleans, groups, adds and standardizes the queried data from the database"""
 		df = df.rename(columns=self.cols_mapping)
 		df = self.split_designacao(df)
 		df = self.exclude_duplicated(df)

@@ -28,7 +28,7 @@ MONGO_URI = os.environ.get('MONGO_URI')
 
 # %% ../../nbs/01f_telecom.ipynb 7
 class Telecom(Mosaico):
-	"""Extração e Processamento dos serviços de Telecomunições distintos de SMP"""
+	"""This class encapsulates the extraction and processing of Telecommunications Services from the MOSAICO MongoDB"""
 
 	def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
 		super().__init__(mongo_uri)
@@ -59,6 +59,7 @@ class Telecom(Mosaico):
 		return DICT_LICENCIAMENTO
 
 	def extraction(self) -> pd.DataFrame:
+		"""Extract the data from the MOSAICO MongoDB collection"""
 		pipeline = [{'$match': self.query}, {'$project': self.projection}]
 		if self.limit > 0:
 			pipeline.append({'$limit': self.limit})
@@ -68,9 +69,9 @@ class Telecom(Mosaico):
 
 	def _format(
 		self,
-		df: pd.DataFrame,  # DataFrame com os dados de Estações e Plano_Básico mesclados
-	) -> pd.DataFrame:  # DataFrame com os dados mesclados e limpos
-		"""Clean the merged dataframe with the data from the MOSAICO page"""
+		df: pd.DataFrame,  # Source dataframe
+	) -> pd.DataFrame:  # Final processed dataframe
+		"""Formats, cleans, groups and standardizes the queried data from the database"""
 		df = df.rename(columns=self.cols_mapping)
 		df = self.split_designacao(df)
 		duplicated = df.duplicated(subset=AGG_LICENCIAMENTO, keep='first')
