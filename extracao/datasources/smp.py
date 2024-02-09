@@ -74,7 +74,7 @@ class SMP(Mosaico):
 		df: pd.DataFrame,  # DataFrame com os dados de Estações
 	) -> pd.DataFrame:  # DataFrame com os dados duplicados excluídos
 		f"""Exclude the duplicated rows
-        Columns considered are {'\n'.join(AGG_SMP)}
+        Columns considered are defined by the AGG_SMP constant
         """
 		df['Estação'] = df['Estação'].astype('int')
 		df = df.sort_values('Estação', ignore_index=True)

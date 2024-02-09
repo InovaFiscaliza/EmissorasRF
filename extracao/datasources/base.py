@@ -7,7 +7,7 @@ __all__ = ['Base']
 import re
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Any
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
@@ -54,7 +54,7 @@ class Base:
 	@staticmethod
 	def parse_bw(
 		bw: str,  # Designação de Emissão (Largura + Classe) codificada como string
-	) -> Tuple[Union[str, pd.NA], Union[str, pd.NA]]:  # Largura e Classe de Emissão
+	) -> Tuple[Union[str, Any], Union[str, Any]]:  # Largura e Classe de Emissão
 		"""Parse the bandwidth string"""
 		if match := re.match(RE_BW, bw):
 			multiplier = BW[match[2]]
