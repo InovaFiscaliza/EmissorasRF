@@ -27,6 +27,8 @@ from extracao.constants import (
 	STR_COLUMNS,
 	CAT_COLUMNS,
 )
+from extracao.location import Geography
+
 from .datasources.aeronautica import Aero
 from .datasources.base import Base
 from .datasources.mosaico import MONGO_URI
@@ -35,6 +37,7 @@ from .datasources.smp import SMP
 from .datasources.srd import SRD
 from .datasources.telecom import Telecom
 from .format import merge_on_frequency, LIMIT_FREQ
+
 
 # %% ../nbs/04_estacoes.ipynb 4
 load_dotenv(find_dotenv(), override=True)
@@ -103,26 +106,6 @@ class Estacoes(Base):
 				self.sources = self.sources.map(Estacoes._update_source)
 		return self.sources.attrgot('df')
 
-	def validate_coordinates(self, df: pd.DataFrame) -> pd.DataFrame:
-		"""
-		Validates the coordinates in the given DataFrame.
-
-		Args:
-		                df: The DataFrame containing the coordinates to be validated.
-
-		Returns:
-		                pd.DataFrame: The DataFrame with validated coordinates.
-
-		Raises:
-		                None
-		"""
-		df = Estacoes.merge_df_with_ibge(df)
-		left, right, both = self.get_missing_location_info(df)
-		return self.insert_ibge_coords(df, empty_coords)
-		df = self.intersect_coordinates_on_poligon(df)
-		diff_mun = df.Código_Município != df.CD_MUN
-		return self.insert_ibge_coords(df, diff_mun)
-
 	@staticmethod
 	def _simplify_sources(df):
 		df['Fonte'] = df['Fonte'].str.replace(
@@ -156,7 +139,6 @@ class Estacoes(Base):
 		anatel = pd.concat(dfs, ignore_index=True)
 		df = merge_on_frequency(anatel, aero)
 		df = Geography(df).validate()
-		df = self.validate_coordinates(df)
 		return df
 
 		df = Estacoes._simplify_sources(df)
