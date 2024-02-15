@@ -1,4 +1,6 @@
-import os
+from typing import Dict
+
+from functools import cached_property
 import urllib.request
 
 from zipfile import ZipFile
@@ -6,6 +8,7 @@ from zipfile import ZipFile
 from dotenv import load_dotenv, find_dotenv
 
 from fastcore.xtras import Path
+from fastcore.foundation import L
 import pandas as pd
 import geopandas as gpd
 
@@ -23,10 +26,12 @@ class Geography:
 		self.shapefile = Path(IBGE_POLIGONO)
 		self.check_files()
 		self.df = df
-		self.missing = self.get_missing_info()
 
 	def check_files(self):
-		assert self.ibge.is_file(), 'File not found: ' + IBGE_MUNICIPIOS
+		"""Check if the `municipios.csv` file from IBGE exists
+		It also calls the `verify_shapefile_folder` method
+		"""
+		assert self.ibge.is_file(), f'File not found: {IBGE_MUNICIPIOS}'
 		self.shapefile.parent.mkdir(exist_ok=True, parents=True)
 		self.verify_shapefile_folder()
 
@@ -53,7 +58,9 @@ class Geography:
 		self,
 		df: pd.DataFrame,  # Input dataframe
 	):  # DataFrame merged with the IBGE file
-		"""Valida as coordenadas consultado a Base Corporativa do IBGE, excluindo o que já está no cache na versão anterior"""
+		"""It merges the instance df with the IBGE dfs based on `Código_Município`
+		The additional columns are: `Latitude_IBGE`, `Longitude_IBGE`, `Município_IBGE`, `UF_IBGE`
+		"""
 
 		municipios = pd.read_csv(
 			self.ibge,
@@ -88,7 +95,8 @@ class Geography:
 
 		return df
 
-	def get_missing_info(self):
+	@cached_property
+	def missing(self) -> Dict[str, pd.Series]:
 		"""Check the coordinates and city code availability"""
 		empty_coords = self.df.Latitude.isna() | self.df.Longitude.isna()
 		empty_code = self.df.Código_Município.isna()
@@ -98,10 +106,15 @@ class Geography:
 		return {'empty_coords': left, 'empty_code': right, 'both': both}
 
 	def fill_missing_coords(self):
+		"""Fill the missing coordinates with the central coordinates of the city from IBGE"""
 		rows = self.missing['empty_coords']
 		self.df.loc[rows, ['Latitude', 'Longitude']] = self.df.loc[
 			rows, ['Latitude_IBGE', 'Longitude_IBGE']
 		]
+
+	def drop_rows_without_location_info(self):
+		rows = self.missing['both']
+		self.df = self.df[~rows].reset_index(drop=True)
 
 	def intersect_coordinates_on_poligon(self):
 		for column in ['Latitude', 'Longitude']:
@@ -134,7 +147,14 @@ class Geography:
 
 		return gdf
 
+	def fill_missing_code(self):
+		rows = self.missing['empty_code']
+		self.df.loc[rows, 'Código_Município'] = self.df.loc[rows, 'CD_MUN']
+
 	def validate(self):
 		self.df = self.merge_df_with_ibge(self.df)
 		self.fill_missing_coords()
+		self.drop_rows_without_location_info()
+		self.df = self.intersect_coordinates_on_poligon()
 		self.fill_missing_code()
+		return self.df
