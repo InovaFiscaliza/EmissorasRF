@@ -66,6 +66,7 @@ class Mosaico(Base, GetAttr):
 		df = df.explode('Designação_Emissão').reset_index(drop=True)
 
 		df = df[df['Designação_Emissão'] != '/']  # Removes empty rows
+		df['Designação_Emissão'] = df['Designação_Emissão'].astype('string', copy=False)
 		# Apply the parse_bw function
 		parsed_data = zip(*df['Designação_Emissão'].apply(Base.parse_bw))
 		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
