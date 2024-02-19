@@ -142,14 +142,13 @@ class SMP(Mosaico):
 		).size()
 		grouped_channels.sort_values('size', ascending=False, inplace=True, ignore_index=True)
 		grouped_channels['Canalização'] = 'Inválida'
-		grouped_channels.loc[:, 'Offset'] = np.nan
-		grouped_channels.loc[:, ['Blocos_Downlink', 'Faixas']] = pd.NA
-		grouped_channels.loc[
-			:, ['Blocos_Downlink', 'Faixas', 'Canalização']
-		] = grouped_channels.loc[:, ['Blocos_Downlink', 'Faixas', 'Canalização']].astype(
-			'string', copy=False
-		)
-		grouped_channels.loc[:, 'Offset'] = grouped_channels.loc[:, 'Offset'].astype('float')
+		grouped_channels['Offset'] = np.nan
+		grouped_channels['Blocos_Downlink'] = pd.NA
+		grouped_channels['Faixas'] = pd.NA
+		grouped_channels.loc[['Blocos_Downlink', 'Faixas', 'Canalização']] = grouped_channels[
+			['Blocos_Downlink', 'Faixas', 'Canalização']
+		].astype('string', copy=False)
+		grouped_channels['Offset'] = grouped_channels['Offset'].astype('float', copy=False)
 
 		for row in grouped_channels.itertuples():
 			interval = channels[
