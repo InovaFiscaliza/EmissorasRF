@@ -77,7 +77,9 @@ class SMP(Mosaico):
 		f"""Exclude the duplicated rows
         Columns considered are defined by the AGG_SMP constant
         """
-		df['Estação'] = df['Estação'].astype('int')
+		df['Estação'] = (
+			df['Estação'].astype('string', copy=False).fillna('-1').astype('int', copy=False)
+		)
 		df = df.sort_values('Estação', ignore_index=True)
 		df['Largura_Emissão(kHz)'] = pd.to_numeric(df['Largura_Emissão(kHz)'], errors='coerce')
 		# df['Largura_Emissão(kHz)'] = df['Largura_Emissão(kHz)'].fillna(0)
