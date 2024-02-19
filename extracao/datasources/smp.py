@@ -15,7 +15,6 @@ from extracao.constants import (
 	CHANNELS,
 	COLUNAS,
 	DICT_LICENCIAMENTO,
-	IBGE_MUNICIPIOS,
 	MONGO_SMP,
 	PROJECTION_LICENCIAMENTO,
 )
@@ -145,7 +144,7 @@ class SMP(Mosaico):
 		grouped_channels['Offset'] = np.nan
 		grouped_channels['Blocos_Downlink'] = pd.NA
 		grouped_channels['Faixas'] = pd.NA
-		grouped_channels.loc[['Blocos_Downlink', 'Faixas', 'Canalização']] = grouped_channels[
+		grouped_channels[['Blocos_Downlink', 'Faixas', 'Canalização']] = grouped_channels[
 			['Blocos_Downlink', 'Faixas', 'Canalização']
 		].astype('string', copy=False)
 		grouped_channels['Offset'] = grouped_channels['Offset'].astype('float', copy=False)
