@@ -46,10 +46,9 @@ class Base:
 	@cached_property
 	def df(self) -> pd.DataFrame:
 		try:
-			df = self._read(self.stem)
+			return self._read(self.stem)
 		except (ArrowInvalid, FileNotFoundError) as e:
 			raise ValueError(f'Não foi possível ler o arquivo parquet {self.stem}') from e
-		return df
 
 	@staticmethod
 	def parse_bw(
@@ -83,7 +82,7 @@ class Base:
 		if row_filter is None:
 			row_filter = pd.Series(True, index=df.index)
 
-		df['Log'] = df['Log'].astype('string').fillna('')
+		df['Log'] = df['Log'].astype('string', copy=False).fillna('')
 
 		df.loc[row_filter, 'Log'] = df.loc[row_filter, 'Log'].apply(
 			lambda x: f'{x}|{log}' if x else log
@@ -120,7 +119,7 @@ class Base:
 		if folder is None:
 			folder = self.folder
 		self._save(self.df, folder, self.stem)
-		self._save(self.discarded, folder, f'{self.stem}_discarded')
+		# self._save(self.discarded, folder, f'{self.stem}_discarded')
 
 	@staticmethod
 	def _cast2float(column: pd.Series) -> pd.Series:

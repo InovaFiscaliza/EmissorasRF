@@ -89,7 +89,7 @@ def _process_frequency(
 	if cols == COLS_DME:
 		df_channels = pd.read_csv(VOR_ILS_DME, dtype='string', dtype_backend='pyarrow')
 		df = df.dropna(subset=[cols[0]])
-		df['Channel'] = df[cols[0]].astype('int').astype('string') + df[cols[1]]
+		df['Channel'] = df[cols[0]].astype('int').astype('string', copy=False) + df[cols[1]]
 		df['Frequência'] = -1.0
 
 		for row in df.itertuples(index=True):
@@ -109,7 +109,9 @@ def _process_frequency(
 # %% ../../nbs/02c_aisgeo.ipynb 8
 def _filter_df(df, cols):  # sourcery skip: use-fstring-for-concatenation
 	df.fillna('', inplace=True)
-	df['Entidade'] = (df[cols[4]] + ' - ' + df[cols[5]] + ' ' + df[cols[6]]).astype('string')
+	df['Entidade'] = (df[cols[4]] + ' - ' + df[cols[5]] + ' ' + df[cols[6]]).astype(
+		'string', copy=False
+	)
 	df['Fonte'] = 'AISGEO'
 	df = df[['Frequência', cols[2], cols[3], 'Entidade', 'Fonte']]
 	return df.rename(
@@ -145,4 +147,4 @@ def get_aisg() -> pd.DataFrame:  # DataFrame com todos os dados do GEOAISWEB
 		get_geodf(link, cols)
 		for link, cols in zip([LINK_NDB, LINK_VOR, LINK_DME], [COLS_NDB, COLS_VOR, COLS_DME])
 	)
-	return df.astype('string').drop_duplicates(UNIQUE_COLS, ignore_index=True)
+	return df.astype('string', copy=False).drop_duplicates(UNIQUE_COLS, ignore_index=True)

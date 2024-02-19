@@ -101,5 +101,5 @@ def map_channels(
 def get_icao() -> pd.DataFrame:  # DataFrame com frequências, coordenadas e descrição das estações
 	"""Lê, concatena e pós-processa os arquivos do ICAO"""
 	df = pd.concat(_read_df(p, c) for p, c in zip([PATH_NAV, PATH_COM], [COLS_NAV, COLS_COM]))
-	df = df.astype('string')
+	df = df.astype('string', copy=False)
 	return map_channels(df, 'ICAO').drop_duplicates(UNIQUE_COLS, ignore_index=True)

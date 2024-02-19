@@ -1,4 +1,4 @@
-from extracao.estacoes import Estacoes
+from extracao.stations import Estacoes
 import pandas as pd
 from fastcore.xtras import Path
 import time

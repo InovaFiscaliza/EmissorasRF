@@ -143,7 +143,9 @@ class SMP(Mosaico):
 		grouped_channels.loc[:, ['Blocos_Downlink', 'Faixas']] = pd.NA
 		grouped_channels.loc[
 			:, ['Blocos_Downlink', 'Faixas', 'Canalização']
-		] = grouped_channels.loc[:, ['Blocos_Downlink', 'Faixas', 'Canalização']].astype('string')
+		] = grouped_channels.loc[:, ['Blocos_Downlink', 'Faixas', 'Canalização']].astype(
+			'string', copy=False
+		)
 		grouped_channels.loc[:, 'Offset'] = grouped_channels.loc[:, 'Offset'].astype('float')
 
 		for row in grouped_channels.itertuples():

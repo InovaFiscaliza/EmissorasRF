@@ -36,7 +36,7 @@ def get_redemet() -> (
 		data_json['data']['radar'][0],
 	)
 	df['Frequência'] = '2800'
-	df['Entidade'] = df.nome.astype('string')
+	df['Entidade'] = df.nome.astype('string', copy=False)
 	df = df[['Frequência', 'lat_center', 'lon_center', 'Entidade']].astype('string', copy=False)
 	df['Fonte'] = 'REDEMET'
 	df = df.rename(columns={'lat_center': 'Latitude', 'lon_center': 'Longitude'})

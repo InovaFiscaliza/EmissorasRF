@@ -136,7 +136,7 @@ class Estacoes(Base):
 		dfs: List,  # List with the individual API sources
 	) -> pd.DataFrame:  # Processed DataFrame
 		aero = dfs.pop()
-		anatel = pd.concat(dfs, ignore_index=True)
+		anatel = pd.concat(dfs, ignore_index=True).astype('string', copy=False)
 		df = merge_on_frequency(anatel, aero)
 		df = Geography(df).validate()
 		return df
