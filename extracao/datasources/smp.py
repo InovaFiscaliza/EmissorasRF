@@ -20,6 +20,7 @@ from extracao.constants import (
 	PROJECTION_LICENCIAMENTO,
 )
 from .mosaico import Mosaico
+from extracao.location import Geography
 
 # %% ../../nbs/01g_smp.ipynb 5
 load_dotenv(find_dotenv())
@@ -206,7 +207,7 @@ class SMP(Mosaico):
 		df.loc[valid, 'Frequência_Recepção'] = df.loc[valid, 'Frequência'] - df.loc[valid, 'Offset']
 		return df
 
-	def substitute_coordenates(
+	def substitute_coordinates(
 		self,
 		df: pd.DataFrame,  # Source dataframe
 	) -> pd.DataFrame:  # Source dataframe with coordinates replace for the city one
@@ -215,22 +216,11 @@ class SMP(Mosaico):
 		coordinate values are no longer valid.
 
 		"""
-		ibge = pd.read_csv(
-			IBGE_MUNICIPIOS,
-			dtype='string',
-			usecols=['Código_Município', 'Município', 'Latitude', 'Longitude'],
-		)
-		ibge.columns = ['Código_Município', 'Município', 'Latitude', 'Longitude']
-		coords = pd.merge(
-			df.loc[df.Multiplicidade > 1, 'Código_Município'],
-			ibge[['Código_Município', 'Latitude', 'Longitude']],
-			on='Código_Município',
-			how='left',
-		)
-		df[['Latitude', 'Longitude']] = df[['Latitude', 'Longitude']].astype('float')
-		df.loc[df.Multiplicidade > 1, ['Latitude', 'Longitude']] = coords[
-			['Latitude', 'Longitude']
-		].values.astype('float')
+		geo = Geography(df)
+		df = geo.merge_df_with_ibge(df)
+		rows = df.Multiplicidade > 1
+		df.loc[rows, 'Latitude'] = df.loc[rows, 'Latitude_IBGE'].copy()
+		df.loc[rows, 'Longitude'] = df.loc[rows, 'Longitude_IBGE'].copy()
 		log = """[("Colunas", ("Latitude", "Longitude")), 
         ("Processamento", "Substituição por Coordenadas do Município (Agrupamento)")]"""
 		return self.register_log(df, log, df.Multiplicidade > 1)
