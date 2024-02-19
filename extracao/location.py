@@ -1,4 +1,6 @@
-import os
+from typing import Dict
+
+from functools import cached_property
 import urllib.request
 
 from zipfile import ZipFile
@@ -6,6 +8,7 @@ from zipfile import ZipFile
 from dotenv import load_dotenv, find_dotenv
 
 from fastcore.xtras import Path
+from fastcore.foundation import L
 import pandas as pd
 import geopandas as gpd
 
@@ -19,14 +22,16 @@ load_dotenv(find_dotenv(), override=True)
 
 class Geography:
 	def __init__(self, df: pd.DataFrame):
-		self.ibge = Path(IBGE_MUNICIPIOS)
-		self.shapefile = Path(IBGE_POLIGONO)
+		self.ibge: Path = Path(IBGE_MUNICIPIOS)
+		self.shapefile: Path = Path(IBGE_POLIGONO)
 		self.check_files()
-		self.df = df
-		self.missing = self.get_missing_info()
+		self.df: pd.DataFrame = df
 
 	def check_files(self):
-		assert self.ibge.is_file(), 'File not found: ' + IBGE_MUNICIPIOS
+		"""Check if the `municipios.csv` file from IBGE exists
+		It also calls the `verify_shapefile_folder` method
+		"""
+		assert self.ibge.is_file(), f'File not found: {IBGE_MUNICIPIOS}'
 		self.shapefile.parent.mkdir(exist_ok=True, parents=True)
 		self.verify_shapefile_folder()
 
@@ -52,8 +57,10 @@ class Geography:
 	def merge_df_with_ibge(
 		self,
 		df: pd.DataFrame,  # Input dataframe
-	):  # DataFrame merged with the IBGE file
-		"""Valida as coordenadas consultado a Base Corporativa do IBGE, excluindo o que já está no cache na versão anterior"""
+	) -> pd.DataFrame:  # DataFrame merged with the IBGE file
+		"""It merges the instance df with the IBGE dfs based on `Código_Município`
+		The additional columns are: `Latitude_IBGE`, `Longitude_IBGE`, `Município_IBGE`, `UF_IBGE`
+		"""
 
 		municipios = pd.read_csv(
 			self.ibge,
@@ -62,7 +69,7 @@ class Geography:
 			dtype_backend='numpy_nullable',
 		)
 
-		df['Código_Município'] = df['Código_Município'].astype('string')
+		df['Código_Município'] = df['Código_Município'].astype('string', copy=False)
 
 		df = pd.merge(
 			df,
@@ -88,7 +95,8 @@ class Geography:
 
 		return df
 
-	def get_missing_info(self):
+	@cached_property
+	def missing(self) -> Dict[str, pd.Series]:
 		"""Check the coordinates and city code availability"""
 		empty_coords = self.df.Latitude.isna() | self.df.Longitude.isna()
 		empty_code = self.df.Código_Município.isna()
@@ -97,30 +105,54 @@ class Geography:
 		right = (~empty_coords) & empty_code
 		return {'empty_coords': left, 'empty_code': right, 'both': both}
 
-	def fill_missing_coords(self):
+	def fill_missing_coords(self) -> None:
+		"""Fill the missing coordinates with the central coordinates of the city from IBGE"""
 		rows = self.missing['empty_coords']
-		self.df.loc[rows, ['Latitude', 'Longitude']] = self.df.loc[
-			rows, ['Latitude_IBGE', 'Longitude_IBGE']
-		]
+		rows &= self.df['Latitude_IBGE'].notna()
+		rows &= self.df['Longitude_IBGE'].notna()
+		self.missing.update({'filled_city_coords': rows})
+		self.df.loc[rows, 'Latitude'] = self.df.loc[rows, 'Latitude_IBGE'].copy()
+		self.df.loc[rows, 'Longitude'] = self.df.loc[rows, 'Longitude_IBGE'].copy()
+
+	def drop_rows_without_location_info(self) -> None:
+		rows = self.missing['both']
+		self.df = self.df[~rows]
+
+	def validate_coordinates(self) -> None:
+		"""Check if the coordinates are actually valid float numbers."""
+		invalid_lats = pd.to_numeric(self.df['Latitude'], errors='coerce')  # type: ignore
+		invalid_longs = pd.to_numeric(self.df['Longitude'], errors='coerce')  # type: ignore
+		invalid = invalid_lats.isna() | invalid_longs.isna()
+		self.missing.update({'invalid_coords': invalid})
+		# TODO: Log original invalid values
 
 	def intersect_coordinates_on_poligon(self):
+		"""Intersect the coordinates with the shapefile of the IBGE
+		Returns a geopandas dataframe with additional columns `CD_MUN, NM_MUN, SIGLA_UF`
+		"""
+		# TODO: Separate values which would be coerced to log, maybe don't replace them
 		for column in ['Latitude', 'Longitude']:
-			self.df[column] = pd.to_numeric(self.df[column], errors='coerce').astype('float')
+			self.df[column] = pd.to_numeric(self.df[column], errors='coerce').astype(
+				'float', copy=False
+			)  # type: ignore
 
 		regions = gpd.read_file(self.shapefile)
 
 		# Convert pandas dataframe to geopandas df with geometry point given coordinates
 		gdf_points = gpd.GeoDataFrame(
 			self.df, geometry=gpd.points_from_xy(self.df.Longitude, self.df.Latitude)
-		)
+		)  # type: ignore
 
 		# Set the same coordinate reference system (CRS) as the regions shapefile
 		gdf_points.crs = regions.crs
 
 		# Spatial join points to the regions
-		gdf = gpd.sjoin(gdf_points, regions, how='inner', predicate='within')
+		gdf = gpd.sjoin(gdf_points, regions, how='left', predicate='within')
 
-		gdf['CD_MUN'] = gdf.CD_MUN.astype('string')
+		gdf['CD_MUN'] = gdf.CD_MUN.astype('string', copy=False)
+
+		gdf['LAT'] = gdf.geometry.centroid.y.astype('string', copy=False)
+		gdf['LON'] = gdf.geometry.centroid.x.astype('string', copy=False)
 
 		gdf.drop(
 			[
@@ -132,9 +164,41 @@ class Geography:
 			inplace=True,
 		)
 
-		return gdf
+		self.df = gdf.copy()
 
-	def validate(self):
-		self.df = self.merge_df_with_ibge(self.df)
+	def fill_missing_code(self):
+		"""Fill the missing city code
+		The missing ones are replaces with the city code derived from the intersection with the shapefile from IBGE"""
+		rows = self.missing['empty_code']
+		rows &= self.df['CD_MUN'].notna()
+		self.df.loc[rows, 'Código_Município'] = self.df.loc[rows, 'CD_MUN'].copy()
+
+	def substitute_divergent_coordinates(self):
+		"""Substitute the coordinates with the centroid from the IBGE `municipios.csv`
+		After the intersection of the coordinates with the shapefile, the city code from the data
+		should match the one returned from the shapefile.
+		If it doesn't the original coordinates are replaced by the ones representing the centroid of the original city code
+		"""
+		# TODO: keep track of "unchanged divergent coordinates, i.e. with IBGE coords null"
+		wrong_city_coords = self.df['Código_Município'].notna()
+		wrong_city_coords &= self.df['CD_MUN'].notna()
+		wrong_city_coords &= self.df['Código_Município'] != self.df['CD_MUN']
+		wrong_city_coords &= self.df['Latitude_IBGE'].notna()
+		wrong_city_coords &= self.df['Longitude_IBGE'].notna()
+		self.df.loc[wrong_city_coords, 'Latitude'] = self.df.loc[
+			wrong_city_coords, 'Latitude_IBGE'
+		].copy()
+		self.df.loc[wrong_city_coords, 'Longitude'] = self.df.loc[
+			wrong_city_coords, 'Longitude_IBGE'
+		].copy()
+		self.missing.update({'wrong_city_coords': wrong_city_coords})
+
+	def validate(self) -> pd.DataFrame:
+		"""Helper function to load the IBGE data, enrich and and validate the location information"""
+		self.drop_rows_without_location_info()
+		self.df = self.merge_df_with_ibge(self.df.copy())
 		self.fill_missing_coords()
+		self.intersect_coordinates_on_poligon()
 		self.fill_missing_code()
+		self.substitute_divergent_coordinates()
+		return self.df.astype('string', copy=False)

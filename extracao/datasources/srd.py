@@ -77,7 +77,9 @@ class SRD(Mosaico):
 		# discarded = self.register_log(discarded, log)
 		df = df[status].reset_index(drop=True)
 		df.dropna(subset='Frequência', ignore_index=True, inplace=True)  # type: ignore
-		df['Frequência'] = df.Frequência.astype('string').str.replace(',', '.').astype('float')
+		df['Frequência'] = (
+			df.Frequência.astype('string', copy=False).str.replace(',', '.').astype('float')
+		)
 		# discarded_with_na = df[df.Frequência.isna()].copy()
 		# log = """[("Registro", "Frequência"),
 		#         ("Processamento", "Registro com valor nulo presente")]"""
@@ -85,10 +87,10 @@ class SRD(Mosaico):
 		df.loc[df['Serviço'] == '205', 'Frequência'] = df.loc[
 			df['Serviço'] == '205', 'Frequência'
 		].apply(lambda x: float(Decimal(x) / Decimal(1000)))
-		df['Validade_RF'] = df.Validade_RF.astype('string').str.slice(0, 10)
+		df['Validade_RF'] = df.Validade_RF.astype('string', copy=False).str.slice(0, 10)
 		df['Fonte'] = 'MOSAICO-SRD'
 		df['Serviço'] = df['Serviço'].fillna('')
-		df['Designação_Emissão'] = df.Serviço.astype('string').fillna('').map(BW_MAP)
+		df['Designação_Emissão'] = df.Serviço.astype('string', copy=False).fillna('').map(BW_MAP)
 		df = self.split_designacao(df)
 		df['Multiplicidade'] = 1
 		df['Padrão_Antena(dBd)'] = df['Padrão_Antena(dBd)'].str.replace('None', '0')
@@ -100,7 +102,7 @@ class SRD(Mosaico):
 			.apply(lambda x: float(Decimal(1000) * Decimal(x)))
 			.astype('float')
 		).fillna(-1.0)
-		df.loc[:, ['Id', 'Status']] = df.loc[:, ['Id', 'Status']].astype('string')
+		df.loc[:, ['Id', 'Status']] = df.loc[:, ['Id', 'Status']].astype('string', copy=False)
 		df['Relatório_Canal'] = df.apply(
 			lambda row: RELATORIO_SRD.format(row['Id'], row['Status']), axis=1
 		)

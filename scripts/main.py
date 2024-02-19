@@ -10,7 +10,7 @@ import typer
 from dotenv import find_dotenv, load_dotenv
 from fastcore.xtras import Path
 
-from extracao.estacoes import Estacoes
+from extracao.stations import Estacoes
 
 load_dotenv(find_dotenv(), override=True)
 warnings.simplefilter('ignore')
@@ -58,10 +58,10 @@ def get_db(
 	versiondb['rfdatahub'].update(mod_times)
 	json.dump(versiondb, (data.folder / 'VersionFile.json').open('w'))
 	if path is not None:
-		path = Path(path)
-		path.mkdir(parents=True, exist_ok=True)
-		print(f'Salvando dados em {path}')
-		shutil.copytree(str(data.folder), str(path), dirs_exist_ok=True)
+		if (path := Path(path)).exists():
+			# path.mkdir(parents=True, exist_ok=True)
+			print(f'Salvando dados em {path}')
+			shutil.copytree(str(data.folder), str(path), dirs_exist_ok=True)
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')
 	return data

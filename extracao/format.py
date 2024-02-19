@@ -60,8 +60,8 @@ def merge_on_frequency(
 	It's assumed the have the same columns or one set is contained in the other,
 	otherwise the various filters won't work as expected
 	"""
-	df_left = df_left.astype('string').drop_duplicates(ignore_index=True)
-	df_right = df_right.astype('string').drop_duplicates(ignore_index=True)
+	df_left = df_left.astype('string', copy=False).drop_duplicates(ignore_index=True)
+	df_right = df_right.astype('string', copy=False).drop_duplicates(ignore_index=True)
 	df = pd.merge(
 		df_left,
 		df_right,
@@ -221,7 +221,7 @@ def merge_on_frequency(
 	return pd.concat(
 		[only_left, df_both_far_left, df_final_merge, only_right, df_both_far_right],
 		ignore_index=True,
-	)
+	).astype('string', copy=False)
 
 
 def _left_filter(df, df_close_merge, merge_cols):

@@ -95,9 +95,11 @@ class Radcom(Sitarweb):
 		df['Fonte'] = 'SRD'
 		df['Multiplicidade'] = '1'
 		a = df.Situação.isna()
-		df.loc[a, 'Classe'] = df.loc[a, 'Fase'].astype('string')
+		df.loc[a, 'Classe'] = df.loc[a, 'Fase'].astype('string', copy=False)
 		df.loc[~a, 'Classe'] = (
-			df.loc[~a, 'Fase'].astype('string') + '-' + df.loc[~a, 'Situação'].astype('string')
+			df.loc[~a, 'Fase'].astype('string', copy=False)
+			+ '-'
+			+ df.loc[~a, 'Situação'].astype('string', copy=False)
 		)
 		df.drop(['Fase', 'Situação'], axis=1, inplace=True)
 		df['Log'] = ''
@@ -132,12 +134,12 @@ class Stel(Sitarweb):
 		df['Status'] = 'L'
 		df['Entidade'] = df.Entidade.str.strip()
 		df['Fonte'] = 'STEL'
-		df['Largura_Emissão'] = df['Largura_Emissão'].astype('string')
+		df['Largura_Emissão'] = df['Largura_Emissão'].astype('string', copy=False)
 		df.loc[:, ['Largura_Emissão(kHz)', '_']] = (
 			df.Largura_Emissão.fillna('').apply(self.parse_bw).tolist()
 		)
 		df.drop(['Largura_Emissão', '_'], axis=1, inplace=True)
-		df.loc[:, 'Validade_RF'] = df.Validade_RF.astype('string').str.slice(0, 10)
+		df.loc[:, 'Validade_RF'] = df.Validade_RF.astype('string', copy=False).str.slice(0, 10)
 		df['Frequência'] = df['Frequência'].astype('float')
 		df.loc[df.Unidade == 'kHz', 'Frequência'] = df.loc[df.Unidade == 'kHz', 'Frequência'].apply(
 			lambda x: float(Decimal(x) / Decimal(1000))
