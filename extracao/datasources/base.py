@@ -114,7 +114,9 @@ class Base:
 		raise NotImplementedError('Subclasses devem implementar o método _format')
 
 	def update(self):
-		self.df = self._format(self.extraction())
+		df = self.extraction()
+		self._save(df, self.folder, f'{self.stem}_raw')
+		self.df = self._format(df)
 
 	def save(self, folder: Union[str, Path, None] = None):
 		if folder is None:
