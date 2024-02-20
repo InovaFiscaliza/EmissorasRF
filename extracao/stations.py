@@ -142,10 +142,7 @@ class Estacoes(Base):
 		anatel = pd.concat(dfs, ignore_index=True).astype('string', copy=False)
 		df = merge_on_frequency(anatel, aero)
 		df = Geography(df).validate()
-		return df
-
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
-		df = SRD._format_types(df)
 		df = df.astype('string', copy=False).replace('-1.0', '-1').astype('category', copy=False)
 		return df.loc[:, self.columns]
