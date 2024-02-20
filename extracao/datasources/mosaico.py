@@ -44,9 +44,11 @@ class Mosaico(Base, GetAttr):
 		client = self.connect()
 		database = client[self.database]
 		db_collection = database[collection]
-		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False)
+		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False).astype(
+			'string', copy=False
+		)
 		# Substitui strings vazias e somente com espaços por nulo
-		return df.replace(r'^\s*$|^\[\]$', pd.NA, regex=True).astype('string', copy=False)
+		return df.replace(r'^\s*$|^\[\]$', pd.NA, regex=True)
 
 	def split_designacao(
 		self,
