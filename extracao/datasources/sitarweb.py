@@ -50,7 +50,8 @@ if sys.platform in ('linux', 'darwin', 'cygwin'):
 class Sitarweb(Base, GetAttr):
 	"""Common logic from the SITARWEB SQÇ Server Database"""
 
-	def __init__(self, sql_params: dict = SQLSERVER_PARAMS):
+	def __init__(self, sql_params: dict = SQLSERVER_PARAMS, read_cache: bool = False):
+		self.read_cache = read_cache
 		self.default = SQLServer(sql_params)
 
 	@property
@@ -63,15 +64,17 @@ class Sitarweb(Base, GetAttr):
 
 	def extraction(self):
 		"""This method returns a DataFrame with the results of the query"""
-		return pd.read_sql_query(self.query, self.connect(), dtype='category')
+		if self.read_cache:
+			return self._read(f'{self.stem}_raw')
+		return pd.read_sql_query(self.query, self.connect()).astype('string', copy=False)
 
 
 # %% ../../nbs/01c_sitarweb.ipynb 7
 class Radcom(Sitarweb):
 	"""Class for extracting data from SITARWEB refering to the"""
 
-	def __init__(self, sql_params: dict = SQLSERVER_PARAMS):
-		super().__init__(sql_params)
+	def __init__(self, sql_params: dict = SQLSERVER_PARAMS, read_cache: bool = False):
+		super().__init__(sql_params, read_cache)
 
 	@property
 	def query(self):
@@ -115,8 +118,8 @@ class Radcom(Sitarweb):
 
 # %% ../../nbs/01c_sitarweb.ipynb 8
 class Stel(Sitarweb):
-	def __init__(self, sql_params: dict = SQLSERVER_PARAMS):
-		super().__init__(sql_params)
+	def __init__(self, sql_params: dict = SQLSERVER_PARAMS, read_cache: bool = False):
+		super().__init__(sql_params, read_cache)
 
 	@property
 	def query(self):

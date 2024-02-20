@@ -153,6 +153,9 @@ checklink/cookies.txt
 *.dbf
 *.prj
 
+# output folder
+extracao/datasources/arquivos/saida
+
 # VSCODE Files
 .virtual_documents
 

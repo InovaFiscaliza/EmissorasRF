@@ -24,6 +24,7 @@ load_dotenv(find_dotenv(), override=True)
 @dataclass
 class Base:
 	folder: Union[str, Path] = Path(__file__).parent / 'arquivos' / 'saida'
+	read_cache: bool = False
 
 	def _read(self, stem: str) -> pd.DataFrame:
 		"""Lê o dataframe formado por self.folder / self.stem.parquet.gzip"""

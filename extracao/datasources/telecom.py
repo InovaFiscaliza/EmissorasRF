@@ -23,15 +23,17 @@ from .mosaico import Mosaico
 load_dotenv(find_dotenv())
 
 # %% ../../nbs/01f_telecom.ipynb 6
-MONGO_URI = os.environ.get('MONGO_URI')
+MONGO_URI = os.environ.get('MONGO_URI', '')
 
 
 # %% ../../nbs/01f_telecom.ipynb 7
 class Telecom(Mosaico):
 	"""This class encapsulates the extraction and processing of Telecommunications Services from the MOSAICO MongoDB"""
 
-	def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
-		super().__init__(mongo_uri)
+	def __init__(
+		self, mongo_uri: str = MONGO_URI, limit: int = 0, read_cache: bool = False
+	) -> None:
+		super().__init__(mongo_uri, read_cache)
 		self.limit = limit
 
 	@property
