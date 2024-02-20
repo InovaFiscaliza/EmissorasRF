@@ -19,15 +19,17 @@ from .mosaico import Mosaico
 load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01e_srd.ipynb 6
-MONGO_URI = os.environ.get('MONGO_URI')
+MONGO_URI = os.environ.get('MONGO_URI', '')
 
 
 # %% ../../nbs/01e_srd.ipynb 7
 class SRD(Mosaico):
 	"""Class to encapsulate the Radio Broadcasting Service extraction logic"""
 
-	def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
-		super().__init__(mongo_uri)
+	def __init__(
+		self, mongo_uri: str = MONGO_URI, limit: int = 0, read_cache: bool = False
+	) -> None:
+		super().__init__(mongo_uri, read_cache)
 		self.limit = limit
 
 	@property

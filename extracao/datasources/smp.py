@@ -25,15 +25,17 @@ from extracao.location import Geography
 load_dotenv(find_dotenv())
 
 # %% ../../nbs/01g_smp.ipynb 7
-MONGO_URI = os.environ.get('MONGO_URI')
+MONGO_URI = os.environ.get('MONGO_URI', '')
 
 
 # %% ../../nbs/01g_smp.ipynb 8
 class SMP(Mosaico):
 	"""Classe para encapsular a lógica de extração do SMP"""
 
-	def __init__(self, mongo_uri: str = MONGO_URI, limit: int = 0) -> None:
-		super().__init__(mongo_uri)
+	def __init__(
+		self, mongo_uri: str = MONGO_URI, limit: int = 0, read_cache: bool = False
+	) -> None:
+		super().__init__(mongo_uri, read_cache)
 		self.limit = limit
 
 	@property
@@ -252,6 +254,6 @@ class SMP(Mosaico):
 		df = self.exclude_duplicated(df)
 		df = self.validate_channels(df)
 		df = self.generate_uplink(df)
-		df = self.substitute_coordenates(df)
+		df = self.substitute_coordinates(df)
 		df = self.input_fixed_columns(df)
 		return df.loc[:, self.columns]

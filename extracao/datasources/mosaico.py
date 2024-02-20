@@ -17,14 +17,15 @@ from .base import Base
 load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01d_mosaico.ipynb 6
-MONGO_URI = os.environ.get('MONGO_URI')
+MONGO_URI = os.environ.get('MONGO_URI', '')
 
 
 # %% ../../nbs/01d_mosaico.ipynb 7
 class Mosaico(Base, GetAttr):
 	"""Base Class with the common API from the MOSAICO MongoDB Source"""
 
-	def __init__(self, mongo_uri: str = MONGO_URI):
+	def __init__(self, mongo_uri: str = MONGO_URI, read_cache: bool = False):
+		self.read_cache = read_cache
 		self.database = 'sms'
 		self.default = MongoDB(mongo_uri)
 
@@ -41,6 +42,8 @@ class Mosaico(Base, GetAttr):
 		raise NotImplementedError("Subclasses should implement the property 'projection'")
 
 	def _extract(self, collection: str, pipeline: list):
+		if self.read_cache:
+			return self._read(f'{self.stem}_raw')
 		client = self.connect()
 		database = client[self.database]
 		db_collection = database[collection]
