@@ -285,7 +285,7 @@ PROJECTION_SRD = {
 	'NumFistel': 1.0,
 	'NumEstacao': '$estacao.NumEstacao',
 	# flatten the nested fields with dot notation
-	# 'NomeMunicipio': '$srd_planobasico.NomeMunicipio',
+	'NomeMunicipio': '$srd_planobasico.NomeMunicipio',
 	'CodMunicipio': '$srd_planobasico.CodMunicipio',
 	'SiglaUF': '$srd_planobasico.SiglaUF',
 	'MedLatitudeDecimal': '$estacao.MedLatitudeDecimal',
