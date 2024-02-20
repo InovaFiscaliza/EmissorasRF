@@ -52,7 +52,7 @@ from pathlib import Path
 # %% ../nbs/00_constants.ipynb 4
 TIMEOUT = 5
 RELATORIO_SRD = (
-	'http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id={id}&state={state}'
+	'http://sistemas.anatel.gov.br/se/eApp/reports/b/srd/resumo_sistema.php?id={}&state={}'
 )
 ESTACAO = 'http://sistemas.anatel.gov.br/se/public/view/b/srd.php?wfid=estacoes&id={}'
 MALHA_IBGE = 'https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2022/Brasil/BR/BR_Municipios_2022.zip'
