@@ -92,7 +92,7 @@ class SRD(Mosaico):
 		df['Validade_RF'] = df.Validade_RF.astype('string', copy=False).str.slice(0, 10)
 		df['Fonte'] = 'MOSAICO-SRD'
 		df['Serviço'] = df['Serviço'].fillna('')
-		df['Designação_Emissão'] = df.Serviço.astype('string', copy=False).fillna('').map(BW_MAP)
+		df['Designação_Emissão'] = df.Serviço.map(BW_MAP)
 		df = self.split_designacao(df)
 		df['Multiplicidade'] = 1
 		df['Padrão_Antena(dBd)'] = df['Padrão_Antena(dBd)'].str.replace('None', '0')
@@ -104,9 +104,8 @@ class SRD(Mosaico):
 			.apply(lambda x: float(Decimal(1000) * Decimal(x)))
 			.astype('float')
 		).fillna(-1.0)
-		df.loc[:, ['Id', 'Status']] = df.loc[:, ['Id', 'Status']].astype('string', copy=False)
 		df['Relatório_Canal'] = df.apply(
-			lambda row: RELATORIO_SRD.format(row['Id'], row['Status']), axis=1
+			lambda row: RELATORIO_SRD.format(row.loc['Id'], row.loc['Status']), axis=1
 		)
 		# self.append2discarded([self.discarded, discarded, discarded_with_na])
 		return df.loc[:, self.columns]

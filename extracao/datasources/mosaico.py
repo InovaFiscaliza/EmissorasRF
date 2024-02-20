@@ -47,9 +47,11 @@ class Mosaico(Base, GetAttr):
 		client = self.connect()
 		database = client[self.database]
 		db_collection = database[collection]
-		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False, dtype='string')
+		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False).astype(
+			'string', copy=False
+		)
 		# Substitui strings vazias e somente com espaços por nulo
-		return df.replace(r'^\s*|\[\]', pd.NA, regex=True)
+		return df.replace(r'^\s*$|^\[\]$', pd.NA, regex=True)
 
 	def split_designacao(
 		self,
@@ -58,7 +60,6 @@ class Mosaico(Base, GetAttr):
 		"""Parse a bandwidth string
 		It returns the numerical component and a character class
 		"""
-		df['Designação_Emissão'] = df['Designação_Emissão'].astype('string', copy=False)
 		df['Designação_Emissão'] = (
 			df['Designação_Emissão'].str.replace(',', ' ').str.strip().str.upper().str.split(' ')
 		)
