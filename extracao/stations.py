@@ -84,27 +84,30 @@ class Estacoes(Base):
 		"""Initializes the individual classes and saves them in a property list"""
 		self.sources = L(
 			[
-				Telecom(self.mongo_uri, self.limit),
-				SMP(self.mongo_uri, self.limit),
-				SRD(self.mongo_uri, self.limit),
-				Stel(self.sql_params),
-				Radcom(self.sql_params),
-				Aero(),
+				Telecom(self.mongo_uri, self.limit, self.read_cache),
+				SMP(self.mongo_uri, self.limit, self.read_cache),
+				SRD(self.mongo_uri, self.limit, self.read_cache),
+				Stel(self.sql_params, self.read_cache),
+				Radcom(self.sql_params, self.read_cache),
+				Aero(self.read_cache),
 			]
 		)
 
 	def extraction(self) -> L:
-		if not self.read_cache:
-			if self.parallel:
-				self.sources = parallel(
-					Estacoes._update_source,
-					self.sources,
-					n_workers=len(self.sources),
-					progress=True,
-				)
-			else:
-				self.sources = self.sources.map(Estacoes._update_source)
+		if self.parallel:
+			self.sources = parallel(
+				Estacoes._update_source,
+				self.sources,
+				n_workers=len(self.sources),
+				progress=True,
+			)
+		else:
+			self.sources = self.sources.map(Estacoes._update_source)
 		return self.sources.attrgot('df')
+
+	def update(self):
+		df = self.extraction()
+		self.df = self._format(df)
 
 	@staticmethod
 	def _simplify_sources(df):
@@ -133,7 +136,7 @@ class Estacoes(Base):
 
 	def _format(
 		self,
-		dfs: List,  # List with the individual API sources
+		dfs: L,  # List with the individual API sources
 	) -> pd.DataFrame:  # Processed DataFrame
 		aero = dfs.pop()
 		anatel = pd.concat(dfs, ignore_index=True).astype('string', copy=False)
