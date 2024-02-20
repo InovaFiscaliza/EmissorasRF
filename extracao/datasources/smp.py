@@ -252,6 +252,6 @@ class SMP(Mosaico):
 		df = self.exclude_duplicated(df)
 		df = self.validate_channels(df)
 		df = self.generate_uplink(df)
-		df = self.substitute_coordenates(df)
+		df = self.substitute_coordinates(df)
 		df = self.input_fixed_columns(df)
 		return df.loc[:, self.columns]

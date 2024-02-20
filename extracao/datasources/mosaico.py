@@ -55,7 +55,6 @@ class Mosaico(Base, GetAttr):
 		"""Parse a bandwidth string
 		It returns the numerical component and a character class
 		"""
-		df['Designação_Emissão'] = df['Designação_Emissão'].astype('string', copy=False)
 		df['Designação_Emissão'] = (
 			df['Designação_Emissão'].str.replace(',', ' ').str.strip().str.upper().str.split(' ')
 		)
