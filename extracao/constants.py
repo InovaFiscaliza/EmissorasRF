@@ -131,70 +131,6 @@ CAT_COLUMNS = [
 	'Fonte',
 ]
 
-# DTYPES = {
-# 	'Frequência'
-# 	'Entidade'
-# 	'Fistel'
-# 	'Serviço'
-# 	'Estação'
-# 	'Latitude'
-# 	'Longitude'
-# 	'Código_Município'
-# 	'Município'
-# 	'UF'
-# 	'Classe'
-# 	'Classe_Emissão'
-# 	'Largura_Emissão(kHz)'
-# 	'Validade_RF'
-# 	'Status'
-# 	'Fonte'
-# 	'Multiplicidade'
-# 	'Log'
-# 	'Cota_Base_Torre(m)'
-# 	'Potência_Transmissor(W)'
-# 	'Ganho_Antena(dBd)'
-# 	'Ângulo_Elevação_Antena'
-# 	'Azimute_Antena'
-# 	'Altura_Antena(m)'
-# 	'Atenuação_Linha(db/100m)'
-# 	'Perdas_Acessórias_Linha(db)'
-# 	'Padrão_Antena(dBd)'
-# 	'Comprimento_Linha(m)'
-# 	'Relatório_Canal'
-# }
-
-# COLS_LICENCIAMENTO = [
-# 	'Frequência',
-# 	'Entidade',
-# 	'Fistel',
-# 	'Estação',
-# 	'Município',
-# 	'Código_Município',
-# 	'UF',
-# 	'Latitude',
-# 	'Longitude',
-# 	'Classe',
-# 	'Serviço',
-# 	'Classe_Emissão',
-# 	'Largura_Emissão(kHz)',
-# 	'Validade_RF',
-# 	'Status',
-# 	'Fonte',
-# 	'Multiplicidade',
-# 	'Potência_Transmissor(W)',
-# 	'Cod_Tipo_Antena',
-# 	'Polarização_Antena',
-# 	# "Raio_Antena",
-# 	'Ganho_Antena',
-# 	'FC_Antena',
-# 	'Ang_MP_Antena',
-# 	'Ângulo_Elevação_Antena',
-# 	'Azimute_Antena',
-# 	'Altura_Antena',
-# 	'Perdas_Acessorias',
-# 	'Log',
-# ]
-
 AGG_LICENCIAMENTO = [
 	'Frequência',
 	'Fistel',
@@ -379,7 +315,7 @@ DICT_LICENCIAMENTO = {
 	'SiglaUf': 'UF',
 	'NumEstacao': 'Estação',
 	'CodTipoClasseEstacao': 'Classe',
-	# 'NomeMunicipio': 'Município',
+	'NomeMunicipio': 'Município',
 	'CodMunicipio': 'Código_Município',
 	'DataValidade': 'Validade_RF',
 	'FreqTxMHz': 'Frequência',
