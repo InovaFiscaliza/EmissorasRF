@@ -247,7 +247,6 @@ class Geography:
 		They are replaced with the city code derived from the intersection with the shapefile from IBGE"""
 		rows = ~self.log['empty_code']
 		rows &= self.df['Município_IBGE'].isna()
-
 		rows &= self.df['CD_MUN'].notna()
 		self.log.update({'replaced_city_info': rows})
 		self.df.loc[rows, 'Código_Município'] = self.df.loc[rows, 'CD_MUN']
@@ -264,7 +263,7 @@ class Geography:
 		wrong_city_coords = self.df['Código_Município'].notna()
 		wrong_city_coords &= self.df['CD_MUN'].notna()
 		wrong_city_coords &= self.df['Código_Município'] != self.df['CD_MUN']
-		wrong_city_coords &= self.log['city_and_uf_normalized']
+		wrong_city_coords &= self.log['city_normalized']
 		self.log.update({'wrong_city_coords': wrong_city_coords})
 		self.df.loc[wrong_city_coords, 'Latitude'] = self.df.loc[wrong_city_coords, 'Latitude_IBGE']
 		self.df.loc[wrong_city_coords, 'Longitude'] = self.df.loc[

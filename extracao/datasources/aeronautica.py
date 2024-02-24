@@ -83,4 +83,4 @@ class Aero(Base):
 			icao.loc[np.isclose(icao.Longitude, -472.033447), 'Longitude'] = -47.2033447
 			icao.loc[np.isclose(icao.Longitude, 69.934998), 'Longitude'] = -69.934998
 			icao['Multiplicidade'] = 1
-			return icao
+			return icao.astype('string', copy=False)
