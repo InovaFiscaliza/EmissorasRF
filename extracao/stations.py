@@ -127,7 +127,7 @@ class Estacoes(Base):
 	def _remove_invalid_frequencies(df):
 		df['Frequência'] = df['Frequência'].astype('float')
 		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
-		return df[df['Frequência'] <= LIMIT_FREQ]
+		return df[df['Frequência'] <= LIMIT_FREQ].reset_index(drop=True)
 		# TODO: save to discarded and log
 		# log = f"""[("Colunas", "Frequência"),
 		# 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
@@ -145,4 +145,5 @@ class Estacoes(Base):
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		df = df.astype('string', copy=False).replace('-1.0', '-1').astype('category', copy=False)
-		return df.loc[:, self.columns]
+		# return df.loc[:, self.columns]
+		return df
