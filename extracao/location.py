@@ -54,6 +54,62 @@ class Geography:
 				zip_ref.extractall(parent_folder)
 			zip_file_path.unlink()
 
+	def replace_bad_city_codes(self, df: pd.DataFrame) -> pd.DataFrame:
+		"""Tries to fix the wrong city codes by looking at the normalized city names"""
+		import re
+		import unicodedata
+
+		def remove_punctuation(word):
+			# Unicode normalize transforma um caracter em seu equivalente em latin.
+			nfkd = unicodedata.normalize('NFKD', word.lower())
+			decoded_word = ''.join(c for c in nfkd if not unicodedata.combining(c))
+
+			return re.sub(r'[^a-zA-Z0-9 ]', '', decoded_word)
+
+		municipios = pd.read_csv(
+			self.ibge,
+			usecols=['Código_Município', 'Município'],
+			dtype='string',
+			dtype_backend='numpy_nullable',
+		)
+
+		municipios['Município_ASCII'] = municipios['Município'].apply(remove_punctuation)
+
+		bad_codes = ~df['Código_Município'].isin(municipios['Código_Município'])
+
+		df['Município'] = df['Município'].astype('string', copy=False)
+
+		df.loc[bad_codes, 'Município'] = df.loc[bad_codes, 'Município'].fillna('')
+
+		df.loc[bad_codes, 'Município_ASCII'] = df.loc[bad_codes, 'Município'].apply(
+			remove_punctuation
+		)
+
+		df = pd.merge(
+			df,
+			municipios,
+			on='Município_ASCII',
+			how='left',
+			copy=False,
+		)
+
+		df.loc[bad_codes, 'Município_x'] = df.loc[bad_codes, 'Município_y']
+
+		df.loc[bad_codes, 'Código_Município_x'] = df.loc[bad_codes, 'Código_Município_y']
+
+		df.drop(columns=['Município_y', 'Município_ASCII', 'Código_Município_y'], inplace=True)
+
+		df.rename(
+			columns={'Município_x': 'Município', 'Código_Município_x': 'Código_Município'},
+			inplace=True,
+		)
+
+		df[['Município', 'Código_Município']] = df[['Município', 'Código_Município']].astype(
+			'string', copy=False
+		)
+
+		return df
+
 	def merge_df_with_ibge(
 		self,
 		df: pd.DataFrame,  # Input dataframe
@@ -62,18 +118,21 @@ class Geography:
 		The additional columns are: `Latitude_IBGE`, `Longitude_IBGE`, `Município_IBGE`, `UF_IBGE`
 		"""
 
+		df['Código_Município'] = df['Código_Município'].astype('string', copy=False).str.strip()
+		# TODO: Add to log invalid city codes catched here
+		df['Código_Município'] = pd.to_numeric(
+			df['Código_Município'], errors='coerce', downcast='unsigned'
+		)
+		df['Código_Município'] = df['Código_Município'].astype('string', copy=False)
+
+		df = self.replace_bad_city_codes(df)
+
 		municipios = pd.read_csv(
 			self.ibge,
 			usecols=['Código_Município', 'Município', 'Latitude', 'Longitude'],
 			dtype='string',
 			dtype_backend='numpy_nullable',
 		)
-
-		df['Código_Município'] = df['Código_Município'].astype('string', copy=False).str.strip()
-		df['Código_Município'] = pd.to_numeric(
-			df['Código_Município'], errors='coerce', downcast='unsigned'
-		)
-		df['Código_Município'] = df['Código_Município'].astype('string', copy=False)
 
 		df = pd.merge(
 			df,
@@ -184,6 +243,18 @@ class Geography:
 		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'NM_MUN']
 		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'SIGLA_UF']
 
+	def substitute_wrong_city_info(self):
+		"""Replace city info for invalid city codes
+		They are replaced with the city code derived from the intersection with the shapefile from IBGE"""
+		rows = ~self.log['empty_code']
+		rows &= self.df['Município_IBGE'].isna()
+
+		rows &= self.df['CD_MUN'].notna()
+		self.log.update({'replaced_city_info': rows})
+		self.df.loc[rows, 'Código_Município'] = self.df.loc[rows, 'CD_MUN']
+		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'NM_MUN']
+		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'SIGLA_UF']
+
 	def substitute_divergent_coordinates(self):
 		"""Substitute the coordinates with the centroid from the IBGE `municipios.csv`
 		After the intersection of the coordinates with the shapefile, the city code from the data
@@ -209,5 +280,6 @@ class Geography:
 		self.fill_missing_coords()
 		self.intersect_coordinates_on_poligon()
 		self.fill_missing_city_info()
+		self.substitute_wrong_city_info()
 		self.substitute_divergent_coordinates()
 		return self.df.astype('string', copy=False)
