@@ -100,7 +100,7 @@ class SMP(Mosaico):
 		df_sub.dropna(subset=AGG_SMP, inplace=True)
 		df_sub['Multiplicidade'] = (
 			df.groupby(AGG_SMP, dropna=True, sort=False, observed=True).size().values
-		)
+		).astype('int')
 		log = f'[("Colunas", {AGG_SMP}), ("Processamento", "Agrupamento")]'
 		return self.register_log(df_sub, log, df_sub['Multiplicidade'] > 1)
 
@@ -220,9 +220,10 @@ class SMP(Mosaico):
 		"""
 		geo = Geography(df)
 		df = geo.merge_df_with_ibge(df)
+		df['Multiplicidade'] = df.Multiplicidade.astype('int')
 		rows = df.Multiplicidade > 1
-		df.loc[rows, 'Latitude'] = df.loc[rows, 'Latitude_IBGE'].copy()
-		df.loc[rows, 'Longitude'] = df.loc[rows, 'Longitude_IBGE'].copy()
+		df.loc[rows, 'Latitude'] = df.loc[rows, 'Latitude_IBGE']
+		df.loc[rows, 'Longitude'] = df.loc[rows, 'Longitude_IBGE']
 		log = """[("Colunas", ("Latitude", "Longitude")), 
         ("Processamento", "Substituição por Coordenadas do Município (Agrupamento)")]"""
 		return self.register_log(df, log, df.Multiplicidade > 1)
