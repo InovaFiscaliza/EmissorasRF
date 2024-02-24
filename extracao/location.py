@@ -169,7 +169,7 @@ class Geography:
 	def fill_missing_coords(self) -> None:
 		"""Fill the missing coordinates with the central coordinates of the city from IBGE"""
 		rows = self.log['empty_coords']
-		rows &= self.log['city_and_uf_normalized']
+		rows &= self.log['city_normalized']
 		self.log.update({'filled_city_coords': rows})
 		self.df.loc[rows, 'Latitude'] = self.df.loc[rows, 'Latitude_IBGE']
 		self.df.loc[rows, 'Longitude'] = self.df.loc[rows, 'Longitude_IBGE']
@@ -177,9 +177,8 @@ class Geography:
 	def normalize_location_names(self) -> None:
 		rows = self.df['Latitude_IBGE'].notna()
 		rows &= self.df['Longitude_IBGE'].notna()
-		self.log.update({'city_and_uf_normalized': rows})
+		self.log.update({'city_normalized': rows})
 		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'Município_IBGE']
-		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'UF_IBGE']
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
