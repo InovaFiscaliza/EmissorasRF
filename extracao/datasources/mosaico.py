@@ -47,11 +47,12 @@ class Mosaico(Base, GetAttr):
 		client = self.connect()
 		database = client[self.database]
 		db_collection = database[collection]
-		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False).astype(
-			'string', copy=False
-		)
-		# Substitui strings vazias e somente com espaços por nulo
-		return df.replace(r'^\s*$|^\[\]$', pd.NA, regex=True)
+		df = pd.DataFrame(list(db_collection.aggregate(pipeline)), copy=False, dtype='string')
+		# Substitui strings vazias, espaços e listas vazias por nulo
+		df = df.replace(r'^\s*$|^\[\]$', pd.NA, regex=True)
+		# Create the Log Column
+		df['Log'] = '[]'
+		return df
 
 	def split_designacao(
 		self,
