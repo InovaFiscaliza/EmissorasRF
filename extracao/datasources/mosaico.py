@@ -75,4 +75,8 @@ class Mosaico(Base, GetAttr):
 		# Apply the parse_bw function
 		parsed_data = zip(*df['Designação_Emissão'].apply(Base.parse_bw))
 		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
+		df.loc[:, ['Largura_Emissão(kHz)', 'Classe_Emissão']] = df.loc[
+			:, ['Largura_Emissão(kHz)', 'Classe_Emissão']
+		].astype('string', copy=False)
+
 		return df.drop('Designação_Emissão', axis=1)

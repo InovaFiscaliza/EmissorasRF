@@ -61,9 +61,7 @@ class SRD(Mosaico):
 		pipeline = [{'$match': self.query}, {'$project': self.projection}]
 		if self.limit > 0:
 			pipeline.append({'$limit': self.limit})
-		df = self._extract(self.collection, pipeline)
-		df['Log'] = ''
-		return df
+		return self._extract(self.collection, pipeline)
 
 	def _format(
 		self,
@@ -91,10 +89,11 @@ class SRD(Mosaico):
 		].apply(lambda x: float(Decimal(x) / Decimal(1000)))
 		df['Validade_RF'] = df.Validade_RF.astype('string', copy=False).str.slice(0, 10)
 		df['Fonte'] = 'MOSAICO-SRD'
-		df['Serviço'] = df['Serviço'].fillna('')
-		df['Designação_Emissão'] = df.Serviço.map(BW_MAP)
+		df['Fonte'] = df['Fonte'].astype('string', copy=False)
+		df['Designação_Emissão'] = df.Serviço.fillna('').map(BW_MAP)
 		df = self.split_designacao(df)
-		df['Multiplicidade'] = 1
+		df['Multiplicidade'] = '1'
+		df['Multiplicidade'] = df['Multiplicidade'].astype('string', copy=False)
 		df['Padrão_Antena(dBd)'] = df['Padrão_Antena(dBd)'].str.replace('None', '0')
 		df['Potência_Transmissor(W)'] = pd.to_numeric(
 			df['Potência_Transmissor(W)'], errors='coerce'
@@ -102,10 +101,10 @@ class SRD(Mosaico):
 		df['Potência_Transmissor(W)'] = (
 			df['Potência_Transmissor(W)']
 			.apply(lambda x: float(Decimal(1000) * Decimal(x)))
-			.astype('float')
-		).fillna(-1.0)
+			.astype('string', copy=False)
+		)
 		df['Relatório_Canal'] = df.apply(
 			lambda row: RELATORIO_SRD.format(row.loc['Id'], row.loc['Status']), axis=1
-		)
+		).astype('string', copy=False)
 		# self.append2discarded([self.discarded, discarded, discarded_with_na])
 		return df.loc[:, self.columns]
