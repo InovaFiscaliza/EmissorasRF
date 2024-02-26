@@ -18,6 +18,7 @@ load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01d_mosaico.ipynb 6
 MONGO_URI = os.environ.get('MONGO_URI', '')
+pd.options.mode.copy_on_write = True
 
 
 # %% ../../nbs/01d_mosaico.ipynb 7
@@ -74,9 +75,8 @@ class Mosaico(Base, GetAttr):
 		df['Designação_Emissão'] = df['Designação_Emissão'].astype('string', copy=False).fillna('')
 		# Apply the parse_bw function
 		parsed_data = zip(*df['Designação_Emissão'].apply(Base.parse_bw))
-		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
-		df.loc[:, ['Largura_Emissão(kHz)', 'Classe_Emissão']] = df.loc[
-			:, ['Largura_Emissão(kHz)', 'Classe_Emissão']
-		].astype('string', copy=False)
 
+		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
+		df['Largura_Emissão(kHz)'] = df['Largura_Emissão(kHz)'].astype('string', copy=False)
+		df['Classe_Emissão'] = df['Classe_Emissão'].astype('string', copy=False)
 		return df.drop('Designação_Emissão', axis=1)

@@ -20,6 +20,7 @@ load_dotenv(find_dotenv(), override=True)
 
 # %% ../../nbs/01e_srd.ipynb 6
 MONGO_URI = os.environ.get('MONGO_URI', '')
+pd.options.mode.copy_on_write = True
 
 
 # %% ../../nbs/01e_srd.ipynb 7

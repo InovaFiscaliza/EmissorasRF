@@ -18,6 +18,7 @@ from extracao.constants import IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
 
 # Load environment variables from .env file
 load_dotenv(find_dotenv(), override=True)
+pd.options.mode.copy_on_write = True
 
 
 class Geography:

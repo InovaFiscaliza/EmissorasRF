@@ -41,6 +41,7 @@ from .format import merge_on_frequency, LIMIT_FREQ
 
 # %% ../nbs/04_estacoes.ipynb 4
 load_dotenv(find_dotenv(), override=True)
+pd.options.mode.copy_on_write = True
 
 
 # %% ../nbs/04_estacoes.ipynb 6
@@ -145,5 +146,5 @@ class Estacoes(Base):
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		df = df.astype('string', copy=False).replace('-1.0', '-1').astype('category', copy=False)
-		# return df.loc[:, self.columns]
-		return df
+
+		return df.loc[:, self.columns]

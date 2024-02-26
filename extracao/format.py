@@ -26,6 +26,7 @@ from .constants import (
 MAX_DIST = 10  # Km
 LIMIT_FREQ = 84812.50
 load_dotenv(find_dotenv(), override=True)
+pd.options.mode.copy_on_write = True
 
 
 # %% ../nbs/00b_format.ipynb 6
