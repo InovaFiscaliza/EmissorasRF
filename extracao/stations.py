@@ -140,11 +140,10 @@ class Estacoes(Base):
 		dfs: L,  # List with the individual API sources
 	) -> pd.DataFrame:  # Processed DataFrame
 		aero = dfs.pop()
-		anatel = pd.concat(dfs, ignore_index=True).astype('string', copy=False)
+		anatel = pd.concat(dfs, ignore_index=True, copy=False).astype('string', copy=False)
 		df = merge_on_frequency(anatel, aero)
 		df = Geography(df).validate()
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		df = df.astype('string', copy=False).replace('-1.0', '-1').astype('category', copy=False)
-
 		return df.loc[:, self.columns]

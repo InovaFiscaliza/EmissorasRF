@@ -11,6 +11,9 @@ from fastcore.xtras import Path
 from fastcore.foundation import L
 import pandas as pd
 import geopandas as gpd
+from tqdm.auto import tqdm
+
+tqdm.pandas()
 
 
 from extracao.constants import IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
@@ -69,12 +72,12 @@ class Geography:
 
 		municipios = pd.read_csv(
 			self.ibge,
-			usecols=['Código_Município', 'Município'],
+			usecols=['Código_Município', 'Município', 'Sigla_UF'],
 			dtype='string',
 			dtype_backend='numpy_nullable',
 		)
 
-		municipios['Município_ASCII'] = municipios['Município'].apply(remove_punctuation)
+		municipios['Município_ASCII'] = municipios['Município'].progress_apply(remove_punctuation)
 
 		bad_codes = ~df['Código_Município'].isin(municipios['Código_Município'])
 
@@ -82,7 +85,7 @@ class Geography:
 
 		df.loc[bad_codes, 'Município'] = df.loc[bad_codes, 'Município'].fillna('')
 
-		df.loc[bad_codes, 'Município_ASCII'] = df.loc[bad_codes, 'Município'].apply(
+		df.loc[bad_codes, 'Município_ASCII'] = df.loc[bad_codes, 'Município'].progress_apply(
 			remove_punctuation
 		)
 
@@ -98,16 +101,21 @@ class Geography:
 
 		df.loc[bad_codes, 'Código_Município_x'] = df.loc[bad_codes, 'Código_Município_y']
 
-		df.drop(columns=['Município_y', 'Município_ASCII', 'Código_Município_y'], inplace=True)
+		df.loc[bad_codes, 'UF'] = df.loc[bad_codes, 'Sigla_UF']
+
+		df.drop(
+			columns=['Município_y', 'Município_ASCII', 'Código_Município_y', 'Sigla_UF'],
+			inplace=True,
+		)
 
 		df.rename(
 			columns={'Município_x': 'Município', 'Código_Município_x': 'Código_Município'},
 			inplace=True,
 		)
 
-		df[['Município', 'Código_Município']] = df[['Município', 'Código_Município']].astype(
-			'string', copy=False
-		)
+		df[['Município', 'Código_Município', 'UF']] = df[
+			['Município', 'Código_Município', 'UF']
+		].astype('string', copy=False)
 
 		return df
 
@@ -130,7 +138,7 @@ class Geography:
 
 		municipios = pd.read_csv(
 			self.ibge,
-			usecols=['Código_Município', 'Município', 'Latitude', 'Longitude'],
+			usecols=['Código_Município', 'Município', 'Latitude', 'Longitude', 'Sigla_UF'],
 			dtype='string',
 			dtype_backend='numpy_nullable',
 		)
@@ -148,6 +156,7 @@ class Geography:
 				'Latitude_x': 'Latitude',
 				'Longitude_x': 'Longitude',
 				'Município_x': 'Município',
+				'Sigla_UF': 'UF_IBGE',
 				'Latitude_y': 'Latitude_IBGE',
 				'Longitude_y': 'Longitude_IBGE',
 				'Município_y': 'Município_IBGE',
@@ -180,6 +189,7 @@ class Geography:
 		rows &= self.df['Longitude_IBGE'].notna()
 		self.log.update({'city_normalized': rows})
 		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'Município_IBGE']
+		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'UF_IBGE']
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
@@ -271,6 +281,29 @@ class Geography:
 			wrong_city_coords, 'Longitude_IBGE'
 		]
 
+	def input_info_from_coords(self):
+		from geopy.geocoders import Nominatim
+
+		rows = self.df['Código_Município'].isna()
+		geolocator = Nominatim(user_agent='rfdatahub')
+		for row in tqdm(self.df[rows].itertuples(), total=len(self.df[rows])):
+			location = geolocator.reverse(
+				f'{row.Latitude}, {row.Longitude}', exactly_one=True, language='pt'
+			)
+			if location is None:
+				continue
+			address = location.raw['address']
+			city = address.get('city', '')
+			state = address.get('state', '')
+			country = address.get('country', '')
+			if any([city, state, country]):
+				self.df.loc[row.Index, 'Município'] = city
+				self.df.loc[row.Index, 'UF'] = (
+					f'{state}-{country}' if country != 'Brasil' else state
+				)
+
+		self.log.update({'city_state_country': rows})
+
 	def validate(self) -> pd.DataFrame:
 		"""Helper function to load the IBGE data, enrich and and validate the location information"""
 		self.drop_rows_without_location_info()
@@ -281,4 +314,5 @@ class Geography:
 		self.fill_missing_city_info()
 		self.substitute_wrong_city_info()
 		self.substitute_divergent_coordinates()
+		self.input_info_from_coords()
 		return self.df.astype('string', copy=False)

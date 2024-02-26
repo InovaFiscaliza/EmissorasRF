@@ -11,6 +11,7 @@ import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.utils import listify
 from geopy.distance import geodesic
+from tqdm.auto import tqdm
 
 from .constants import (
 	APP_ANALISE_EN,
@@ -27,6 +28,7 @@ MAX_DIST = 10  # Km
 LIMIT_FREQ = 84812.50
 load_dotenv(find_dotenv(), override=True)
 pd.options.mode.copy_on_write = True
+tqdm.pandas()
 
 
 # %% ../nbs/00b_format.ipynb 6
@@ -103,7 +105,7 @@ def merge_on_frequency(
 		f'{lat}{right_suffix}',
 		f'{long}{right_suffix}',
 	]
-	df.loc[both, 'Distance'] = df.loc[both, both_columns].apply(get_km_distance, axis=1)
+	df.loc[both, 'Distance'] = df.loc[both, both_columns].progress_apply(get_km_distance, axis=1)
 
 	df_both = df[both].sort_values('Distance', ignore_index=True)
 
