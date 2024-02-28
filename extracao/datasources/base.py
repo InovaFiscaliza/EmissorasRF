@@ -4,20 +4,23 @@
 __all__ = ['Base']
 
 # %% ../../nbs/01b_base.ipynb 3
+import json
 import re
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, partial
 from typing import Tuple, Union, List, Any
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.xtras import Path, listify
 from pyarrow import ArrowInvalid, ArrowTypeError
+from tqdm.auto import tqdm
 
 from ..constants import BW, RE_BW
 
 # %% ../../nbs/01b_base.ipynb 4
 load_dotenv(find_dotenv(), override=True)
+tqdm.pandas()
 
 
 # %% ../../nbs/01b_base.ipynb 6
@@ -78,18 +81,30 @@ class Base:
 		self.discarded = pd.concat(dfs, ignore_index=True)
 
 	@staticmethod
-	def register_log(df: pd.DataFrame, log: str, row_filter: pd.Series = None):
+	def register_log(
+		df: pd.DataFrame, log_tuple: Tuple[str, str, str], row_filter: Union[pd.Series, None] = None
+	) -> pd.DataFrame:
 		"""Register a log in the dataframe"""
+		assert isinstance(log_tuple, tuple), 'log_tuple must be a tuple'
 		if row_filter is None:
 			row_filter = pd.Series(True, index=df.index)
 
-		df['Log'] = df['Log'].astype('string', copy=False).fillna('')
-
-		df.loc[row_filter, 'Log'] = df.loc[row_filter, 'Log'].apply(
-			lambda x: f'{x}|{log}' if x else log
-		)
-		df['Log'] = df.Log.str.replace(r'[\n\t]', '', regex=True)
+		df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
+		df['Log'] = df['Log'].str.replace(r'', '[]', regex=False)
+		log_function = partial(Base.format_log, log_tuple=log_tuple)
+		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
 		return df
+
+	@staticmethod
+	def format_log(row: pd.Series, log_tuple: Tuple[str, str, str]) -> str:
+		"""Translate log string into dict, update it and reformats it a log message
+		It's assumed the typing in the signature is correct
+		"""
+		column, processing, original = log_tuple
+		log = json.loads(row.loc['Log'])
+		new_log = {'Coluna': column, 'Processamento': processing, 'Original': row.loc[original]}
+		log.append(new_log)
+		return json.dumps(log, ensure_ascii=False)
 
 	@property
 	def columns(self):
@@ -122,7 +137,7 @@ class Base:
 		if folder is None:
 			folder = self.folder
 		self._save(self.df, folder, self.stem)
-		# self._save(self.discarded, folder, f'{self.stem}_discarded')
+		self._save(self.discarded, folder, f'{self.stem}_discarded')
 
 	@staticmethod
 	def _cast2float(column: pd.Series) -> pd.Series:
