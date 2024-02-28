@@ -67,7 +67,6 @@ class Telecom(Mosaico):
 		if self.limit > 0:
 			pipeline.append({'$limit': self.limit})
 		df = self._extract(self.collection, pipeline)
-		df['Log'] = ''
 		return df
 
 	def _format(
@@ -76,7 +75,7 @@ class Telecom(Mosaico):
 	) -> pd.DataFrame:  # Final processed dataframe
 		"""Formats, cleans, groups and standardizes the queried data from the database"""
 		df = df.rename(columns=self.cols_mapping)
-		df = self.split_designacao(df)
+		df = Mosaico.split_designacao(df)
 		duplicated = df.duplicated(subset=AGG_LICENCIAMENTO, keep='first')
 		df_sub = df[~duplicated].reset_index(drop=True)
 		# discarded = df[duplicated].reset_index(drop=True)
@@ -90,8 +89,8 @@ class Telecom(Mosaico):
 		df_sub['Multiplicidade'] = (
 			df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False, observed=True).size().values
 		)
-		log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
-		df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)
+		# log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
+		# df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)
 		df_sub['Status'] = 'L'
 		df_sub['Fonte'] = 'MOSAICO-LIC'
 		return df_sub.loc[:, self.columns]
