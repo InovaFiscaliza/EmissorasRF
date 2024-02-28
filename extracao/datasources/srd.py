@@ -92,7 +92,7 @@ class SRD(Mosaico):
 		df['Fonte'] = 'MOSAICO-SRD'
 		df['Fonte'] = df['Fonte'].astype('string', copy=False)
 		df['Designação_Emissão'] = df.Serviço.fillna('').map(BW_MAP)
-		df = self.split_designacao(df)
+		df = Mosaico.split_designacao(df)
 		df['Multiplicidade'] = '1'
 		df['Multiplicidade'] = df['Multiplicidade'].astype('string', copy=False)
 		df['Padrão_Antena(dBd)'] = df['Padrão_Antena(dBd)'].str.replace('None', '0')
