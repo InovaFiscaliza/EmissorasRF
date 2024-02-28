@@ -83,7 +83,7 @@ class Base:
 	@staticmethod
 	def register_log(
 		df: pd.DataFrame, log_tuple: Tuple[str, str, str], row_filter: Union[pd.Series, None] = None
-	) -> pd.DataFrame:
+	):
 		"""Register a log in the dataframe"""
 		assert isinstance(log_tuple, tuple), 'log_tuple must be a tuple'
 		if row_filter is None:
@@ -93,7 +93,6 @@ class Base:
 		df['Log'] = df['Log'].str.replace(r'', '[]', regex=False)
 		log_function = partial(Base.format_log, log_tuple=log_tuple)
 		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
-		return df
 
 	@staticmethod
 	def format_log(row: pd.Series, log_tuple: Tuple[str, str, str]) -> str:
@@ -130,7 +129,8 @@ class Base:
 
 	def update(self):
 		df = self.extraction()
-		self._save(df, self.folder, f'{self.stem}_raw')
+		if not self.read_cache:
+			self._save(df, self.folder, f'{self.stem}_raw')
 		self.df = self._format(df)
 
 	def save(self, folder: Union[str, Path, None] = None):
