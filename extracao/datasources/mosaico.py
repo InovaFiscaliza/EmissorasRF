@@ -55,28 +55,33 @@ class Mosaico(Base, GetAttr):
 		df['Log'] = '[]'
 		return df
 
+	@staticmethod
 	def split_designacao(
-		self,
 		df: pd.DataFrame,  # DataFrame com coluna original DesignacaoEmissao
 	) -> pd.DataFrame:  # DataFrame com novas colunas Largura_Emissão(kHz) e Classe_Emissão
 		"""Parse a bandwidth string
 		It returns the numerical component and a character class
 		"""
-		df['Designação_Emissão'] = (
+
+		# split then explode
+		df['Temp'] = (
 			df['Designação_Emissão'].str.replace(',', ' ').str.strip().str.upper().str.split(' ')
 		)
-		exploded_rows = df['Designação_Emissão'].apply(lambda x: isinstance(x, list))
-		log = """[("Colunas", "Designação_Emissão"]),
-		          ("Processamento", "Registro expandido nos componentes individuais e extraídas Largura e Classe")]"""
-		df = self.register_log(df, log, exploded_rows)
-		df = df.explode('Designação_Emissão').reset_index(drop=True)
+		exploded_rows = df['Temp'].apply(lambda x: isinstance(x, list))
+		# Log
+		column = 'Designação_Emissão'
+		processing = 'Registro expandido em Largura_Emissão(kHz) e Classe_Emissão'
+		log_tuple = (column, processing, column)
+		Base.register_log(df, log_tuple, exploded_rows)
 
-		df = df[df['Designação_Emissão'] != '/']  # Removes empty rows
-		df['Designação_Emissão'] = df['Designação_Emissão'].astype('string', copy=False).fillna('')
+		df = df.explode('Temp').reset_index(drop=True)
+		df = df[df['Temp'] != '/']  # Removes empty rows
+		df['Temp'] = df['Temp'].astype('string', copy=False).fillna('')
+
 		# Apply the parse_bw function
-		parsed_data = zip(*df['Designação_Emissão'].apply(Base.parse_bw))
+		parsed_data = zip(*df['Temp'].apply(Base.parse_bw))
 
 		df['Largura_Emissão(kHz)'], df['Classe_Emissão'] = parsed_data
 		df['Largura_Emissão(kHz)'] = df['Largura_Emissão(kHz)'].astype('string', copy=False)
 		df['Classe_Emissão'] = df['Classe_Emissão'].astype('string', copy=False)
-		return df.drop('Designação_Emissão', axis=1)
+		return df.drop(['Designação_Emissão', 'Temp'], axis=1)
