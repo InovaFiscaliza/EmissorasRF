@@ -72,29 +72,39 @@ class SRD(Mosaico):
 
 		df = df.rename(columns=self.cols_mapping)
 		status = df.Status.str.contains('-C1$|-C2$|-C3$|-C4$|-C7|-C98$', na=False)
-		# discarded = df[~status].copy()
-		# log = """[("Registro", "Status"),
-		#         ("Processamento", "Registro com Status não considerado para fins de monitoração")]"""
-		# discarded = self.register_log(discarded, log)
-		df = df[status].reset_index(drop=True)
+
+		# Discard inactive statuses
+		discarded = df[~status].copy()
+		processing = 'Registro com Status não considerado para fins de monitoração'
+		Mosaico.register_log(discarded, processing, 'Status')
+		self.append2discarded(discarded)
+
+		df[status].reset_index(drop=True, inplace=True)
+
+		# Discard null frequencies
+		discarded = df[df.Frequência.isna()].copy()
+		processing = 'Registro com Frequência nula'
+		Mosaico.register_log(discarded, processing, 'Frequência')
+
 		df.dropna(subset='Frequência', ignore_index=True, inplace=True)  # type: ignore
 		df['Frequência'] = (
 			df.Frequência.astype('string', copy=False).str.replace(',', '.').astype('float')
 		)
-		# discarded_with_na = df[df.Frequência.isna()].copy()
-		# log = """[("Registro", "Frequência"),
-		#         ("Processamento", "Registro com valor nulo presente")]"""
-		# discarded_with_na = self.register_log(discarded_with_na, log)
+
 		df.loc[df['Serviço'] == '205', 'Frequência'] = df.loc[
 			df['Serviço'] == '205', 'Frequência'
 		].apply(lambda x: float(Decimal(x) / Decimal(1000)))
 		df['Validade_RF'] = df.Validade_RF.astype('string', copy=False).str.slice(0, 10)
+
 		df['Fonte'] = 'MOSAICO-SRD'
 		df['Fonte'] = df['Fonte'].astype('string', copy=False)
+
 		df['Designação_Emissão'] = df.Serviço.fillna('').map(BW_MAP)
 		df = Mosaico.split_designacao(df)
+
 		df['Multiplicidade'] = '1'
 		df['Multiplicidade'] = df['Multiplicidade'].astype('string', copy=False)
+
 		df['Padrão_Antena(dBd)'] = df['Padrão_Antena(dBd)'].str.replace('None', '0')
 		df['Potência_Transmissor(W)'] = pd.to_numeric(
 			df['Potência_Transmissor(W)'], errors='coerce'
@@ -104,8 +114,9 @@ class SRD(Mosaico):
 			.apply(lambda x: float(Decimal(1000) * Decimal(x)))
 			.astype('string', copy=False)
 		)
+
 		df['Relatório_Canal'] = df.apply(
 			lambda row: RELATORIO_SRD.format(row.loc['Id'], row.loc['Status']), axis=1
 		).astype('string', copy=False)
-		# self.append2discarded([self.discarded, discarded, discarded_with_na])
+
 		return df.loc[:, self.columns]
