@@ -10,8 +10,8 @@ import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import GetAttr
 
-from .connectors import MongoDB
 from .base import Base
+from .connectors import MongoDB
 
 # %% ../../nbs/01d_mosaico.ipynb 4
 load_dotenv(find_dotenv(), override=True)
@@ -69,10 +69,8 @@ class Mosaico(Base, GetAttr):
 		)
 		exploded_rows = df['Temp'].apply(lambda x: isinstance(x, list))
 		# Log
-		column = 'Designação_Emissão'
 		processing = 'Registro expandido em Largura_Emissão(kHz) e Classe_Emissão'
-		log_tuple = (column, processing, column)
-		Base.register_log(df, log_tuple, exploded_rows)
+		Base.register_log(df, processing, 'Designação_Emissão', exploded_rows)
 
 		df = df.explode('Temp').reset_index(drop=True)
 		df = df[df['Temp'] != '/']  # Removes empty rows
