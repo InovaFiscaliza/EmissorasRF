@@ -21,6 +21,7 @@ from ..constants import BW, RE_BW
 # %% ../../nbs/01b_base.ipynb 4
 load_dotenv(find_dotenv(), override=True)
 tqdm.pandas()
+pd.options.mode.copy_on_write = True
 
 
 # %% ../../nbs/01b_base.ipynb 6
@@ -82,26 +83,35 @@ class Base:
 
 	@staticmethod
 	def register_log(
-		df: pd.DataFrame, log_tuple: Tuple[str, str, str], row_filter: Union[pd.Series, None] = None
+		df: pd.DataFrame,
+		processing: str,
+		column: Union[str, None] = None,
+		row_filter: Union[pd.Series, None] = None,
 	):
 		"""Register a log in the dataframe"""
-		assert isinstance(log_tuple, tuple), 'log_tuple must be a tuple'
 		if row_filter is None:
 			row_filter = pd.Series(True, index=df.index)
 
 		df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
 		df['Log'] = df['Log'].str.replace(r'', '[]', regex=False)
-		log_function = partial(Base.format_log, log_tuple=log_tuple)
+		log_function = partial(Base.format_log, processing=processing, column=column)
 		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
 
 	@staticmethod
-	def format_log(row: pd.Series, log_tuple: Tuple[str, str, str]) -> str:
+	def format_log(
+		row: pd.Series,
+		processing: str,
+		column: Union[str, None] = None,
+	) -> str:
 		"""Translate log string into dict, update it and reformats it a log message
 		It's assumed the typing in the signature is correct
 		"""
-		column, processing, original = log_tuple
 		log = json.loads(row.loc['Log'])
-		new_log = {'Coluna': column, 'Processamento': processing, 'Original': row.loc[original]}
+		if column is None:
+			column, original = 'N/A', 'N/A'
+		else:
+			original = row.loc[column]
+		new_log = {'Coluna': column, 'Processamento': processing, 'Original': original}
 		log.append(new_log)
 		return json.dumps(log, ensure_ascii=False)
 
