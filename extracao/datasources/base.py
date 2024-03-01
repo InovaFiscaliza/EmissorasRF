@@ -8,7 +8,7 @@ import json
 import re
 from dataclasses import dataclass
 from functools import cached_property, partial
-from typing import Tuple, Union, List, Any
+from typing import Iterable, Tuple, Union, List, Any
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
@@ -34,7 +34,7 @@ class Base:
 		"""Lê o dataframe formado por self.folder / self.stem.parquet.gzip"""
 		file = Path(f'{self.folder}/{stem}.parquet.gzip')
 		try:
-			df = pd.read_parquet(file, dtype_backend='numpy_nullable')
+			df = pd.read_parquet(file, dtype_backend='pyarrow')
 		except (ArrowInvalid, FileNotFoundError) as e:
 			raise ValueError(f'Error when reading {file}') from e
 		return df
@@ -93,7 +93,7 @@ class Base:
 			row_filter = pd.Series(True, index=df.index)
 
 		df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
-		df['Log'] = df['Log'].str.replace(r'', '[]', regex=False)
+		df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
 		log_function = partial(Base.format_log, processing=processing, column=column)
 		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
 
@@ -140,7 +140,7 @@ class Base:
 	def update(self):
 		df = self.extraction()
 		if not self.read_cache:
-			self._save(df, self.folder, f'{self.stem}_raw')
+			self._save(df.drop('Log', axis=1), self.folder, f'{self.stem}_raw')
 		self.df = self._format(df)
 
 	def save(self, folder: Union[str, Path, None] = None):
@@ -168,9 +168,9 @@ class Base:
 		).fillna(-1)
 
 	@staticmethod
-	def _cast2str(column: pd.Series) -> pd.Series:
-		column.replace('', '-1', inplace=True)
-		return column.astype('string', copy=False).fillna('-1')
+	def _cast2str(df: pd.DataFrame, columns: Iterable):
+		for column in listify(columns):
+			df[column] = df[column].astype('string', copy=False).str.replace('', '-1').fillna('-1')
 
 	@staticmethod
 	def _cast2cat(column: pd.Series) -> pd.Series:

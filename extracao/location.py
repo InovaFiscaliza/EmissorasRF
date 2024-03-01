@@ -77,7 +77,7 @@ class Geography:
 			dtype_backend='numpy_nullable',
 		)
 
-		municipios['Município_ASCII'] = municipios['Município'].progress_apply(remove_punctuation)
+		municipios['Município_ASCII'] = municipios['Município'].apply(remove_punctuation)
 
 		bad_codes = ~df['Código_Município'].isin(municipios['Código_Município'])
 
@@ -85,7 +85,7 @@ class Geography:
 
 		df.loc[bad_codes, 'Município'] = df.loc[bad_codes, 'Município'].fillna('')
 
-		df.loc[bad_codes, 'Município_ASCII'] = df.loc[bad_codes, 'Município'].progress_apply(
+		df.loc[bad_codes, 'Município_ASCII'] = df.loc[bad_codes, 'Município'].apply(
 			remove_punctuation
 		)
 
