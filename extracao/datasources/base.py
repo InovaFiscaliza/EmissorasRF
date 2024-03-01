@@ -95,6 +95,7 @@ class Base:
 		df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
 		df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
 		log_function = partial(Base.format_log, processing=processing, column=column)
+		print(f'Logging {processing}...')
 		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
 
 	@staticmethod
@@ -148,31 +149,3 @@ class Base:
 			folder = self.folder
 		self._save(self.df, folder, self.stem)
 		self._save(self.discarded, folder, f'{self.stem}_discarded')
-
-	@staticmethod
-	def _cast2float(column: pd.Series) -> pd.Series:
-		return pd.to_numeric(
-			column,
-			downcast='float',
-			errors='coerce',
-			dtype_backend='numpy_nullable',
-		).fillna(-1.0)
-
-	@staticmethod
-	def _cast2int(column: pd.Series) -> pd.Series:
-		return pd.to_numeric(
-			column,
-			downcast='integer',
-			errors='coerce',
-			dtype_backend='numpy_nullable',
-		).fillna(-1)
-
-	@staticmethod
-	def _cast2str(df: pd.DataFrame, columns: Iterable):
-		for column in listify(columns):
-			df[column] = df[column].astype('string', copy=False).str.replace('', '-1').fillna('-1')
-
-	@staticmethod
-	def _cast2cat(column: pd.Series) -> pd.Series:
-		column.replace('', '-1', inplace=True)
-		return column.fillna('-1').astype('category', copy=False)
