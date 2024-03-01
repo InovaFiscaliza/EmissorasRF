@@ -5,8 +5,11 @@ __all__ = ['MONGO_URI', 'Telecom']
 
 # %% ../../nbs/01f_telecom.ipynb 3
 import os
+import gc
+
 
 import pandas as pd
+
 from dotenv import find_dotenv, load_dotenv
 
 from extracao.constants import (
@@ -77,20 +80,39 @@ class Telecom(Mosaico):
 		df = df.rename(columns=self.cols_mapping)
 		df = Mosaico.split_designacao(df)
 		duplicated = df.duplicated(subset=AGG_LICENCIAMENTO, keep='first')
-		df_sub = df[~duplicated].reset_index(drop=True)
-		# discarded = df[duplicated].reset_index(drop=True)
-		# log = f"""[("Colunas", {AGG_LICENCIAMENTO}),
-		# ("Processamento", "Registro agrupado e descartado do arquivo final")]"""
-		# self.append2discarded(self.register_log(discarded, log))
-		# del discarded
-		# gc.collect()
-		# .count() drop the NaN from the subset, not keeping them
-		df_sub.dropna(subset=AGG_LICENCIAMENTO, inplace=True)
+
+		# Discard and Log
+		df_temp = df[duplicated]
+		processing = (
+			f'Registro agregado no arquivo final. Colunas Consideradas: {AGG_LICENCIAMENTO}'
+		)
+		Mosaico.register_log(df_temp, processing)
+		self.append2discarded(df_temp)
+
+		# I didn't find a better way to do this, the LLMs suggested were wrong!
+		df_temp = df[~duplicated]
+		df_sub = df_temp.dropna(subset=AGG_LICENCIAMENTO)
+		df_temp = df_temp.loc[~df_temp.index.isin(df_sub.index)]
+
+		# Discard and Log dropped rows
+		processing = (
+			f'Registro removido por conter valores nulos. Colunas Consideradas: {AGG_LICENCIAMENTO}'
+		)
+		Mosaico.register_log(df_temp, processing)
+		self.append2discarded(df_temp)
+
 		df_sub['Multiplicidade'] = (
 			df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False, observed=True).size().values
 		)
-		# log = f'[("Colunas", {AGG_LICENCIAMENTO}), ("Processamento", "Agrupamento")]'
-		# df_sub = self.register_log(df_sub, log, df_sub.Multiplicidade > 1)
+		del df, df_temp
+		gc.collect()
+
+		processing = f'Registro agrupado. Colunas consideradas: {AGG_LICENCIAMENTO}'
+		Mosaico.register_log(df_sub[df_sub['Multiplicidade'] > 1], processing)
+
 		df_sub['Status'] = 'L'
+		df_sub['Status'] = df_sub['Status'].astype('string', copy=False)
 		df_sub['Fonte'] = 'MOSAICO-LIC'
+		df_sub['Fonte'] = df_sub['Fonte'].astype('string', copy=False)
+		df_sub['Multiplicidade'] = df_sub['Multiplicidade'].astype('string', copy=False)
 		return df_sub.loc[:, self.columns]

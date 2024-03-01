@@ -6,7 +6,7 @@ __all__ = ['MONGO_URI', 'SRD']
 # %% ../../nbs/01e_srd.ipynb 3
 import os
 from decimal import Decimal
-from functools import cached_property
+
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
