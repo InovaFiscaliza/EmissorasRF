@@ -65,15 +65,22 @@ class Mosaico(Base, GetAttr):
 
 		# split then explode
 		df['Temp'] = (
-			df['Designação_Emissão'].str.replace(',', ' ').str.strip().str.upper().str.split(' ')
+			df['Designação_Emissão']
+			.str.strip()
+			.str.replace(',', ' ')
+			.str.strip()
+			.str.upper()
+			.str.split()
 		)
-		exploded_rows = df['Temp'].apply(lambda x: isinstance(x, list))
+		# exploded_rows = df['Temp'].apply(lambda x: isinstance(x, list)) # Not Working, returning all False
 		# Log
 		processing = 'Registro expandido em Largura_Emissão(kHz) e Classe_Emissão'
-		Base.register_log(df, processing, 'Designação_Emissão', exploded_rows)
+		Base.register_log(df, processing, 'Designação_Emissão')
 
-		df = df.explode('Temp').reset_index(drop=True)
-		df = df[df['Temp'] != '/']  # Removes empty rows
+		df = df.explode('Temp', ignore_index=True)
+
+		# Removes empty rows
+		df = df[df['Temp'] != '/']
 		df['Temp'] = df['Temp'].astype('string', copy=False).fillna('')
 
 		# Apply the parse_bw function
