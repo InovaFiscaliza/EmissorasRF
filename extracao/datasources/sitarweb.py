@@ -65,8 +65,11 @@ class Sitarweb(Base, GetAttr):
 	def extraction(self):
 		"""This method returns a DataFrame with the results of the query"""
 		if self.read_cache:
-			return self._read(f'{self.stem}_raw')
-		return pd.read_sql_query(self.query, self.connect()).astype('string', copy=False)
+			df = self._read(f'{self.stem}_raw', 'numpy_nullable')
+		else:
+			df = pd.read_sql_query(self.query, self.connect(), dtype='string', copy=False)
+		df['Log'] = '[]'
+		return df
 
 
 # %% ../../nbs/01c_sitarweb.ipynb 7
@@ -89,7 +92,7 @@ class Radcom(Sitarweb):
 		df: pd.DataFrame,  # DataFrame com o resultantes do banco de dados
 	) -> pd.DataFrame:  # DataFrame formatado
 		"""Formata, limpa e padroniza os dados provenientes da query no banco"""
-		df['Entidade'] = df['Entidade'].str.strip()
+		df['Entidade'] = df['Entidade'].astype('string', copy=False).str.strip()
 		df['Serviço'] = '231'
 		df['Classe_Emissão'] = pd.NA
 		df['Largura_Emissão(kHz)'] = '256'
@@ -105,13 +108,14 @@ class Radcom(Sitarweb):
 			+ df.loc[~a, 'Situação'].astype('string', copy=False)
 		)
 		df.drop(['Fase', 'Situação'], axis=1, inplace=True)
-		df['Log'] = ''
+		processing = 'Coluna Classe criada à partir de Fase e Situação'
+		Base.register_log(df, processing, 'Classe', a)
 		df['Frequência'] = pd.to_numeric(df['Frequência'], errors='coerce').astype('float')
-		discarded = df[df.Frequência.isna()].copy()
+		discarded = df[df.Frequência.isna()]
 		if not discarded.empty:
-			log = """[("Colunas", "Frequência"),  
-            ("Processamento", "Valor Nulo")]"""
-			self.append2discarded(self.register_log(discarded, log))
+			processing = 'Coluna Frequência com valores nulos'
+			Base.register_log(discarded, processing)
+			self.append2discarded(discarded)
 		df.dropna(subset=['Frequência'], inplace=True)
 		return df.loc[:, self.columns]
 
@@ -135,7 +139,7 @@ class Stel(Sitarweb):
 	) -> pd.DataFrame:  # DataFrame formatado
 		"""Formata, limpa e padroniza os dados provenientes da query no banco"""
 		df['Status'] = 'L'
-		df['Entidade'] = df.Entidade.str.strip()
+		df['Entidade'] = df.Entidade.astype('string', copy=False).str.strip()
 		df['Fonte'] = 'STEL'
 		df['Largura_Emissão'] = df['Largura_Emissão'].astype('string', copy=False)
 		df.loc[:, ['Largura_Emissão(kHz)', '_']] = (
@@ -143,7 +147,7 @@ class Stel(Sitarweb):
 		)
 		df.drop(['Largura_Emissão', '_'], axis=1, inplace=True)
 		df.loc[:, 'Validade_RF'] = df.Validade_RF.astype('string', copy=False).str.slice(0, 10)
-		df['Frequência'] = df['Frequência'].astype('float')
+		df['Frequência'] = pd.to_numeric(df['Frequência'], errors='coerce').astype('float')
 		df.loc[df.Unidade == 'kHz', 'Frequência'] = df.loc[df.Unidade == 'kHz', 'Frequência'].apply(
 			lambda x: float(Decimal(x) / Decimal(1000))
 		)
@@ -151,6 +155,5 @@ class Stel(Sitarweb):
 			lambda x: float(Decimal(x) * Decimal(1000))
 		)
 		df.drop('Unidade', axis=1, inplace=True)
-		df['Multiplicidade'] = 1
-		df['Log'] = ''
+		df['Multiplicidade'] = '1'
 		return df.loc[:, self.columns]
