@@ -75,7 +75,7 @@ class SRD(Mosaico):
 
 		# Discard inactive statuses
 		discarded = df[~status].copy()
-		processing = 'Registro com Status não considerado para fins de monitoração'
+		processing = 'Status não considerado para fins de monitoração'
 		Mosaico.register_log(discarded, processing, 'Status')
 		self.append2discarded(discarded)
 
@@ -83,7 +83,7 @@ class SRD(Mosaico):
 
 		# Discard null frequencies
 		discarded = df[df.Frequência.isna()].copy()
-		processing = 'Registro com Frequência nula'
+		processing = 'Frequência nula'
 		Mosaico.register_log(discarded, processing, 'Frequência')
 
 		df.dropna(subset='Frequência', ignore_index=True, inplace=True)  # type: ignore

@@ -8,7 +8,7 @@ import json
 import re
 from dataclasses import dataclass
 from functools import cached_property, partial
-from typing import Iterable, Tuple, Union, List, Any
+from typing import Tuple, Union, List, Any
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
