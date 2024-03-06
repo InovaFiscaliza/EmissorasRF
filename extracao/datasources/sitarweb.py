@@ -100,19 +100,19 @@ class Radcom(Sitarweb):
 		df['Status'] = 'RADCOM'
 		df['Fonte'] = 'SRD'
 		df['Multiplicidade'] = '1'
+		df['Fase'] = df['Fase'].astype('string', copy=False)
+		df['Situação'] = df['Situação'].astype('string', copy=False)
+
 		a = df.Situação.isna()
-		df.loc[a, 'Classe'] = df.loc[a, 'Fase'].astype('string', copy=False)
-		processing = 'Coluna Classe criada à partir da coluna Fase'
-		Base.register_log(df, processing, 'Fase', a)
-		df.loc[~a, 'Classe'] = (
-			df.loc[~a, 'Fase'].astype('string', copy=False)
-			+ '-'
-			+ df.loc[~a, 'Situação'].astype('string', copy=False)
-		)
-		processing = 'Coluna Classe criada à partir de Fase e Situação'
-		Base.register_log(df, processing, 'Fase', ~a)
-		Base.register_log(df, processing, 'Situação', ~a)
+		df.loc[a, 'Classe'] = df.loc[a, 'Fase']
+		processing = 'Classe=Fase. Situação Nula. Colunas Fase e Situação descartadas'
+		Base.register_log(df, processing, row_filter=a)
+
+		df.loc[~a, 'Classe'] = df.loc[~a, 'Fase'] + '-' + df.loc[~a, 'Situação']
+		processing = 'Classe=Fase-Situação. Colunas Fase e Situação descartadas'
+		Base.register_log(df, processing, row_filter=~a)
 		df.drop(['Fase', 'Situação'], axis=1, inplace=True)
+
 		df['Frequência'] = pd.to_numeric(df['Frequência'], errors='coerce').astype('float')
 		discarded = df[df.Frequência.isna()]
 		if not discarded.empty:
