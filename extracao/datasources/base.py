@@ -108,11 +108,9 @@ class Base:
 		It's assumed the typing in the signature is correct
 		"""
 		log = json.loads(row.loc['Log'])
-		if column is None:
-			column, original = 'N/A', 'N/A'
-		else:
-			original = row.loc[column]
-		new_log = {'Coluna': column, 'Processamento': processing, 'Original': original}
+		new_log = {'Processamento': processing}
+		if column is not None:
+			new_log.update({'Coluna': column, 'Original': row.loc[column]})
 		log.append(new_log)
 		return json.dumps(log, ensure_ascii=False)
 
