@@ -72,7 +72,6 @@ class Mosaico(Base, GetAttr):
 			.str.upper()
 			.str.split()
 		)
-		# exploded_rows = df['Temp'].apply(lambda x: isinstance(x, list)) # Not Working, returning all False
 		# Log
 		processing = 'Registro expandido em Largura_Emissão(kHz) e Classe_Emissão'
 		Base.register_log(df, processing, 'Designação_Emissão')

@@ -74,12 +74,12 @@ class Base:
 	def discarded(self) -> pd.DataFrame:
 		return pd.DataFrame(columns=self.columns)
 
-	def append2discarded(self, dfs: Union[pd.DataFrame, List]) -> None:
+	def append2discarded(self, df: pd.DataFrame) -> None:
 		"""Receives one of more dataframes and append to the discarded dataframe"""
-		dfs = listify(dfs)
 		if not self.discarded.empty:
-			dfs.append(self.discarded)
-		self.discarded = pd.concat(dfs, ignore_index=True)
+			self.discarded = pd.concat([self.discarded, df], ignore_index=True, copy=False)
+		else:
+			self.discarded = df
 
 	@staticmethod
 	def register_log(
@@ -107,7 +107,7 @@ class Base:
 		"""Translate log string into dict, update it and reformats it a log message
 		It's assumed the typing in the signature is correct
 		"""
-		log = json.loads(row.loc['Log'])
+		log = listify(json.loads(row.loc['Log']))
 		new_log = {'Processamento': processing}
 		if column is not None:
 			new_log.update({'Coluna': column, 'Original': row.loc[column]})
