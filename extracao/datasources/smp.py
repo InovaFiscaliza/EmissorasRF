@@ -157,7 +157,7 @@ class Smp(Mosaico):
 		grouped_channels = grouped_channels[columns]
 
 		df = pd.merge(df, grouped_channels, how='left', on=['Início_Canal_Down', 'Fim_Canal_Down'])
-		processing = f'Colunas criadas à partir da legislação de canalização: {columns}'
+		processing = f'Colunas criadas à partir da Canalização do Serviço: {columns}'
 		Mosaico.register_log(df, processing)
 		return self.exclude_invalid_channels(df)
 
@@ -178,6 +178,8 @@ class Smp(Mosaico):
 		)
 		df[['Frequência', 'Offset']] = df[['Frequência', 'Offset']].astype('float')
 		df.loc[valid, 'Frequência_Recepção'] = df.loc[valid, 'Frequência'] - df.loc[valid, 'Offset']
+		log = 'Criada Frequência de Recepção (Uplink) à partir do Downlink e Offset.'
+		Mosaico.register_log(df, log, row_filter=valid)
 		return df
 
 	def substitute_coordinates(
@@ -191,14 +193,14 @@ class Smp(Mosaico):
 		"""
 		geo = Geography(df)
 		df = geo.merge_df_with_ibge(df)
-		df['Multiplicidade'] = df.Multiplicidade.astype('int')
-		rows = df.Multiplicidade > 1
-		df.loc[rows, 'Latitude'] = df.loc[rows, 'Latitude_IBGE']
-		df.loc[rows, 'Longitude'] = df.loc[rows, 'Longitude_IBGE']
+		# df['Multiplicidade'] = df.Multiplicidade.astype('int')
+		row_filter = df.Multiplicidade > 1
+		df.loc[row_filter, 'Latitude'] = df.loc[row_filter, 'Latitude_IBGE']
+		df.loc[row_filter, 'Longitude'] = df.loc[row_filter, 'Longitude_IBGE']
+		log = 'Substituição por Coordenadas do Município (Agrupamento SMP)'
+		for column in ('Latitude', 'Longitude'):
+			Mosaico.register_log(df, log, column, row_filter)
 		return df
-		# log = """[("Colunas", ("Latitude", "Longitude")),
-		# ("Processamento", "Substituição por Coordenadas do Município (Agrupamento)")]"""
-		# return self.register_log(df, log, df.Multiplicidade > 1)
 
 	def input_fixed_columns(
 		self,
