@@ -88,12 +88,14 @@ class Smp(Mosaico):
 	) -> pd.DataFrame:  # DataFrame com os canais inválidos excluídos
 		"""Helper function to keep only the valid downlink channels"""
 		df_sub = df[df.Canalização == 'Downlink'].reset_index(drop=True)
-		# for flag in ["Uplink", "Inválida"]:
-		#     discarded = df[df.Canalização == flag]
-		#     if not discarded.empty:
-		#         log = f"""[("Colunas", ("Frequência", "Largura_Emissão(kHz)")),
-		#                  ("Processamento", "Canalização {flag}")]"""
-		#         self.append2discarded(self.register_log(discarded, log))
+		for flag in ['Uplink', 'Inválida']:
+			discarded = df['Canalização'] == flag
+			if discarded.any():
+				processing = f'Frequência de Downlink. Canalização {flag}.'
+				Mosaico.register_log(df_sub, processing, row_filter=discarded)
+				self.append2discarded(df[discarded])
+		del df
+		gc.collect()
 		return df_sub
 
 	def validate_channels(
@@ -144,17 +146,19 @@ class Smp(Mosaico):
 			grouped_channels.loc[
 				row.Index, ['Blocos_Downlink', 'Faixas', 'Canalização', 'Offset']
 			] = (down, faixas, faixa, float(offset[0]))
-		grouped_channels = grouped_channels[
-			[
-				'Início_Canal_Down',
-				'Fim_Canal_Down',
-				'Blocos_Downlink',
-				'Faixas',
-				'Canalização',
-				'Offset',
-			]
+		columns = [
+			'Início_Canal_Down',
+			'Fim_Canal_Down',
+			'Blocos_Downlink',
+			'Faixas',
+			'Canalização',
+			'Offset',
 		]
+		grouped_channels = grouped_channels[columns]
+
 		df = pd.merge(df, grouped_channels, how='left', on=['Início_Canal_Down', 'Fim_Canal_Down'])
+		processing = f'Colunas criadas à partir da legislação de canalização: {columns}'
+		Mosaico.register_log(df, processing)
 		return self.exclude_invalid_channels(df)
 
 	def generate_uplink(
