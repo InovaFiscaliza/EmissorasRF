@@ -98,7 +98,7 @@ class Base:
 		df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
 		print(f'Logging: {processing}')
 		log_function = partial(Base.format_log, processing=processing, column=column)
-		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
+		df.loc[row_filter, 'Log'] = df.loc[row_filter].progress_apply(log_function, axis=1)
 
 	@staticmethod
 	def format_log(

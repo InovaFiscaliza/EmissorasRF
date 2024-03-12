@@ -74,7 +74,9 @@ class Mosaico(Base, GetAttr):
 			.str.split()
 		)
 		# Log
-		processing = 'Registro expandido em Largura_Emissão(kHz) e Classe_Emissão'
+		processing = (
+			'Registro expandido nos componentes individuais Largura_Emissão(kHz) e Classe_Emissão'
+		)
 		Base.register_log(df, processing, 'Designação_Emissão')
 
 		df = df.explode('Temp', ignore_index=True)
@@ -108,7 +110,7 @@ class Mosaico(Base, GetAttr):
 
 		# Log discarded
 		df_temp = df[duplicated]
-		processing = f'Registro agrupado num único registro no arquivo final. Colunas Consideradas: {agg_cols}'
+		processing = f'Registro agrupado no arquivo final. Colunas Consideradas: {agg_cols}'
 		Mosaico.register_log(df_temp, processing)
 		self.append2discarded(df_temp)
 		del df_temp
@@ -133,6 +135,7 @@ class Mosaico(Base, GetAttr):
 		df_sub['Multiplicidade'] = grouped_stations.size().values
 
 		df_sub['#Estação'] = grouped_stations['Estação'].apply(lambda x: list(x)).values
+		df_sub['#Estação'] = df_sub['#Estação'].astype('string', copy=False)
 
 		row_filter = df_sub['Multiplicidade'] > 1
 		processing = f'Registro agrupado. Colunas consideradas: {agg_cols}'
