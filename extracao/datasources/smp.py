@@ -193,12 +193,12 @@ class Smp(Mosaico):
 		"""
 		geo = Geography(df)
 		df = geo.merge_df_with_ibge(df)
-		# df['Multiplicidade'] = df.Multiplicidade.astype('int')
-		row_filter = df.Multiplicidade > 1
+		df['Multiplicidade'] = df.Multiplicidade.astype('int')
+		row_filter = df['Multiplicidade'] > 1
 		df.loc[row_filter, 'Latitude'] = df.loc[row_filter, 'Latitude_IBGE']
 		df.loc[row_filter, 'Longitude'] = df.loc[row_filter, 'Longitude_IBGE']
-		log = 'Substituição por Coordenadas do Município (Agrupamento SMP)'
 		for column in ('Latitude', 'Longitude'):
+			log = f'Substituição por {column} do Município (Agrupamento SMP)'
 			Mosaico.register_log(df, log, column, row_filter)
 		return df
 
