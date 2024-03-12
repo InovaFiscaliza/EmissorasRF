@@ -5,6 +5,7 @@ __all__ = ['MONGO_URI', 'Mosaico']
 
 # %% ../../nbs/01d_mosaico.ipynb 3
 import os
+import gc
 
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
@@ -89,3 +90,52 @@ class Mosaico(Base, GetAttr):
 		df['Largura_Emissão(kHz)'] = df['Largura_Emissão(kHz)'].astype('string', copy=False)
 		df['Classe_Emissão'] = df['Classe_Emissão'].astype('string', copy=False)
 		return df.drop(['Designação_Emissão', 'Temp'], axis=1)
+
+	def exclude_duplicated(
+		self,
+		df: pd.DataFrame,  # DataFrame com os dados de Estações
+		agg_cols: list,  # Lista de colunas a serem agrupadas
+	) -> pd.DataFrame:  # DataFrame com os dados duplicados excluídos
+		f"""Exclude and log the duplicated rows
+        Columns considered are defined by agg_cols 
+        """
+		df['Estação'] = (
+			df['Estação'].astype('string', copy=False).fillna('-1').astype('int', copy=False)
+		)
+		df = df.sort_values('Estação', ignore_index=True)
+		df['Largura_Emissão(kHz)'] = pd.to_numeric(df['Largura_Emissão(kHz)'], errors='coerce')
+		duplicated = df.duplicated(subset=agg_cols, keep='first')
+
+		# Log discarded
+		df_temp = df[duplicated]
+		processing = f'Registro agrupado num único registro no arquivo final. Colunas Consideradas: {agg_cols}'
+		Mosaico.register_log(df_temp, processing)
+		self.append2discarded(df_temp)
+		del df_temp
+		gc.collect()
+
+		# I didn't find a better way to do this, the LLMs suggestions were wrong!
+		df_temp = df[~duplicated]
+		df_sub = df_temp.dropna(subset=agg_cols).reset_index(drop=True)
+		df_temp = df_temp.loc[~df_temp.index.isin(df_sub.index)]
+
+		# Discard and Log dropped rows
+		processing = f'Valor nulo presente nas colunas utilizadas para agrupamento: {agg_cols}'
+		Mosaico.register_log(df_temp, processing)
+		self.append2discarded(df_temp)
+		del df_temp
+		gc.collect()
+
+		grouped_stations = df.groupby(agg_cols, dropna=True, sort=False, observed=True)
+		del df
+		gc.collect()
+
+		df_sub['Multiplicidade'] = grouped_stations.size().values
+
+		df_sub['#Estação'] = grouped_stations['Estação'].apply(lambda x: list(x)).values
+
+		row_filter = df_sub['Multiplicidade'] > 1
+		processing = f'Registro agrupado. Colunas consideradas: {agg_cols}'
+		Mosaico.register_log(df_sub, processing, column='#Estação', row_filter=row_filter)
+
+		return df_sub
