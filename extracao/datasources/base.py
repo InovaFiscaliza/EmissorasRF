@@ -43,7 +43,7 @@ class Base:
 		"""Format, Save and return a dataframe"""
 		try:
 			file = Path(f'{folder}/{stem}.parquet.gzip')
-			df.astype('string').to_parquet(file, compression='gzip', index=False, engine='pyarrow')
+			df.astype('category').to_parquet(file, compression='gzip', index=False, engine='pyarrow')
 		except (ArrowInvalid, ArrowTypeError) as e:
 			raise Exception(f'Não foi possível salvar o arquivo parquet') from e
 		return df
@@ -79,7 +79,7 @@ class Base:
 		if not self.discarded.empty:
 			self.discarded = pd.concat([self.discarded, df], ignore_index=True, copy=False)
 		else:
-			self.discarded = df
+			self.discarded =
 
 	@staticmethod
 	def register_log(
@@ -94,8 +94,8 @@ class Base:
 
 		df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
 		df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
-		log_function = partial(Base.format_log, processing=processing, column=column)
 		print(f'Logging: {processing}')
+		log_function = partial(Base.format_log, processing=processing, column=column)
 		df.loc[row_filter, 'Log'] = df[row_filter].progress_apply(log_function, axis=1)
 
 	@staticmethod
