@@ -69,8 +69,7 @@ class Telecom(Mosaico):
 		pipeline = [{'$match': self.query}, {'$project': self.projection}]
 		if self.limit > 0:
 			pipeline.append({'$limit': self.limit})
-		df = self._extract(self.collection, pipeline)
-		return df
+		return self._extract(self.collection, pipeline)
 
 	def _format(
 		self,
@@ -79,44 +78,7 @@ class Telecom(Mosaico):
 		"""Formats, cleans, groups and standardizes the queried data from the database"""
 		df = df.rename(columns=self.cols_mapping)
 		df = Mosaico.split_designacao(df)
-		duplicated = df.duplicated(subset=AGG_LICENCIAMENTO, keep='first')
-
-		# Discard and Log
-		df_temp = df[duplicated]
-		processing = f'Registro agrupado num único registro no arquivo final. Colunas Consideradas: {AGG_LICENCIAMENTO}'
-		Mosaico.register_log(df_temp, processing)
-		self.append2discarded(df_temp)
-		del df_temp
-		gc.collect()
-
-		# I didn't find a better way to do this, the LLMs suggestions were wrong!
-		df_temp = df[~duplicated]
-		df_sub = df_temp.dropna(subset=AGG_LICENCIAMENTO).reset_index(drop=True)
-		df_temp = df_temp.loc[~df_temp.index.isin(df_sub.index)]
-
-		# Discard and Log dropped rows
-		processing = (
-			f'Valor nulo presente nas colunas utilizadas para agrupamento: {AGG_LICENCIAMENTO}'
-		)
-		Mosaico.register_log(df_temp, processing)
-		self.append2discarded(df_temp)
-		del df_temp
-		gc.collect()
-
-		grouped_stations = df.groupby(AGG_LICENCIAMENTO, dropna=True, sort=False, observed=True)
-		del df
-		gc.collect()
-
-		df_sub['Multiplicidade'] = grouped_stations.size().values
-
-		# df_ub['#Estação'] = grouped_stations['Estação'].agg(lambda x: ', '.join(x)).values
-		# df_sub['#Estação'] = grouped_stations['Estação'].agg(lambda x: x).values.tolist()
-		df_sub['#Estação'] = grouped_stations['Estação'].apply(lambda x: list(x)).values
-
-		row_filter = df_sub['Multiplicidade'] > 1
-		processing = f'Registro agrupado. Colunas consideradas: {AGG_LICENCIAMENTO}'
-		Mosaico.register_log(df_sub, processing, column='#Estação', row_filter=row_filter)
-
+		df_sub = self.exclude_duplicated(df, AGG_LICENCIAMENTO)
 		df_sub['Status'] = 'L'
 		df_sub['Status'] = df_sub['Status'].astype('string', copy=False)
 		df_sub['Fonte'] = 'MOSAICO-LIC'

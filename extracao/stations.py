@@ -33,7 +33,7 @@ from .datasources.aeronautica import Aero
 from .datasources.base import Base
 from .datasources.mosaico import MONGO_URI
 from .datasources.sitarweb import SQLSERVER_PARAMS, Radcom, Stel
-from .datasources.smp import SMP
+from .datasources.smp import Smp
 from .datasources.srd import SRD
 from .datasources.telecom import Telecom
 from .format import merge_on_frequency, LIMIT_FREQ
@@ -86,7 +86,7 @@ class Estacoes(Base):
 		self.sources = L(
 			[
 				Telecom(self.mongo_uri, self.limit, self.read_cache),
-				SMP(self.mongo_uri, self.limit, self.read_cache),
+				Smp(self.mongo_uri, self.limit, self.read_cache),
 				SRD(self.mongo_uri, self.limit, self.read_cache),
 				Stel(self.sql_params, self.read_cache),
 				Radcom(self.sql_params, self.read_cache),

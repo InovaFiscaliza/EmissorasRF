@@ -1,24 +1,15 @@
-from extracao.datasources.smp import SMP
-from pprint import pprint
+import time
+from extracao.datasources.smp import Smp
+import typer
+
+
+def main(limit: int = 0, read_cache: bool = True):
+	start = time.perf_counter()
+	data = Smp(limit=limit, read_cache=read_cache)
+	data.update()
+	data.save()
+	print(f'Elapsed time: {time.perf_counter() - start} seconds')
 
 
 if __name__ == '__main__':
-	import time
-
-	start = time.perf_counter()
-
-	data = SMP(limit=100000)
-
-	data.update()
-
-	print(data.df)
-
-	print(150 * '=')
-
-	# print("DISCARDED!")
-
-	# print(data.discarded[["Frequência", "Entidade", "Log"]])
-
-	print(150 * '=')
-
-	print(f'Elapsed time: {time.perf_counter() - start} seconds')
+	typer.run(main)
