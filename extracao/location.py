@@ -17,6 +17,7 @@ tqdm.pandas()
 
 
 from extracao.constants import IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
+from extracao.datasources.base import Base
 
 
 # Load environment variables from .env file
@@ -128,10 +129,15 @@ class Geography:
 		"""
 
 		df['Código_Município'] = df['Código_Município'].astype('string', copy=False).str.strip()
-		# TODO: Add to log invalid city codes catched here
+		df['#Código_Município'] = df['Código_Município']
+		# TODO: #25 Add to log invalid city codes catched here
 		df['Código_Município'] = pd.to_numeric(
 			df['Código_Município'], errors='coerce', downcast='unsigned'
 		)
+		row_filter = df['Código_Município'].isna()
+		processing = 'Código_Município nulo ou inválido.'
+		column = '#Código_Município'
+		Base.register_log(df, processing, column, row_filter)
 		df['Código_Município'] = df['Código_Município'].astype('string', copy=False)
 
 		df = self.replace_bad_city_codes(df)
@@ -193,6 +199,8 @@ class Geography:
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
+		processing = 'Coordenadas e Código do Município nulos'
+		Base.register_log(self.df, processing, row_filter=rows)
 		self.df = self.df[~rows].reset_index(drop=True)
 
 	def validate_coordinates(self) -> None:
