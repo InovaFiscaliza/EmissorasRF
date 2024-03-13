@@ -93,8 +93,11 @@ class Base:
 		if row_filter is None:
 			row_filter = pd.Series(True, index=df.index)
 
-		df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
-		df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
+		if 'Log' not in df:
+			df['Log'] = '[]'
+		else:
+			df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
+			df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
 		print(f'Logging: {processing}')
 		log_function = partial(Base.format_log, processing=processing, column=column)
 		df.loc[row_filter, 'Log'] = df.loc[row_filter].progress_apply(log_function, axis=1)
