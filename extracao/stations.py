@@ -55,12 +55,14 @@ class Estacoes(Base):
 		limit: int = 0,
 		parallel: bool = True,
 		read_cache: bool = False,
+		reprocess_sources: bool = False,
 	):
 		self.sql_params = sql_params
 		self.mongo_uri = mongo_uri
 		self.limit = limit
 		self.parallel = parallel
 		self.read_cache = read_cache
+		self.reprocess_sources = reprocess_sources
 		self.init_data_sources()
 
 	@property
@@ -95,12 +97,14 @@ class Estacoes(Base):
 		)
 
 	def extraction(self) -> L:
+		if not self.reprocess_sources and self.read_cache:
+			return self.sources.attrgot('df')
 		if self.parallel:
 			self.sources = parallel(
 				Estacoes._update_source,
 				self.sources,
 				n_workers=len(self.sources),
-				progress=True,
+				progress=False,
 			)
 		else:
 			self.sources = self.sources.map(Estacoes._update_source)
