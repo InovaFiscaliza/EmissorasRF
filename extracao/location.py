@@ -17,6 +17,7 @@ tqdm.pandas()
 
 
 from extracao.constants import IBGE_MUNICIPIOS, IBGE_POLIGONO, MALHA_IBGE
+from extracao.datasources.base import Base
 
 
 # Load environment variables from .env file
@@ -193,6 +194,8 @@ class Geography:
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
+		processing = 'Coordenadas e Código do Município nulos'
+		Base.register_log(self.df, processing, row_filter=rows)
 		self.df = self.df[~rows].reset_index(drop=True)
 
 	def validate_coordinates(self) -> None:
