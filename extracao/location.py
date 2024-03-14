@@ -80,7 +80,9 @@ class Geography:
 
 		municipios['Município_ASCII'] = municipios['Município'].apply(remove_punctuation)
 
-		bad_codes = ~df['Código_Município'].isin(municipios['Código_Município'])
+		bad_codes = ~self.log['empty_code']
+		bad_codes &= ~df['Código_Município'].isin(municipios['Código_Município'])
+		self.log.update({'invalid_code': bad_codes})
 
 		df['Município'] = df['Município'].astype('string', copy=False)
 
@@ -98,11 +100,21 @@ class Geography:
 			copy=False,
 		)
 
+		processing = 'Código do Município inexistente no IBGE. Município normalizado usado como chave para validação'
+		df['#Município'] = df['Município_y'].fillna('')
+		Base.register_log(df, processing, '#Município', bad_codes)
 		df.loc[bad_codes, 'Município_x'] = df.loc[bad_codes, 'Município_y']
+		df.drop('#Município', inplace=True, axis=1)
 
+		df['#Código_Município'] = df['Código_Município_y'].fillna('')
+		Base.register_log(df, processing, '#Código_Município', bad_codes)
 		df.loc[bad_codes, 'Código_Município_x'] = df.loc[bad_codes, 'Código_Município_y']
+		df.drop('#Código_Município', inplace=True, axis=1)
 
+		df['#UF'] = df['Sigla_UF'].fillna('')
+		Base.register_log(df, processing, '#UF', bad_codes)
 		df.loc[bad_codes, 'UF'] = df.loc[bad_codes, 'Sigla_UF']
+		df.drop('#UF', inplace=True, axis=1)
 
 		df.drop(
 			columns=['Município_y', 'Município_ASCII', 'Código_Município_y', 'Sigla_UF'],
@@ -129,8 +141,7 @@ class Geography:
 		"""
 
 		df['Código_Município'] = df['Código_Município'].astype('string', copy=False).str.strip()
-		df['#Código_Município'] = df['Código_Município']
-		# TODO: #25 Add to log invalid city codes catched here
+		df['#Código_Município'] = df['Código_Município'].fillna('')
 		df['Código_Município'] = pd.to_numeric(
 			df['Código_Município'], errors='coerce', downcast='unsigned'
 		)
@@ -194,8 +205,13 @@ class Geography:
 		rows = self.df['Latitude_IBGE'].notna()
 		rows &= self.df['Longitude_IBGE'].notna()
 		self.log.update({'city_normalized': rows})
+		self.df['#Município'] = self.df['Município']
+		self.df['#UF'] = self.df['UF']
 		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'Município_IBGE']
 		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'UF_IBGE']
+		log = f'Coluna normalizada de acordo com o IBGE'
+		for column in ('#Município', '#UF'):
+			Base.register_log(self.df, log, column, rows)
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
@@ -294,7 +310,9 @@ class Geography:
 
 		rows = self.df['Código_Município'].isna()
 		geolocator = Nominatim(user_agent='rfdatahub')
-		for row in tqdm(self.df[rows].itertuples(), total=len(self.df[rows])):
+		pbar = tqdm(self.df[rows].itertuples(), total=len(self.df[rows]))
+		pbar.set_description('Utilizando API geocoders.Local fora do perímetro brasileiro.')
+		for row in pbar:
 			location = geolocator.reverse(
 				f'{row.Latitude}, {row.Longitude}', exactly_one=True, language='pt'
 			)
