@@ -200,18 +200,25 @@ class Geography:
 		self.log.update({'filled_city_coords': rows})
 		self.df.loc[rows, 'Latitude'] = self.df.loc[rows, 'Latitude_IBGE']
 		self.df.loc[rows, 'Longitude'] = self.df.loc[rows, 'Longitude_IBGE']
+		self.df['#Latitude'] = self.df['Latitude'].astype('string', copy=False).fillna('')
+		self.df['#Longitude'] = self.df['Longitude'].astype('string', copy=False).fillna('')
+		log = f'Coordenadas ausentes. Coordenadas do Município inseridas'
+		for column in ('Latitude', 'Longitude'):
+			Base.register_log(self.df, log, column, rows)
+		self.df.drop(columns=['#Latitude', '#Longitude'], inplace=True)
 
 	def normalize_location_names(self) -> None:
 		rows = self.df['Latitude_IBGE'].notna()
 		rows &= self.df['Longitude_IBGE'].notna()
 		self.log.update({'city_normalized': rows})
-		self.df['#Município'] = self.df['Município']
-		self.df['#UF'] = self.df['UF']
+		self.df['#Município'] = self.df['Município'].fillna('')
+		self.df['#UF'] = self.df['UF'].fillna('')
 		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'Município_IBGE']
 		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'UF_IBGE']
-		log = f'Coluna normalizada de acordo com o IBGE'
+		log = f'Inserida coluna proveniente da base de municípios do IBGE'
 		for column in ('#Município', '#UF'):
 			Base.register_log(self.df, log, column, rows)
+		self.df.drop(columns=['#Município', '#UF'], inplace=True)
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
