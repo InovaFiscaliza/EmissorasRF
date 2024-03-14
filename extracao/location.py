@@ -282,9 +282,11 @@ class Geography:
 
 	def _replace_with_poligon(self, columns, originals, log, rows):
 		for original, column in zip(columns, originals):
+			row_filter = rows & (self.df[column] != self.df[original])
 			self.df[f'#{original}'] = self.df[original].astype('string', copy=False).fillna('')
-			Base.register_log(self.df, log.format(original), f'#{original}', rows)
+			Base.register_log(self.df, log.format(original), f'#{original}', row_filter)
 			self.df.loc[rows, original] = self.df.loc[rows, column]
+			self.df.drop(columns=[f'#{original}'], inplace=True)
 
 	def fill_missing_city_info(self):
 		"""Fill the missing city code
@@ -336,9 +338,7 @@ class Geography:
 			'[bold green]Logging: [/bold green][italic]Requisitando API geocoders para locais fora do perímetro brasileiro.'
 		)
 		for row in pbar:
-			pbar.set_description(
-				f'Requesting {row.Entidade}-{row.Latitude:.4f}:{row.Longitude:.4f}'
-			)
+			pbar.set_description(f'Requesting: ({row.Latitude:.4f}, {row.Longitude:.4f})')
 			location = geolocator.reverse(
 				f'{row.Latitude}, {row.Longitude}', exactly_one=True, language='pt'
 			)

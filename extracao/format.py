@@ -107,7 +107,7 @@ def merge_on_frequency(
 		f'{long}{right_suffix}',
 	]
 
-	pp('[bold green]Logging:[/bold green] Calculando distância entre estações mescladas.')
+	pp('[bold green]Logging:[/bold green] [italic]Calculando distância entre estações mescladas.')
 	df.loc[both, 'Distance'] = df.loc[both, both_columns].progress_apply(get_km_distance, axis=1)
 
 	df_both = df[both].sort_values('Distance', ignore_index=True)
