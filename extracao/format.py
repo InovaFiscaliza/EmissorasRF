@@ -8,6 +8,7 @@ import re
 from typing import Tuple
 
 import pandas as pd
+from rich import print as pp
 from dotenv import find_dotenv, load_dotenv
 from fastcore.utils import listify
 from geopy.distance import geodesic
@@ -105,6 +106,8 @@ def merge_on_frequency(
 		f'{lat}{right_suffix}',
 		f'{long}{right_suffix}',
 	]
+
+	pp('[bold green]Logging:[/bold green] Calculando distância entre estações mescladas.')
 	df.loc[both, 'Distance'] = df.loc[both, both_columns].progress_apply(get_km_distance, axis=1)
 
 	df_both = df[both].sort_values('Distance', ignore_index=True)
