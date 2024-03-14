@@ -237,11 +237,17 @@ class Geography:
 		"""Intersect the coordinates with the shapefile of the IBGE
 		Returns a geopandas dataframe with additional columns `CD_MUN, NM_MUN, SIGLA_UF`
 		"""
-		# TODO: Separate values which would be coerced to log, maybe don't replace them
+		self.df['Latitude'] = self.df['Latitude'].astype('string', copy=False).str.strip()
+		self.df['Longitude'] = self.df['Longitude'].astype('string', copy=False).str.strip()
+		self.df['#Longitude'] = self.df['Longitude'].astype('string', copy=False).fillna('')
 		for column in ['Latitude', 'Longitude']:
+			self.df[f'#{column}'] = self.df[column].astype('string', copy=False).fillna('')
 			self.df[column] = pd.to_numeric(self.df[column], errors='coerce').astype(
 				'float', copy=False
 			)  # type: ignore
+			bad_coords = self.df[column].isna() & self.df[f'#{column}'].notna()
+			Base.register_log(self.df, f'Coluna {column} não numérica.', f'#{column}', bad_coords)
+			self.df.drop(columns=[f'#{column}'], inplace=True)
 
 		regions = gpd.read_file(self.shapefile)
 
@@ -257,7 +263,6 @@ class Geography:
 		gdf_joined = gpd.sjoin(gdf_points, regions, how='left', predicate='within')
 
 		gdf_joined['CD_MUN'] = gdf_joined.CD_MUN.astype('string', copy=False)
-
 		gdf_joined['LAT'] = gdf_joined.geometry.centroid.y.astype('string', copy=False)
 		gdf_joined['LON'] = gdf_joined.geometry.centroid.x.astype('string', copy=False)
 
