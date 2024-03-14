@@ -113,10 +113,10 @@ class Base:
 		"""Translate log string into dict, update it and reformats it a log message
 		It's assumed the typing in the signature is correct
 		"""
-		log = listify(json.loads(row.loc['Log']))
-		new_log = {'Processamento': processing}
+		log = listify(eval(row.loc['Log']))
+		new_log = {"Processamento": processing}
 		if column is not None:
-			new_log.update({'Coluna': column, 'Original': row.loc[column]})
+			new_log.update({"Coluna": column, "Original": row.loc[column]})
 		log.append(new_log)
 		return json.dumps(log, ensure_ascii=False)
 
