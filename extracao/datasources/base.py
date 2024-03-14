@@ -11,6 +11,7 @@ from functools import cached_property, partial
 from typing import Tuple, Union, List, Any
 
 import pandas as pd
+from rich import print as pp
 from dotenv import find_dotenv, load_dotenv
 from fastcore.xtras import Path, listify
 from pyarrow import ArrowInvalid, ArrowTypeError
@@ -100,7 +101,7 @@ class Base:
 		else:
 			df['Log'] = df['Log'].astype('string', copy=False).fillna('[]')
 			df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
-		print(f'Logging: {processing}')
+		pp(f'[bold green]Logging:[/bold green] [italic]{processing}')
 		log_function = partial(Base.format_log, processing=processing, column=column)
 		df.loc[row_filter, 'Log'] = df.loc[row_filter].progress_apply(log_function, axis=1)
 
@@ -114,9 +115,9 @@ class Base:
 		It's assumed the typing in the signature is correct
 		"""
 		log = listify(eval(row.loc['Log']))
-		new_log = {"Processamento": processing}
+		new_log = {'Processamento': processing}
 		if column is not None:
-			new_log.update({"Coluna": column, "Original": row.loc[column]})
+			new_log.update({'Coluna': column, 'Original': row.loc[column]})
 		log.append(new_log)
 		return json.dumps(log, ensure_ascii=False)
 

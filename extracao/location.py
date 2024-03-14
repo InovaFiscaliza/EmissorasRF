@@ -73,7 +73,7 @@ class Geography:
 
 		municipios = pd.read_csv(
 			self.ibge,
-			usecols=['Código_Município', 'Município', 'Sigla_UF'],
+			usecols=['Código_Município', 'Município', 'UF'],
 			dtype='string',
 			dtype_backend='numpy_nullable',
 		)
@@ -100,29 +100,27 @@ class Geography:
 			copy=False,
 		)
 
-		processing = 'Código do Município inexistente no IBGE. Município normalizado usado como chave para validação'
-		df['#Município'] = df['Município_y'].fillna('')
-		Base.register_log(df, processing, '#Município', bad_codes)
-		df.loc[bad_codes, 'Município_x'] = df.loc[bad_codes, 'Município_y']
-		df.drop('#Município', inplace=True, axis=1)
-
-		df['#Código_Município'] = df['Código_Município_y'].fillna('')
-		Base.register_log(df, processing, '#Código_Município', bad_codes)
-		df.loc[bad_codes, 'Código_Município_x'] = df.loc[bad_codes, 'Código_Município_y']
-		df.drop('#Código_Município', inplace=True, axis=1)
-
-		df['#UF'] = df['Sigla_UF'].fillna('')
-		Base.register_log(df, processing, '#UF', bad_codes)
-		df.loc[bad_codes, 'UF'] = df.loc[bad_codes, 'Sigla_UF']
-		df.drop('#UF', inplace=True, axis=1)
+		processing = 'Código do Município inválido mesmo após limpeza.'
+		processing += '\nMunicípio normalizado e usado como chave para cruzamento com o IBGE.'
+		processing += '\nColuna {} substituída conforme consta no IBGE'
+		# TODO: Verify if there isn't a wrong Município match, given Município is not unique
+		for column in ['Município', 'Código_Município', 'UF']:
+			df[f'#{column}'] = df[f'{column}_y'].fillna('')
+			Base.register_log(df, processing.format(column).strip(), f'#{column}', bad_codes)
+			df.loc[bad_codes, f'{column}_x'] = df.loc[bad_codes, f'{column}_y']
+			df.drop(f'#{column}', inplace=True, axis=1)
 
 		df.drop(
-			columns=['Município_y', 'Município_ASCII', 'Código_Município_y', 'Sigla_UF'],
+			columns=['Município_y', 'Município_ASCII', 'Código_Município_y', 'UF_y'],
 			inplace=True,
 		)
 
 		df.rename(
-			columns={'Município_x': 'Município', 'Código_Município_x': 'Código_Município'},
+			columns={
+				'Município_x': 'Município',
+				'UF_x': 'UF',
+				'Código_Município_x': 'Código_Município',
+			},
 			inplace=True,
 		)
 
@@ -155,7 +153,7 @@ class Geography:
 
 		municipios = pd.read_csv(
 			self.ibge,
-			usecols=['Código_Município', 'Município', 'Latitude', 'Longitude', 'Sigla_UF'],
+			usecols=['Código_Município', 'Município', 'Latitude', 'Longitude', 'UF'],
 			dtype='string',
 			dtype_backend='numpy_nullable',
 		)
@@ -173,7 +171,8 @@ class Geography:
 				'Latitude_x': 'Latitude',
 				'Longitude_x': 'Longitude',
 				'Município_x': 'Município',
-				'Sigla_UF': 'UF_IBGE',
+				'UF_x': 'UF',
+				'UF_y': 'UF_IBGE',
 				'Latitude_y': 'Latitude_IBGE',
 				'Longitude_y': 'Longitude_IBGE',
 				'Município_y': 'Município_IBGE',
@@ -202,8 +201,8 @@ class Geography:
 		self.df.loc[rows, 'Longitude'] = self.df.loc[rows, 'Longitude_IBGE']
 		self.df['#Latitude'] = self.df['Latitude'].astype('string', copy=False).fillna('')
 		self.df['#Longitude'] = self.df['Longitude'].astype('string', copy=False).fillna('')
-		log = f'Coordenadas ausentes. Coordenadas do Município inseridas'
 		for column in ('Latitude', 'Longitude'):
+			log = f'{column} do Município inserida.'
 			Base.register_log(self.df, log, column, rows)
 		self.df.drop(columns=['#Latitude', '#Longitude'], inplace=True)
 
@@ -215,8 +214,8 @@ class Geography:
 		self.df['#UF'] = self.df['UF'].fillna('')
 		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'Município_IBGE']
 		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'UF_IBGE']
-		log = f'Inserida coluna proveniente da base de municípios do IBGE'
 		for column in ('#Município', '#UF'):
+			log = f'Coluna {column.replace("#", "")} normalizada como consta no IBGE.'
 			Base.register_log(self.df, log, column, rows)
 		self.df.drop(columns=['#Município', '#UF'], inplace=True)
 
