@@ -12,6 +12,7 @@ from fastcore.foundation import L
 import pandas as pd
 import geopandas as gpd
 from tqdm.auto import tqdm
+from rich import print as pp
 
 tqdm.pandas()
 
@@ -102,11 +103,12 @@ class Geography:
 
 		processing = 'Código do Município inválido mesmo após limpeza.'
 		processing += '\nMunicípio normalizado e usado como chave para cruzamento com o IBGE.'
-		processing += '\nColuna {} substituída conforme consta no IBGE'
+		Base.register_log(df, processing, row_filter=bad_codes)
 		# TODO: Verify if there isn't a wrong Município match, given Município is not unique
 		for column in ['Município', 'Código_Município', 'UF']:
+			processing = f'Coluna {column} substituída conforme consta no IBGE'
 			df[f'#{column}'] = df[f'{column}_y'].fillna('')
-			Base.register_log(df, processing.format(column).strip(), f'#{column}', bad_codes)
+			Base.register_log(df, processing, f'#{column}', bad_codes)
 			df.loc[bad_codes, f'{column}_x'] = df.loc[bad_codes, f'{column}_y']
 			df.drop(f'#{column}', inplace=True, axis=1)
 
@@ -202,7 +204,7 @@ class Geography:
 		self.df['#Latitude'] = self.df['Latitude'].astype('string', copy=False).fillna('')
 		self.df['#Longitude'] = self.df['Longitude'].astype('string', copy=False).fillna('')
 		for column in ('Latitude', 'Longitude'):
-			log = f'{column} do Município inserida.'
+			log = f'Coordenadas ausentes. {column} do Município inserida.'
 			Base.register_log(self.df, log, column, rows)
 		self.df.drop(columns=['#Latitude', '#Longitude'], inplace=True)
 
@@ -278,15 +280,22 @@ class Geography:
 
 		self.df = gdf_joined
 
+	def _replace_with_poligon(self, columns, originals, log, rows):
+		for original, column in zip(columns, originals):
+			self.df[f'#{original}'] = self.df[original].astype('string', copy=False).fillna('')
+			Base.register_log(self.df, log.format(original), f'#{original}', rows)
+			self.df.loc[rows, original] = self.df.loc[rows, column]
+
 	def fill_missing_city_info(self):
 		"""Fill the missing city code
 		The missing ones are replaces with the city code derived from the intersection with the shapefile from IBGE"""
 		rows = self.log['empty_code']
 		rows &= self.df['CD_MUN'].notna()
 		self.log.update({'filled_city_info': rows})
-		self.df.loc[rows, 'Código_Município'] = self.df.loc[rows, 'CD_MUN']
-		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'NM_MUN']
-		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'SIGLA_UF']
+		originals = ['Código_Município', 'Município', 'UF']
+		columns = ['CD_MUN', 'NM_MUN', 'SIGLA_UF']
+		log = '{} Ausente. Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
+		self._replace_with_poligon(columns, originals, log, rows)
 
 	def substitute_wrong_city_info(self):
 		"""Replace city info for invalid city codes
@@ -295,9 +304,10 @@ class Geography:
 		rows &= self.df['Município_IBGE'].isna()
 		rows &= self.df['CD_MUN'].notna()
 		self.log.update({'replaced_city_info': rows})
-		self.df.loc[rows, 'Código_Município'] = self.df.loc[rows, 'CD_MUN']
-		self.df.loc[rows, 'Município'] = self.df.loc[rows, 'NM_MUN']
-		self.df.loc[rows, 'UF'] = self.df.loc[rows, 'SIGLA_UF']
+		originals = ['Código_Município', 'Município', 'UF']
+		columns = ['CD_MUN', 'NM_MUN', 'SIGLA_UF']
+		log = '{} invalidada (IBGE). Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
+		self._replace_with_poligon(columns, originals, log, rows)
 
 	def substitute_divergent_coordinates(self):
 		"""Substitute the coordinates with the centroid from the IBGE `municipios.csv`
@@ -322,8 +332,13 @@ class Geography:
 		rows = self.df['Código_Município'].isna()
 		geolocator = Nominatim(user_agent='rfdatahub')
 		pbar = tqdm(self.df[rows].itertuples(), total=len(self.df[rows]))
-		pbar.set_description('Utilizando API geocoders.Local fora do perímetro brasileiro.')
+		pp(
+			'[bold green]Logging: [/bold green][italic]Requisitando API geocoders para locais fora do perímetro brasileiro.'
+		)
 		for row in pbar:
+			pbar.set_description(
+				f'Requesting {row.Entidade}-{row.Latitude:.4f}:{row.Longitude:.4f}'
+			)
 			location = geolocator.reverse(
 				f'{row.Latitude}, {row.Longitude}', exactly_one=True, language='pt'
 			)
