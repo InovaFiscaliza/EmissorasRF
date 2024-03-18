@@ -32,6 +32,11 @@ class Geography:
 		self.shapefile: Path = Path(IBGE_POLIGONO)
 		self.check_files()
 		self.df: pd.DataFrame = df
+		self._initialize()
+
+	def _initialize(self):
+		self.log_empty_coords()
+		self.log_empty_code()
 		self.drop_rows_without_location_info()
 		self.validate_coordinates_as_number()
 		self.validate_codigo_municipio_as_number()
@@ -72,6 +77,18 @@ class Geography:
 		left = empty_coords & (~empty_code)
 		right = (~empty_coords) & empty_code
 		return {'empty_coords': left, 'empty_code': right, 'both': both}
+
+	def log_empty_coords(self):
+		"""Log the rows with empty coordinates"""
+		rows = self.log['empty_coords']
+		processing = 'Coordenadas nulas.'
+		Base.register_log(self.df, processing, row_filter=rows)
+
+	def log_empty_code(self):
+		"""Log the rows with empty city code"""
+		rows = self.log['empty_code']
+		processing = 'Código do Município nulo.'
+		Base.register_log(self.df, processing, row_filter=rows)
 
 	def drop_rows_without_location_info(self) -> None:
 		rows = self.log['both']
