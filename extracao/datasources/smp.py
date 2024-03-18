@@ -192,7 +192,8 @@ class Smp(Mosaico):
 
 		"""
 		geo = Geography(df)
-		df = geo.merge_df_with_ibge(df)
+		geo.merge_df_with_ibge()
+		df = geo.df
 		df['Multiplicidade'] = df.Multiplicidade.astype('int')
 		row_filter = df['Multiplicidade'] > 1
 		df.loc[row_filter, 'Latitude'] = df.loc[row_filter, 'Latitude_IBGE']
