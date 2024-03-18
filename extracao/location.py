@@ -131,9 +131,10 @@ class Geography:
 		for column, original in zip(columns, originals):
 			if not float_cols:
 				row_filter = row_filter & (
-					self.df[original].astype('string') != self.df[column].astype('string')
+					self.df[original].astype('string').fillna('')
+					!= self.df[column].astype('string').fillna('')
 				)
-			self.df[f'#{original}'] = self.df[original]
+			self.df[f'#{original}'] = self.df[original].fillna('')
 			Base.register_log(self.df, log.format(original), f'#{original}', row_filter)
 			# Use of row_filter instead of rows to avoid float comparison
 			self.df.loc[row_filter, original] = self.df.loc[row_filter, column]
@@ -267,16 +268,18 @@ class Geography:
 		gdf_points = gpd.GeoDataFrame(
 			self.df,
 			geometry=gpd.points_from_xy(
-				self.df['Latitude'].fillna('-1'), self.df.Latitude.fillna('-1')
+				self.df.Longitude.astype('float').fillna(-1),
+				self.df.Latitude.astype('float').fillna(-1),
 			),
-		)  # type: ignore
-
+			crs=regions.crs.to_string(),
+		)
 		# Set the same coordinate reference system (CRS) as the regions shapefile
-		gdf_points.crs = regions.crs
 
 		# Spatial join points to the regions
-		gdf_joined = gpd.sjoin(gdf_points, regions, how='left', predicate='within')
+		gdf_joined = gdf_points.sjoin(regions, how='left', predicate='intersects')
 		gdf_joined['CD_MUN'] = gdf_joined['CD_MUN'].astype('string', copy=False)
+		gdf_joined['NM_MUN'] = gdf_joined['NM_MUN'].astype('string', copy=False)
+		gdf_joined['SIGLA_UF'] = gdf_joined['SIGLA_UF'].astype('string', copy=False)
 		gdf_joined['LAT'] = gdf_joined.geometry.centroid.y.astype('string', copy=False)
 		gdf_joined['LON'] = gdf_joined.geometry.centroid.x.astype('string', copy=False)
 
@@ -303,17 +306,17 @@ class Geography:
 		log = '{} Ausente. Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
 		self._replace_columns(columns, originals, log, rows)
 
-	def substitute_wrong_city_info(self):
-		"""Replace city info for invalid city codes
-		They are replaced with the city code derived from the intersection with the shapefile from IBGE"""
-		rows = self.df['Código_Município'].notna()
-		rows &= self.df['Município_IBGE'].isna()
-		rows &= self.df['CD_MUN'].notna()
-		self.log.update({'replaced_city_info': rows})
-		originals = ['Código_Município', 'Município', 'UF']
-		columns = ['CD_MUN', 'NM_MUN', 'SIGLA_UF']
-		log = '{} invalidada (IBGE). Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
-		self._replace_columns(columns, originals, log, rows)
+	# def substitute_wrong_city_info(self):
+	# 	"""Replace city info for invalid city codes
+	# 	They are replaced with the city code derived from the intersection with the shapefile from IBGE"""
+	# 	rows = self.df['Código_Município'].notna()
+	# 	rows &= self.df['Município_IBGE'].isna()
+	# 	rows &= self.df['CD_MUN'].notna()
+	# 	self.log.update({'replaced_city_info': rows})
+	# 	originals = ['Código_Município', 'Município', 'UF']
+	# 	columns = ['CD_MUN', 'NM_MUN', 'SIGLA_UF']
+	# 	log = '{} invalidada (IBGE). Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
+	# 	self._replace_columns(columns, originals, log, rows)
 
 	def substitute_divergent_coordinates(self):
 		"""Substitute the coordinates with the centroid from the IBGE `municipios.csv`
@@ -332,7 +335,7 @@ class Geography:
 		originals = ['Latitude', 'Longitude']
 		columns = ['Latitude_IBGE', 'Longitude_IBGE']
 		log = '{} divergente. Valor substituído pelo centróide da intersecção das coordenadas no polígono territorial.'
-		self._replace_columns(columns, originals, log, wrong_city_coords)
+		self._replace_columns(columns, originals, log, wrong_city_coords, True)
 
 	def input_info_from_coords(self):
 		from geopy.geocoders import Nominatim
@@ -376,7 +379,7 @@ class Geography:
 		self.fill_missing_coords()
 		self.intersect_coordinates_on_poligon()
 		self.fill_missing_city_info()
-		self.substitute_wrong_city_info()
+		# self.input_missing_info_from_poligon()
 		self.substitute_divergent_coordinates()
 		self.input_info_from_coords()
 		self._append_filters()
