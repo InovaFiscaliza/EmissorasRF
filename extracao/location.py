@@ -127,13 +127,15 @@ class Geography:
 		)
 		self.df.drop(columns=['#Código_Município'], inplace=True)
 
-	def _replace_columns(self, columns, originals, log, rows):
+	def _replace_columns(self, columns, originals, log, row_filter, float_cols=False):
 		for column, original in zip(columns, originals):
-			# self.df[original] = self.df[original].astype('string', copy=False)
-			# self.df[column] = self.df[column].astype('string', copy=False)
-			row_filter = rows & (self.df[original] != self.df[column])
+			if not float_cols:
+				row_filter = row_filter & (
+					self.df[original].astype('string') != self.df[column].astype('string')
+				)
 			self.df[f'#{original}'] = self.df[original]
 			Base.register_log(self.df, log.format(original), f'#{original}', row_filter)
+			# Use of row_filter instead of rows to avoid float comparison
 			self.df.loc[row_filter, original] = self.df.loc[row_filter, column]
 			self.df.drop(columns=[f'#{original}'], inplace=True)
 
@@ -187,7 +189,7 @@ class Geography:
 		Base.register_log(self.df, processing, 'Código_Município', bad_codes)
 		columns = ['Município_y', 'Código_Município_y']
 		originals = ['Município', 'Código_Município']
-		log = 'Coluna {} substituída conforme consta no IBGE'
+		log = 'Valor da coluna {} substituído conforme consta no IBGE'
 		# TODO: Verify if there isn't a wrong Município match, given Município is not unique
 		self._replace_columns(columns, originals, log, bad_codes)
 
@@ -244,7 +246,8 @@ class Geography:
 		columns = ['Latitude_IBGE', 'Longitude_IBGE']
 		originals = ['Latitude', 'Longitude']
 		log = 'Coordenadas ausentes. {} do Município inserida.'
-		self._replace_columns(columns, originals, log, rows)
+		# Lembre-se que colunas float não é possível comparar diretamente como strings
+		self._replace_columns(columns, originals, log, rows, float_cols=True)
 
 	def normalize_location_names(self) -> None:
 		rows = self.df['Latitude_IBGE'].notna()
