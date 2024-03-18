@@ -95,7 +95,6 @@ class Base:
 			row_filter = pd.Series(True, index=df.index)
 		elif not row_filter.any():
 			return
-
 		if 'Log' not in df:
 			df['Log'] = '[]'
 		else:
@@ -103,7 +102,12 @@ class Base:
 			df['Log'] = df['Log'].str.replace('^$', r'[]', regex=True)
 		pp(f'[bold green]Logging:[/bold green] [italic]{processing}')
 		log_function = partial(Base.format_log, processing=processing, column=column)
-		df.loc[row_filter, 'Log'] = df.loc[row_filter].progress_apply(log_function, axis=1)
+		if column is not None:
+			df_logged = df.loc[row_filter, ['Log', column]].copy()
+			df_logged[column] = df_logged[column].astype('string', copy=False).fillna('')
+		else:
+			df_logged = df.loc[row_filter, ['Log']]
+		df.loc[row_filter, 'Log'] = df_logged.progress_apply(log_function, axis=1)
 
 	@staticmethod
 	def format_log(
