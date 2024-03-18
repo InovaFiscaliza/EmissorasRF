@@ -4,29 +4,12 @@
 __all__ = ['Estacoes']
 
 # %% ../nbs/04_estacoes.ipynb 3
-import urllib.request
-from typing import List, Union, Tuple
-from zipfile import ZipFile
-
-import geopandas as gpd
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import L
 from fastcore.parallel import parallel
-from fastcore.xtras import Path
-from pyarrow import ArrowInvalid, ArrowTypeError
 
-
-from extracao.constants import (
-	COLS_SRD,
-	IBGE_MUNICIPIOS,
-	IBGE_POLIGONO,
-	MALHA_IBGE,
-	FLOAT_COLUMNS,
-	INT_COLUMNS,
-	STR_COLUMNS,
-	CAT_COLUMNS,
-)
+from extracao.constants import COLS_SRD
 from extracao.location import Geography
 
 from .datasources.aeronautica import Aero
@@ -36,8 +19,7 @@ from .datasources.sitarweb import SQLSERVER_PARAMS, Radcom, Stel
 from .datasources.smp import Smp
 from .datasources.srd import SRD
 from .datasources.telecom import Telecom
-from .format import merge_on_frequency, LIMIT_FREQ
-
+from .format import LIMIT_FREQ, merge_on_frequency
 
 # %% ../nbs/04_estacoes.ipynb 4
 load_dotenv(find_dotenv(), override=True)
@@ -132,12 +114,14 @@ class Estacoes(Base):
 	def _remove_invalid_frequencies(df):
 		df['Frequência'] = df['Frequência'].astype('float')
 		df.sort_values(['Frequência', 'Latitude', 'Longitude'], ignore_index=True, inplace=True)
-		return df[df['Frequência'] <= LIMIT_FREQ].reset_index(drop=True)
-		# TODO: save to discarded and log
-		# log = f"""[("Colunas", "Frequência"),
-		# 		   ("Processamento", "Frequência Inválida: Maior que {LIMIT_FREQ}")
-		# 		  """
-		# self.register_log(df, log, check_coords)
+		row_filter = df['Frequência'] > LIMIT_FREQ
+		Base.register_log(
+			df,
+			f'Frequência removida. Valor superior a {LIMIT_FREQ}MHz.',
+			'Frequência',
+			row_filter,
+		)
+		return df[~row_filter].reset_index(drop=True)
 
 	def _format(
 		self,
@@ -149,5 +133,7 @@ class Estacoes(Base):
 		df = Geography(df).validate()
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
-		df = df.astype('string', copy=False).replace('-1.0', '-1').astype('category', copy=False)
+		df = df.astype('string', copy=False)
+		df = df.replace('-1.0', '-1').fillna('-1')
+		df = df.astype('category', copy=False)
 		return df.loc[:, self.columns]
