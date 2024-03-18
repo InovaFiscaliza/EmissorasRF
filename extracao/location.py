@@ -263,18 +263,19 @@ class Geography:
 		Returns a geopandas dataframe with additional columns `CD_MUN, NM_MUN, SIGLA_UF`
 		"""
 		regions = gpd.read_file(self.shapefile)
-		df = self.df.copy()
-		df['Latitude'] = df['Latitude'].fillna('0')
-		df['Longitude'] = df['Longitude'].fillna('0')
 		# Convert pandas dataframe to geopandas df with geometry point given coordinates
-		gdf_points = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.Longitude, df.Latitude))  # type: ignore
+		gdf_points = gpd.GeoDataFrame(
+			self.df,
+			geometry=gpd.points_from_xy(
+				self.df['Latitude'].fillna('-1'), self.df.Latitude.fillna('-1')
+			),
+		)  # type: ignore
 
 		# Set the same coordinate reference system (CRS) as the regions shapefile
 		gdf_points.crs = regions.crs
 
 		# Spatial join points to the regions
 		gdf_joined = gpd.sjoin(gdf_points, regions, how='left', predicate='within')
-
 		gdf_joined['CD_MUN'] = gdf_joined['CD_MUN'].astype('string', copy=False)
 		gdf_joined['LAT'] = gdf_joined.geometry.centroid.y.astype('string', copy=False)
 		gdf_joined['LON'] = gdf_joined.geometry.centroid.x.astype('string', copy=False)
@@ -294,7 +295,7 @@ class Geography:
 	def fill_missing_city_info(self):
 		"""Fill the missing city code
 		The missing ones are replaces with the city code derived from the intersection with the shapefile from IBGE"""
-		rows = self.df['Código_Município'].notna()
+		rows = self.df['Código_Município'].isna()
 		rows &= self.df['CD_MUN'].notna()
 		self.log.update({'filled_city_info': rows})
 		originals = ['Código_Município', 'Município', 'UF']
