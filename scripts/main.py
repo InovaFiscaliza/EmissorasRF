@@ -42,13 +42,14 @@ def get_db(
 	path: str = os.environ.get('DESTINATION'),  # Pasta onde salvar os arquivos",
 	limit: int = 0,  # Número máximo de registros a serem extraídos da cada base MongoDB, 0: sem limite
 	parallel: bool = True,  # Caso verdadeiro efetua as requisições de forma paralela em cada fonte de dados
-	read_cache: bool = False,  # Caso verdadeiro lê os dados já existentes, do contrário efetua a atualização dos dados
+	read_cache: bool = True,  # Caso verdadeiro lê os dados já existentes, do contrário efetua a atualização dos dados
+	reprocess_sources: bool = False,
 ) -> 'pd.DataFrame':  # Retorna o DataFrame com as bases da Anatel e da Aeronáutica
 	"""Função para encapsular a instância e atualização dos dados"""
 	import time
 
 	start = time.perf_counter()
-	data = Estacoes(SQLSERVER_PARAMS, MONGO_URI, limit, parallel, read_cache)
+	data = Estacoes(SQLSERVER_PARAMS, MONGO_URI, limit, parallel, read_cache, reprocess_sources)
 	data.update()
 	data.save()
 	mod_times = {'ANATEL': datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
@@ -64,7 +65,6 @@ def get_db(
 			shutil.copytree(str(data.folder), str(path), dirs_exist_ok=True)
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')
-	return data
 
 
 if __name__ == '__main__':
