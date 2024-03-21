@@ -134,6 +134,7 @@ class Estacoes(Base):
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		df = df.astype('string', copy=False)
+
 		df = df.replace('-1.0', '-1').fillna('-1')
 		df = df.astype('category', copy=False)
 		return df.loc[:, self.columns]

@@ -211,7 +211,7 @@ class Smp(Mosaico):
 		df['Status'] = 'L'
 		df['Serviço'] = '010'
 		down = df.drop('Frequência_Recepção', axis=1)
-		down['Fonte'] = 'MOSAICO-LICENCIAMENTO'
+		down['Fonte'] = 'MOSAICO-LIC'
 		down['Classe'] = 'FB'
 		up = df.drop('Frequência', axis=1)
 		up = up.rename(columns={'Frequência_Recepção': 'Frequência'})

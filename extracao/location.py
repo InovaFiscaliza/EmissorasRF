@@ -306,18 +306,6 @@ class Geography:
 		log = '{} Ausente. Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
 		self._replace_columns(columns, originals, log, rows)
 
-	# def substitute_wrong_city_info(self):
-	# 	"""Replace city info for invalid city codes
-	# 	They are replaced with the city code derived from the intersection with the shapefile from IBGE"""
-	# 	rows = self.df['Código_Município'].notna()
-	# 	rows &= self.df['Município_IBGE'].isna()
-	# 	rows &= self.df['CD_MUN'].notna()
-	# 	self.log.update({'replaced_city_info': rows})
-	# 	originals = ['Código_Município', 'Município', 'UF']
-	# 	columns = ['CD_MUN', 'NM_MUN', 'SIGLA_UF']
-	# 	log = '{} invalidada (IBGE). Informação resgatada à partir da intersecção das coordenadas no polígono territorial.'
-	# 	self._replace_columns(columns, originals, log, rows)
-
 	def substitute_divergent_coordinates(self):
 		"""Substitute the coordinates with the centroid from the IBGE `municipios.csv`
 		After the intersection of the coordinates with the shapefile, the city code from the data
@@ -330,8 +318,6 @@ class Geography:
 		wrong_city_coords &= self.df['Código_Município'] != self.df['CD_MUN']
 		wrong_city_coords &= self.log['city_normalized']
 		self.log.update({'wrong_city_coords': wrong_city_coords})
-		# originals = ['Código_Município', 'Latitude', 'Longitude']
-		# columns = ['CD_MUN', 'LAT', 'LON']
 		originals = ['Latitude', 'Longitude']
 		columns = ['Latitude_IBGE', 'Longitude_IBGE']
 		log = '{} divergente. Valor substituído pelo centróide da intersecção das coordenadas no polígono territorial.'
@@ -379,7 +365,6 @@ class Geography:
 		self.fill_missing_coords()
 		self.intersect_coordinates_on_poligon()
 		self.fill_missing_city_info()
-		# self.input_missing_info_from_poligon()
 		self.substitute_divergent_coordinates()
 		self.input_info_from_coords()
 		self._append_filters()
