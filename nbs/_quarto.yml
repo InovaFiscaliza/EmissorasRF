@@ -1,8 +1,5 @@
-ipynb-filters: [nbdev_filter]
-
 project:
   type: website
-  output-dir: _docs
   preview:
     port: 3000
     browser: false
@@ -15,23 +12,59 @@ format:
     toc-depth: 4
 
 website:
-  title: "Estações Licenciadas de Telecomunicações e Radiodifusão"
-  site-url: "https://ronaldokun.github.io/anateldb/"
-  description: "This repository hold automation scripts to fetch, clean and merge data from licensed telecomunications entities available at ANATEL Database Systems."
+  favicon: Puzzle.ico
   twitter-card: true
   open-graph: true
-  repo-branch: master
-  repo-url: "https://github.com/ronaldokun/anateldb"
   repo-actions: [issue]
+  # sidebar:
+  #   style: floating
+  #   contents:
+  #     - auto: "/*.ipynb"
+  #     - section: Tutorials
+  #       contents: tutorials/*
+  #     - section: Explanations
+  #       contents: explanations/*
+  #     - section: API
+  #       contents: api/*
+ 
   navbar:
-    background: primary
-    search: true
+    collapse-below: lg
+    left:
+      - text: "Principal"
+        href: 05_main.ipynb
+      - text: "Leitura"
+        href: 04_reading.ipynb
+      - text: "Atualização"
+        href: 02_updates.ipynb
+      - text: "API"
+        menu:
+          - text: "Constantes"
+            href: 00_constants.ipynb
+          - text: "Formatação"
+            href: 03_format.ipynb
+          - text: "ICAO"
+            href: 06_icao.ipynb
+          - text: "AISWEB"
+            href: 07_aisweb.ipynb
+          - text: "AISGEO"
+            href: 08_aisgeo.ipynb
+          - text: "REDEMET"
+            href: 09_redemet.ipynb
+      - text: "Ajuda"
+        menu:
+          - text: "Reporte um problema"
+            icon: bug
+            href: https://github.com/InovaFiscaliza/EmissorasRF/issues
+          - text: "Contato"
+            icon: chat-right-text
+            href: ronaldokun@gmail.com
+          # - text: "FAQ"
+          #   icon: question-circle
+          #   href: getting_started.ipynb#faq
     right:
-      - icon: github
-        href: "https://github.com/ronaldokun/anateldb"
-  sidebar:
-    style: "floating"
+      - icon: twitter
+        href: https://twitter.com/ronaldokun
+        aria-label: Twitter Author
 
-metadata-files: 
-  - sidebar.yml
-  - custom.yml
+metadata-files: [nbdev.yml]
+

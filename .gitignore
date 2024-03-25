@@ -147,12 +147,22 @@ checklink/cookies.txt
 *.parquet.gzip
 *.xlsx
 *.html
+*.shp
+*.shx
+*.cpg
+*.dbf
+*.prj
 
+# output folder
+extracao/datasources/arquivos/saida
 
 # VSCODE Files
 .virtual_documents
 
 *desktop.ini
 
+# Quarto Files
 _docs/
+_proc/
+index_files/
 sidebar.yml

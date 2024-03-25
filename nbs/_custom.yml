@@ -1,0 +1,43 @@
+website:
+  favicon: Puzzle.ico
+  reader-mode: false
+  navbar:
+    collapse-below: lg
+    left:
+      - text: "Principal"
+        href: 05_main.ipynb
+      - text: "Leitura"
+        href: 04_reading.ipynb
+      - text: "Atualização"
+        href: 02_updates.ipynb
+      - text: "API"
+        menu:
+          - text: "Constantes"
+            href: 00_constants.ipynb
+          - text: "Formatação"
+            href: 03_format.ipynb
+          - text: "Dados Aeronáuticos"
+            menu:
+              - text: "ICAO"
+                href: 06_icao.ipynb
+              - text: "AISWEB"
+                href: 07_aisweb.ipynb
+              - text: "AISGEO"
+                href: 08_aisgeo.ipynb
+              - text: "REDEMET"
+                href: 09_redemet.ipynb
+      - text: "Ajuda"
+        menu:
+          - text: "Reporte um problema"
+            icon: bug
+            href: https://github.com/InovaFiscaliza/EmissorasRF/issues
+          - text: "Contato"
+            icon: chat-right-text
+            href: ronaldokun@gmail.com
+          # - text: "FAQ"
+          #   icon: question-circle
+          #   href: getting_started.ipynb#faq
+    right:
+      - icon: twitter
+        href: https://twitter.com/ronaldokun
+        aria-label: Twitter Autor
