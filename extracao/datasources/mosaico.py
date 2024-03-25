@@ -74,9 +74,7 @@ class Mosaico(Base, GetAttr):
 			.str.split()
 		)
 		# Log
-		processing = (
-			'Registro expandido nos componentes individuais Largura_Emissão(kHz) e Classe_Emissão'
-		)
+		processing = 'Largura e Classe de Emissão individuais extraídas'
 		Base.register_log(df, processing, 'Designação_Emissão')
 
 		df = df.explode('Temp', ignore_index=True)
@@ -109,22 +107,22 @@ class Mosaico(Base, GetAttr):
 		duplicated = df.duplicated(subset=agg_cols, keep='first')
 
 		# Log discarded
-		df_temp = df[duplicated]
-		processing = f'Registro agrupado no arquivo final. Colunas Consideradas: {agg_cols}'
-		Mosaico.register_log(df_temp, processing)
-		self.append2discarded(df_temp)
-		del df_temp
-		gc.collect()
+		# df_temp = df[duplicated]
+		# processing = f'Registro agrupado no arquivo final. Colunas Consideradas: {agg_cols}'
+		# Mosaico.register_log(df_temp, processing)
+		# self.append2discarded(df_temp)
+		# del df_temp
+		# gc.collect()
 
 		# I didn't find a better way to do this, the LLMs suggestions were wrong!
 		df_temp = df[~duplicated]
 		df_sub = df_temp.dropna(subset=agg_cols).reset_index(drop=True)
-		df_temp = df_temp.loc[~df_temp.index.isin(df_sub.index)]
+		# df_temp = df_temp.loc[~df_temp.index.isin(df_sub.index)]
 
-		# Discard and Log dropped rows
-		processing = f'Valor nulo presente nas colunas utilizadas para agrupamento: {agg_cols}'
-		Mosaico.register_log(df_temp, processing)
-		self.append2discarded(df_temp)
+		# # Discard and Log dropped rows
+		# processing = f'Valor nulo presente nas colunas utilizadas para agrupamento: {agg_cols}'
+		# Mosaico.register_log(df_temp, processing)
+		# self.append2discarded(df_temp)
 		del df_temp
 		gc.collect()
 
@@ -138,7 +136,8 @@ class Mosaico(Base, GetAttr):
 		df_sub['#Estação'] = df_sub['#Estação'].astype('string', copy=False)
 
 		row_filter = df_sub['Multiplicidade'] > 1
-		processing = f'Registro agrupado. Colunas consideradas: {agg_cols}'
+		processing = f'Registro agrupado.'  # Colunas consideradas: {agg_cols}'
+		# TODO: Adicionar nova chave "Colunas Consideradas"
 		Mosaico.register_log(df_sub, processing, column='#Estação', row_filter=row_filter)
 
 		return df_sub
