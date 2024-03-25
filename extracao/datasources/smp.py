@@ -178,7 +178,7 @@ class Smp(Mosaico):
 		)
 		df[['Frequência', 'Offset']] = df[['Frequência', 'Offset']].astype('float')
 		df.loc[valid, 'Frequência_Recepção'] = df.loc[valid, 'Frequência'] - df.loc[valid, 'Offset']
-		log = 'Criada Frequência de Recepção (Uplink) à partir do Downlink e Offset.'
+		log = 'Criado registro com Frequência de Recepção.'
 		Mosaico.register_log(df, log, row_filter=valid)
 		return df
 
@@ -199,7 +199,7 @@ class Smp(Mosaico):
 		df.loc[row_filter, 'Latitude'] = df.loc[row_filter, 'Latitude_IBGE']
 		df.loc[row_filter, 'Longitude'] = df.loc[row_filter, 'Longitude_IBGE']
 		for column in ('Latitude', 'Longitude'):
-			log = f'Substituição por {column} do Município (Agrupamento SMP)'
+			log = f'Coordenadas do Município inseridas.'
 			Mosaico.register_log(df, log, column, row_filter)
 		return df
 
