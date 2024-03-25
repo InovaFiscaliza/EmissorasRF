@@ -105,12 +105,12 @@ class Radcom(Sitarweb):
 
 		a = df.Situação.isna()
 		df.loc[a, 'Classe'] = df.loc[a, 'Fase']
-		processing = 'Classe=Fase. Situação Nula. Colunas Fase e Situação descartadas'
-		Base.register_log(df, processing, row_filter=a)
+		# processing = 'Classe=Fase. Situação Nula. Colunas Fase e Situação descartadas'
+		# Base.register_log(df, processing, row_filter=a)
 
 		df.loc[~a, 'Classe'] = df.loc[~a, 'Fase'] + '-' + df.loc[~a, 'Situação']
-		processing = 'Classe=Fase-Situação. Colunas Fase e Situação descartadas'
-		Base.register_log(df, processing, row_filter=~a)
+		# processing = 'Classe=Fase-Situação. Colunas Fase e Situação descartadas'
+		# Base.register_log(df, processing, row_filter=~a)
 		df.drop(['Fase', 'Situação'], axis=1, inplace=True)
 
 		df['Frequência'] = pd.to_numeric(df['Frequência'], errors='coerce').astype('float')
