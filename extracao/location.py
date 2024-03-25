@@ -95,7 +95,7 @@ class Geography:
 		# processing = 'Coordenadas e Código do Município nulos. Registro descartado'
 		# # TODO: append to discarded
 		# Base.register_log(self.df, processing, row_filter=rows)
-		# self.df = self.df[~rows]
+		self.df = self.df[~rows]
 
 	def validate_coordinates_as_number(self) -> None:
 		for column in ['Latitude', 'Longitude']:
@@ -132,12 +132,12 @@ class Geography:
 					self.df[original].astype('string').fillna('')
 					!= self.df[column].astype('string').fillna('')
 				)
-			self.df[f'#{original}'] = self.df[original].fillna('')
-			# Base.register_log(self.df, log.format(original), f'#{original}', row_filter)
-			Base.register_log(self.df, log, f'#{original}', row_filter)
+			if log:
+				self.df[f'#{original}'] = self.df[original].fillna('')
+				Base.register_log(self.df, log, f'#{original}', row_filter)
+				self.df.drop(columns=[f'#{original}'], inplace=True)
 			# Use of row_filter instead of rows to avoid float comparison
 			self.df.loc[row_filter, original] = self.df.loc[row_filter, column]
-			self.df.drop(columns=[f'#{original}'], inplace=True)
 
 	def replace_bad_city_codes(self):
 		"""Tries to fix the wrong city codes by looking at the normalized city names"""
@@ -245,7 +245,7 @@ class Geography:
 		self.log.update({'filled_city_coords': rows})
 		columns = ['Latitude_IBGE', 'Longitude_IBGE']
 		originals = ['Latitude', 'Longitude']
-		log = 'Coordenadas do Município inseridas.'
+		log = 'Valor Nulo.'
 		# Lembre-se que colunas float não é possível comparar diretamente como strings
 		self._replace_columns(columns, originals, log, rows, float_cols=True)
 
@@ -255,7 +255,9 @@ class Geography:
 		self.log.update({'city_normalized': rows})
 		originals = ['Município', 'UF']
 		columns = ['Município_IBGE', 'UF_IBGE']
-		log = 'Valor normalizado conforme IBGE.'
+		self.df.loc[:, 'Município'] = self.df.loc[:, 'Município'].str.title()
+		self.df.loc[:, 'UF'] = self.df.loc[:, 'UF'].str.upper()
+		log = ''
 		self._replace_columns(columns, originals, log, rows)
 
 	def intersect_coordinates_on_poligon(self):
@@ -313,7 +315,6 @@ class Geography:
 		"""
 		# TODO: keep track of "unchanged divergent coordinates, i.e. with IBGE coords null"
 		wrong_city_coords = self.df['Código_Município'].notna()
-		# wrong_city_coords &= self.df['CD_MUN'].notna()
 		wrong_city_coords &= self.df['Código_Município'] != self.df['CD_MUN'].fillna('-1')
 		wrong_city_coords &= self.log['city_normalized']
 		self.log.update({'wrong_city_coords': wrong_city_coords})
@@ -355,7 +356,7 @@ class Geography:
 	def _append_filters(self):
 		for column, row_filter in self.log.items():
 			self.df[column] = False
-			self.df.loc[row_filter.index, column] = True
+			self.df.loc[row_filter, column] = True
 
 	def validate(self) -> pd.DataFrame:
 		"""Helper function to load the IBGE data, enrich and and validate the location information"""
@@ -363,8 +364,8 @@ class Geography:
 		self.normalize_location_names()
 		self.fill_missing_coords()
 		self.intersect_coordinates_on_poligon()
-		self.fill_missing_city_info()
 		self.substitute_divergent_coordinates()
+		self.fill_missing_city_info()
 		# self.input_info_from_coords()
 		self._append_filters()
 		return self.df
