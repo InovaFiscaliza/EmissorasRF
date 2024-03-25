@@ -137,7 +137,7 @@ class Base:
 
 	@property
 	def stem(self):
-		raise NotImplementedError('Subclasses devem setar a propriedade stem!')
+		raise NotImplementedError('Subclasses devem setar a propriedade stem')
 
 	def extraction(self) -> pd.DataFrame:
 		raise NotImplementedError('Subclasses devem implementar o método extract')

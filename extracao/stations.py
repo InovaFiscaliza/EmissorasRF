@@ -123,10 +123,7 @@ class Estacoes(Base):
 		)
 		return df[~row_filter].reset_index(drop=True)
 
-	def _format(
-		self,
-		dfs: L,  # List with the individual API sources
-	) -> pd.DataFrame:  # Processed DataFrame
+	def _format(self, dfs: L) -> pd.DataFrame:
 		aero = dfs.pop()
 		anatel = pd.concat(dfs, ignore_index=True, copy=False).astype('string', copy=False)
 		df = merge_on_frequency(anatel, aero)
@@ -134,7 +131,7 @@ class Estacoes(Base):
 		df = Estacoes._simplify_sources(df)
 		df = Estacoes._remove_invalid_frequencies(df)
 		df = df.astype('string', copy=False)
-
-		df = df.replace('-1.0', '-1').fillna('-1')
-		df = df.astype('category', copy=False)
+		for column in df.columns:
+			df[column] = df[column].str.replace(r'^-1\.0$|^\s$', '-1', regex=True)
+		df = df.fillna('-1').astype('category', copy=False)
 		return df.loc[:, self.columns]
