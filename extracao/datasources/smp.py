@@ -92,7 +92,7 @@ class Smp(Mosaico):
 			discarded = df['Canalização'] == flag
 			if discarded.any():
 				processing = f'Frequência de Downlink. Canalização {flag}.'
-				Mosaico.register_log(df_sub, processing, row_filter=discarded)
+				Mosaico.register_log(df[discarded], processing, row_filter=discarded)
 				self.append2discarded(df[discarded])
 		del df
 		gc.collect()
