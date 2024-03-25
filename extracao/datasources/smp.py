@@ -157,8 +157,8 @@ class Smp(Mosaico):
 		grouped_channels = grouped_channels[columns]
 
 		df = pd.merge(df, grouped_channels, how='left', on=['Início_Canal_Down', 'Fim_Canal_Down'])
-		processing = f'Colunas criadas à partir da Canalização do Serviço: {columns}'
-		Mosaico.register_log(df, processing)
+		# processing = f'Colunas criadas à partir da Canalização do Serviço: {columns}'
+		# Mosaico.register_log(df, processing)
 		return self.exclude_invalid_channels(df)
 
 	def generate_uplink(
