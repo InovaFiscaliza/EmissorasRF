@@ -54,10 +54,10 @@ def get_db(
 	data.save()
 	mod_times = {'ANATEL': datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
 	mod_times['AERONAUTICA'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-	versiondb = json.loads((data.folder / 'VersionFile.json').read_text())
+	versiondb = json.loads((data.folder / 'Release.json').read_text())
 	mod_times['ReleaseDate'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 	versiondb['rfdatahub'].update(mod_times)
-	json.dump(versiondb, (data.folder / 'VersionFile.json').open('w'))
+	json.dump(versiondb, (data.folder / 'Release.json').open('w'))
 	if path is not None:
 		if (path := Path(path)).exists():
 			# path.mkdir(parents=True, exist_ok=True)

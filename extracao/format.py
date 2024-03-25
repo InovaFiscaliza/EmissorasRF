@@ -5,12 +5,17 @@ __all__ = ['MAX_DIST', 'LIMIT_FREQ', 'parse_bw', 'get_km_distance', 'merge_on_fr
 
 # %% ../nbs/00b_format.ipynb 3
 import re
+import json
 from typing import Tuple
+from collections import defaultdict
+
 
 import pandas as pd
 from rich import print as pp
 from dotenv import find_dotenv, load_dotenv
 from fastcore.utils import listify
+from fastcore.foundation import L
+
 from geopy.distance import geodesic
 from tqdm.auto import tqdm
 
@@ -276,3 +281,52 @@ def format_types(df):
 	for col in STR_COLUMNS:
 		df[col] = cast2str(df[col])
 	return df
+
+
+def merge_dicts(json_log: str):
+	"""
+	Mescla dicionários em uma lista com base no valor da chave "Processamento".
+
+	Argumentos:
+	  list_of_dicts: Uma lista contendo dicionários com as mesmas chaves.
+
+	Retorno:
+	  Um dicionário com os dicionários mesclados.
+	"""
+
+	if not (list_of_dicts := [i for i in json.loads(json_log) if i != '[]']):
+		return '[]'
+	merged_dict = defaultdict(list)
+	for dict in list_of_dicts:
+		processamento = dict['Processamento']
+		merged_dict[processamento].append(dict)
+
+	for key, value in merged_dict.items():
+		if len(value) == 1:
+			merged_dict[key] = value[0]
+		else:
+			merged_dict[key] = _merge_sub_dicts(value)
+
+	return json.dumps(list(merged_dict.values()), ensure_ascii=False)
+
+
+def _merge_sub_dicts(list_of_sub_dicts):
+	"""
+	Mescla dicionários que possuem a mesma chave "Processamento".
+
+	Argumentos:
+	  list_of_sub_dicts: Uma lista contendo dicionários com a mesma chave "Processamento".
+
+	Retorno:
+	  Um dicionário com os dicionários mesclados.
+	"""
+
+	merged_dict = {}
+	for key in list_of_sub_dicts[0].keys():
+		if key == 'Processamento':
+			merged_dict[key] = list_of_sub_dicts[0][key]
+		else:
+			values = [sub_dict[key] for sub_dict in list_of_sub_dicts]
+			merged_dict[key] = values
+
+	return merged_dict

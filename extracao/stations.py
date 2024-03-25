@@ -4,6 +4,9 @@
 __all__ = ['Estacoes']
 
 # %% ../nbs/04_estacoes.ipynb 3
+from collections import defaultdict
+
+
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 from fastcore.foundation import L
@@ -19,7 +22,7 @@ from .datasources.sitarweb import SQLSERVER_PARAMS, Radcom, Stel
 from .datasources.smp import Smp
 from .datasources.srd import SRD
 from .datasources.telecom import Telecom
-from .format import LIMIT_FREQ, merge_on_frequency
+from .format import LIMIT_FREQ, merge_on_frequency, merge_dicts
 
 # %% ../nbs/04_estacoes.ipynb 4
 load_dotenv(find_dotenv(), override=True)
@@ -123,6 +126,15 @@ class Estacoes(Base):
 		)
 		return df[~row_filter].reset_index(drop=True)
 
+	def process_log(self, df):
+		"""Process the log and save in a different dataframe"""
+		log = df['Log'].progress_apply(merge_dicts)
+		labels, uniques = pd.factorize(log, sort=False)
+		log = pd.DataFrame({'Log': uniques}, dtype='string', copy=False)
+		log.to_parquet(f'{self.folder}/log.parquet.gzip', compression='gzip', index=False)
+		df['Log'] = pd.to_numeric(labels, downcast='integer')
+		return df
+
 	def _format(self, dfs: L) -> pd.DataFrame:
 		aero = dfs.pop()
 		anatel = pd.concat(dfs, ignore_index=True, copy=False).astype('string', copy=False)
@@ -134,4 +146,5 @@ class Estacoes(Base):
 		for column in df.columns:
 			df[column] = df[column].str.replace(r'^-1\.0$|^\s$', '-1', regex=True)
 		df = df.fillna('-1').astype('category', copy=False)
+		df = self.process_log(df)
 		return df.loc[:, self.columns]
