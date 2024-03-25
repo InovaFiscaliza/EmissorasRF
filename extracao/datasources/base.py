@@ -68,8 +68,10 @@ class Base:
 				number = float(f'{match[1]}.{mantissa}')
 			else:
 				number = float(match[1])
-			classe = match[4]
-			return str(multiplier * number), str(classe)
+			classe = str(match[4])
+			if not classe:
+				classe = pd.NA
+			return str(multiplier * number), classe
 		return pd.NA, pd.NA
 
 	@cached_property
