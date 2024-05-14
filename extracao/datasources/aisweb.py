@@ -190,7 +190,7 @@ class AisWeb:
 			self.request_stations,
 			self.airports.AeroCode,
 			threadpool=True,
-			n_workers=20,
+			n_workers=8,
 			pause=0.1,
 			progress=False,
 		)
