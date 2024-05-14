@@ -293,13 +293,14 @@ def merge_dicts(json_log: str):
 	Retorno:
 	  Um dicionário com os dicionários mesclados.
 	"""
+	from collections import Counter
 
 	if not (list_of_dicts := [i for i in json.loads(json_log) if i != '[]']):
 		return '[]'
 	merged_dict = defaultdict(list)
-	for dict in list_of_dicts:
-		processamento = dict['Processamento']
-		merged_dict[processamento].append(dict)
+	for item in list_of_dicts:
+		processamento = item['Processamento']
+		merged_dict[processamento].append(item)
 
 	for key, value in merged_dict.items():
 		if len(value) == 1:
@@ -307,7 +308,26 @@ def merge_dicts(json_log: str):
 		else:
 			merged_dict[key] = _merge_sub_dicts(value)
 
-	return json.dumps(list(merged_dict.values()), ensure_ascii=False)
+	output_list = []
+
+	for log_dict in merged_dict.values():
+		if log_dict.get("Coluna") == "#Estação":
+			if value := log_dict.get("Original"):
+				value = eval(value)
+				counter = Counter()
+				for item in value:
+					counter[item] += 1
+				result = []
+				for item, count in counter.items():
+					if count > 1:
+						i = f'{count}x{item}'
+					else:
+						i = item
+					result.append(i)						
+				log_dict["Original"] = result
+		output_list.append(log_dict)
+
+	return json.dumps(output_list, ensure_ascii=False)
 
 
 def _merge_sub_dicts(list_of_sub_dicts):
@@ -320,13 +340,11 @@ def _merge_sub_dicts(list_of_sub_dicts):
 	Retorno:
 	  Um dicionário com os dicionários mesclados.
 	"""
-
 	merged_dict = {}
 	for key in list_of_sub_dicts[0].keys():
 		if key == 'Processamento':
 			merged_dict[key] = list_of_sub_dicts[0][key]
 		else:
-			values = [sub_dict[key] for sub_dict in list_of_sub_dicts]
-			merged_dict[key] = values
+			merged_dict[key] = [sub_dict[key] for sub_dict in list_of_sub_dicts]
 
 	return merged_dict
