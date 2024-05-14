@@ -167,7 +167,7 @@ class AisWeb:
 		df = self._check_ils_dme(df)
 		df = self._process_coords(df, airport_data)
 		df = df[COLUMNS]
-		df['Frequência'] = df.Frequência.apply(lambda x: ''.join(re.findall('\d|\.', x)))
+		df['Frequência'] = df.Frequência.apply(lambda x: ''.join(re.findall(r'\d|\.', x)))
 		df = df[~df['Frequência'].isin({'', '0'})].reset_index(drop=True)
 		df['Frequência'] = df.Frequência.str.extract(r'(^\d+\.?\d*)')
 		df['Frequência'] = df.Frequência.astype('float')
