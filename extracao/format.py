@@ -314,18 +314,9 @@ def merge_dicts(json_log: str):
 		if log_dict.get("Coluna") == "#Estação":
 			if value := log_dict.get("Original"):
 				value = eval(value)
-				counter = Counter()
-				for item in value:
-					counter[item] += 1
-				result = []
-				for item, count in counter.items():
-					if count > 1:
-						i = f'{count}x{item}'
-					else:
-						i = item
-					result.append(i)						
-				log_dict["Original"] = result
-		output_list.append(log_dict)
+				if isinstance(value, list):
+					log_dict["Original"] = str(sorted(list(set(value))))
+				output_list.append(log_dict)
 
 	return json.dumps(output_list, ensure_ascii=False)
 
