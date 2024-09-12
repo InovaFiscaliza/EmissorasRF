@@ -4,6 +4,7 @@ import shutil
 import warnings
 from datetime import datetime
 import sys
+import subprocess
 
 import pandas as pd
 import typer
@@ -52,17 +53,73 @@ def get_db(
 	data = Estacoes(SQLSERVER_PARAMS, MONGO_URI, limit, parallel, read_cache, reprocess_sources)
 	data.update()
 	data.save()
-	mod_times = {'ANATEL': datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
-	mod_times['AERONAUTICA'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+	mod_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+	mod_times = {'ANATEL': mod_time, 'AERONAUTICA': mod_time, 'ReleaseDate': mod_time}
 	versiondb = json.loads((data.folder / 'Release.json').read_text())
-	mod_times['ReleaseDate'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+	version = versiondb['rfdatahub']['Version']
+	version_parts = version.split('.')
+	version_parts[-1] = str(int(version_parts[-1]) + 1)
+	new_version = '.'.join(version_parts)
+	versiondb['rfdatahub']['Version'] = new_version
 	versiondb['rfdatahub'].update(mod_times)
 	json.dump(versiondb, (data.folder / 'Release.json').open('w'))
 	if path is not None:
 		if (path := Path(path)).exists():
 			# path.mkdir(parents=True, exist_ok=True)
 			print(f'Salvando dados em {path}')
-			shutil.copytree(str(data.folder), str(path), dirs_exist_ok=True)
+			subprocess.run(
+				['powershell', '-Command', f'"robocopy {data.folder} {path} /E /IS /IT"'],
+				check=False,
+			)
+
+	# Create a release with the version tag and generate release notes
+	subprocess.run(
+		[
+			'gh',
+			'release',
+			'create',
+			new_version,
+			'--generate-notes',
+			'.\\extracao\\datasources\\arquivos\\saida\\estacoes.parquet.gzip',
+			'.\\extracao\\datasources\\arquivos\\saida\\log.parquet.gzip',
+		],
+		check=False,
+	)
+
+	# Delete the 'rfdatahub' release and cleanup the tag
+	subprocess.run(
+		[
+			'gh',
+			'release',
+			'delete',
+			'rfdatahub',
+			'--cleanup-tag',
+			'-R',
+			'InovaFiscaliza/.github',
+			'-y',
+		],
+		check=False,
+	)
+
+	# Create a new 'rfdatahub' release with specific title, notes, and files
+	subprocess.run(
+		[
+			'gh',
+			'release',
+			'create',
+			'rfdatahub',
+			'-t',
+			'RFDataHub',
+			'--notes',
+			new_version,
+			'.\\extracao\\datasources\\arquivos\\saida\\estacoes.parquet.gzip',
+			'.\\extracao\\datasources\\arquivos\\saida\\log.parquet.gzip',
+			'.\\extracao\\datasources\\arquivos\\saida\\Release.json',
+			'-R',
+			'InovaFiscaliza/.github',
+		],
+		check=False,
+	)
 
 	print(f'Elapsed time: {time.perf_counter() - start} seconds')
 

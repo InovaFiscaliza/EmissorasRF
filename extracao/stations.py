@@ -96,8 +96,8 @@ class Estacoes(Base):
 		return self.sources.attrgot('df')
 
 	def update(self):
-		df = self.extraction()
-		self.df = self._format(df)
+		dfs = self.extraction()
+		self.df = self._format(dfs)
 
 	@staticmethod
 	def _simplify_sources(df):
