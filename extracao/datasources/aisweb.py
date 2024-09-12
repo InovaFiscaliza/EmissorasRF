@@ -178,8 +178,15 @@ class AisWeb:
 		icao_code: str,  # Código ICAO identificando o aeroporto
 	) -> pd.DataFrame:  # DataFrame com os dados de estações do aeroporto de código `icao_code`
 		"""Recebe o código do aeroporto `icao_code` e retorna as estações registradas nele"""
-		dict_data = self._get_request('&icaoCode=', icao_code)
-		return self._process_data(dict_data) if dict_data.get('aisweb') else pd.DataFrame()
+
+		from xml.parsers.expat import ExpatError
+
+		try:
+			dict_data = self._get_request('&icaoCode=', icao_code)
+			return self._process_data(dict_data) if dict_data.get('aisweb') else pd.DataFrame()
+		except ExpatError:
+			print(f'Error parsing XML for ICAO code: {icao_code}')
+			return pd.DataFrame()
 
 	@cached_property
 	def records(
