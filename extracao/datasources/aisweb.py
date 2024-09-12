@@ -167,7 +167,7 @@ class AisWeb:
 		df = self._check_ils_dme(df)
 		df = self._process_coords(df, airport_data)
 		df = df[COLUMNS]
-		df['Frequência'] = df.Frequência.apply(lambda x: ''.join(re.findall('\d|\.', x)))
+		df['Frequência'] = df.Frequência.apply(lambda x: ''.join(re.findall(r'\d|\.', x)))
 		df = df[~df['Frequência'].isin({'', '0'})].reset_index(drop=True)
 		df['Frequência'] = df.Frequência.str.extract(r'(^\d+\.?\d*)')
 		df['Frequência'] = df.Frequência.astype('float')
@@ -178,8 +178,15 @@ class AisWeb:
 		icao_code: str,  # Código ICAO identificando o aeroporto
 	) -> pd.DataFrame:  # DataFrame com os dados de estações do aeroporto de código `icao_code`
 		"""Recebe o código do aeroporto `icao_code` e retorna as estações registradas nele"""
-		dict_data = self._get_request('&icaoCode=', icao_code)
-		return self._process_data(dict_data) if dict_data.get('aisweb') else pd.DataFrame()
+
+		from xml.parsers.expat import ExpatError
+
+		try:
+			dict_data = self._get_request('&icaoCode=', icao_code)
+			return self._process_data(dict_data) if dict_data.get('aisweb') else pd.DataFrame()
+		except ExpatError:
+			print(f'Error parsing XML for ICAO code: {icao_code}')
+			return pd.DataFrame()
 
 	@cached_property
 	def records(
@@ -190,7 +197,7 @@ class AisWeb:
 			self.request_stations,
 			self.airports.AeroCode,
 			threadpool=True,
-			n_workers=20,
+			n_workers=8,
 			pause=0.1,
 			progress=False,
 		)

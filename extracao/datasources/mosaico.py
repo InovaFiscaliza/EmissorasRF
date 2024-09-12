@@ -74,8 +74,8 @@ class Mosaico(Base, GetAttr):
 			.str.split()
 		)
 		# Log
-		processing = 'Largura e Classe de Emissão individuais extraídas'
-		Base.register_log(df, processing, 'Designação_Emissão')
+		# processing = 'Largura e Classe de Emissão individuais extraídas'
+		# Base.register_log(df, processing, 'Designação_Emissão')
 
 		df = df.explode('Temp', ignore_index=True)
 

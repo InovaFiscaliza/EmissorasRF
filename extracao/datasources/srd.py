@@ -74,10 +74,10 @@ class SRD(Mosaico):
 		status = df.Status.str.contains('-C1$|-C2$|-C3$|-C4$|-C7|-C98$', na=False)
 
 		# Discard inactive statuses
-		discarded = df[~status].copy()
-		processing = 'Status não considerado para fins de monitoração'
-		Mosaico.register_log(discarded, processing, 'Status')
-		self.append2discarded(discarded)
+		# discarded = df[~status].copy()
+		# processing = 'Status não considerado para fins de monitoração'
+		# Mosaico.register_log(discarded, processing, 'Status')
+		# self.append2discarded(discarded)
 
 		df[status].reset_index(drop=True, inplace=True)
 

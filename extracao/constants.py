@@ -284,7 +284,6 @@ PROJECTION_SRD = {
 	'licensee': 1.0,
 	'NumFistel': 1.0,
 	'NumEstacao': '$estacao.NumEstacao',
-	# flatten the nested fields with dot notation
 	'NomeMunicipio': '$srd_planobasico.NomeMunicipio',
 	'CodMunicipio': '$srd_planobasico.CodMunicipio',
 	'SiglaUF': '$srd_planobasico.SiglaUF',
@@ -359,7 +358,6 @@ MONGO_SRD = {
 		{'frequency': {'$nin': [None, '', 0], '$type': 1.0}},
 		{'srd_planobasico.CodMunicipio': {'$nin': [None, '']}},
 		{'NumFistel': {'$nin': [None, '']}},
-		# {'habilitacao.DataValFreq': {'$nin': [None, '']}},
 	]
 }
 

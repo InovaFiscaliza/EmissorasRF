@@ -41,6 +41,8 @@ class Base:
 
 	def _save(self, df: pd.DataFrame, folder: Union[str, Path], stem: str) -> pd.DataFrame:
 		"""Format, Save and return a dataframe"""
+		folder = Path(folder)
+		folder.mkdir(parents=True, exist_ok=True)
 		try:
 			file = Path(f'{folder}/{stem}.parquet.gzip')
 			df.astype('category').to_parquet(

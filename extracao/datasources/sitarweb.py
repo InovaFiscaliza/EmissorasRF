@@ -67,7 +67,7 @@ class Sitarweb(Base, GetAttr):
 		if self.read_cache:
 			df = self._read(f'{self.stem}_raw', 'numpy_nullable')
 		else:
-			df = pd.read_sql_query(self.query, self.connect(), dtype='string', copy=False)
+			df = pd.read_sql_query(self.query, self.connect(), dtype='string')
 		df['Log'] = '[]'
 		return df
 
