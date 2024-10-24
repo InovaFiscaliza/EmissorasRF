@@ -1,9 +1,7 @@
-import json
 import os
-import shutil
 import warnings
-from datetime import datetime
 import sys
+import subprocess
 
 import pandas as pd
 import typer
@@ -41,7 +39,7 @@ MONGO_URI: str = os.environ.get('MONGO_URI')
 def get_db(
 	path: str = os.environ.get('DESTINATION'),  # Pasta onde salvar os arquivos",
 	limit: int = 0,  # Número máximo de registros a serem extraídos da cada base MongoDB, 0: sem limite
-	parallel: bool = True,  # Caso verdadeiro efetua as requisições de forma paralela em cada fonte de dados
+	parallel: bool = False,  # Caso verdadeiro efetua as requisições de forma paralela em cada fonte de dados
 	read_cache: bool = False,  # Caso verdadeiro lê os dados já existentes, do contrário efetua a atualização dos dados
 	reprocess_sources: bool = False,
 ) -> 'pd.DataFrame':  # Retorna o DataFrame com as bases da Anatel e da Aeronáutica
