@@ -67,6 +67,7 @@ class Mosaico(Base, GetAttr):
 		# split then explode
 		df['Temp'] = (
 			df['Designação_Emissão']
+			.astype('string', copy=False)
 			.str.strip()
 			.str.replace(',', ' ')
 			.str.strip()
